@@ -1,2 +1,1 @@
-# Alumni-Club
-Alumni Club Project - Distribuirani Razvoj Softvera
+# Alumni Club
