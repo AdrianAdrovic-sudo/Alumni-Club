@@ -31,8 +31,7 @@ Server će se pokrenuti na:
  http://localhost:3000
 
 Struktura Projekta
-graphql
-Копирај кȏд
+
 Alumni-Club/
 │
 ├── src/
