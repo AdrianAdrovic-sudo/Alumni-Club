@@ -127,11 +127,7 @@ Adrian Adrović	Backend Developer, Scrum Master
 
 ---
 
-## Objašnjenje
-Ovaj README:
-- Pokazuje **šta projekat trenutno ima**,  
-- Objašnjava **kako da se pokrene**,  
-- I vodi u sledeću fazu rada (Sprint 2).  
+ 
 
----
+
 
