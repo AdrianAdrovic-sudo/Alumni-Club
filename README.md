@@ -17,7 +17,7 @@ Alumni-Club/
 |------|--------------|----------|
 | Frontend | Izgled i korisnički interfejs aplikacije | Mia Vraneš, Lazar Marinović |
 | Backend | API, validacija podataka, povezivanje sa bazom | Adrian Adrović, Ansar Kurbardović|
-| Database | Dizajn i održavanje baze podataka | Filip Čokovski, Milija Knežević |
+| Database | Dizajn i održavanje baze podataka | Filip Cokovski, Milija Knežević |
 
 ## Pokretanje projekta
 
