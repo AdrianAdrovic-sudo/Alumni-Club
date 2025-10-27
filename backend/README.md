@@ -1,7 +1,7 @@
 
 ---
 
-## 💻 **backend/README.md** 
+## **backend/README.md** 
 
 ```markdown
 #  Alumni Club – Backend
@@ -10,7 +10,6 @@ Backend deo projekta **Alumni Club**, razvijen u **Node.js + Express + TypeScrip
 
 ##  Pokretanje projekta
 
-```bash
 cd backend
 npm install
 npm run dev
