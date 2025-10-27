@@ -13,15 +13,14 @@ Alumni-Club/
 
 ## Uloge timova
 
-| Tim | Odgovornost |
-|------|--------------|
-| Frontend | Izgled i korisnički interfejs aplikacije | Mia Vraneš, Lazar Marinović
-| Backend | API, validacija podataka, povezivanje sa bazom | Adrian Adrović, Ansar Kurbardović
-| Database | Dizajn i održavanje baze podataka | Filip Čokovski, Milija Knežević
+| Tim | Odgovornost | Osobe |
+|------|--------------|----------|
+| Frontend | Izgled i korisnički interfejs aplikacije | Mia Vraneš, Lazar Marinović |
+| Backend | API, validacija podataka, povezivanje sa bazom | Adrian Adrović, Ansar Kurbardović|
+| Database | Dizajn i održavanje baze podataka | Filip Čokovski, Milija Knežević |
 
 ## Pokretanje projekta
 
-### Frontend
 ```bash
 cd frontend
 npm install
