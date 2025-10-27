@@ -144,3 +144,4 @@ vite.config.ts.timestamp-*
 # Temporary runtime logs or uploads
 /tmp
 /uploads
+/NUL
