@@ -13,11 +13,12 @@ BEGIN
 END;
 $$;
 
+-- USERS tabela
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL UNIQUE,
+  email VARCHAR(255) UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   role VARCHAR(20) DEFAULT 'alumni',
   username VARCHAR(30) NOT NULL,
@@ -25,32 +26,32 @@ CREATE TABLE users (
   enrollment_year INT NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   occupation VARCHAR(255),
-   created_at TIMESTAMP DEFAULT now(),
+  created_at TIMESTAMP DEFAULT now(),
   updated_at TIMESTAMP DEFAULT now()
-  
 );
 
-CREATE TABLE post (
+-- POSTS tabela
+CREATE TABLE posts (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL,
   content TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT now(),
-  updated_at TIMESTAMP DEFAULT now()
+  updated_at TIMESTAMP DEFAULT now(),
   image_url TEXT,
-  FOREIGN KEY user_id REFERENCES User(id) ON DELETE CASCADE;
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE comment (
+-- COMMENTS tabela
+CREATE TABLE comments (
   id SERIAL PRIMARY KEY,
   post_id INT NOT NULL,
   user_id INT NOT NULL,
   content TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT now(),
   updated_at TIMESTAMP DEFAULT now(),
-  FOREIGN KEY post_id REFERENCES post(id) ON DELETE CASCADE,
-  FOREIGN KEY user_id REFERENCES user(id) ON DELETE CASCADE
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
 
 -- Triggeri --
 CREATE TRIGGER set_users_updated_at
@@ -67,5 +68,3 @@ CREATE TRIGGER set_comments_updated_at
 BEFORE UPDATE ON comments
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at_column();
-
-
