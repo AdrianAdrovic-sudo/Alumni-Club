@@ -1,7 +1,7 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
-const filePath = path.join(__dirname, "../../seed/blogs.json");
+const filePath = path.join(__dirname, '../../seed/blogs.json');
 
 export interface Blog {
   id: number;
@@ -13,7 +13,7 @@ export interface Blog {
 let blogs: Blog[] = [];
 
 export function loadBlogs() {
-  const data = fs.readFileSync(filePath, "utf-8");
+  const data = fs.readFileSync(filePath, 'utf-8');
   blogs = JSON.parse(data);
   console.log(`✅ Blogs loaded: ${blogs.length}`);
 }

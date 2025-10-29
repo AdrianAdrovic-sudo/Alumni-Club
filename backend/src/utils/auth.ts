@@ -1,7 +1,8 @@
-import jwt, { JwtPayload, Secret, SignOptions } from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import type { JwtPayload, Secret, SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
-const JWT_SECRET: Secret = (process.env.JWT_SECRET || "dev_secret") as Secret;
+const JWT_SECRET: Secret = (process.env.JWT_SECRET || 'dev_secret') as Secret;
 // 1h u sekundama
 const JWT_EXPIRES_IN_SECONDS = Number(process.env.JWT_EXPIRES_IN ?? 3600);
 
@@ -24,7 +25,7 @@ export function generateToken(payload: object, options?: SignOptions) {
 export function verifyToken(token: string): JwtPayload | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    return typeof decoded === "string"
+    return typeof decoded === 'string'
       ? ({ sub: decoded } as JwtPayload)
       : (decoded as JwtPayload);
   } catch {

@@ -145,3 +145,9 @@ vite.config.ts.timestamp-*
 /tmp
 /uploads
 /NUL
+
+# ESLint cache and Windows device ghosts
+.eslintcache
+backend/.eslintcache
+backend/NUL
+backend/nul
