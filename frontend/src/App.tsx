@@ -5,6 +5,7 @@ import { Routes, Route } from "react-router-dom";
 import AlumniDirectory from "./pages/AlumniDirectory";
 import Blog from "./pages/Blog.tsx";
 import Login from "./pages/Login.tsx";
+import AboutUs from "./pages/AboutUs.tsx";
 
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
             <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
             <Route path="/Blog" element={<Blog />} />
             <Route path="/Login" element={<Login />} />
+            <Route path="/AboutUs" element={<AboutUs/>} />
         </Routes>
       </main>
       <Footer />
