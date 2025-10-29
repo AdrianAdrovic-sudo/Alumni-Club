@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import rateLimit from 'express-rate-limit';
 
 // Ograničava 5 zahteva u minuti po IP adresi
 export const authRateLimiter = rateLimit({
@@ -7,7 +7,7 @@ export const authRateLimiter = rateLimit({
   message: {
     error: {
       status: 429,
-      message: "Previše pokušaja. Pokušajte ponovo kasnije.",
+      message: 'Previše pokušaja. Pokušajte ponovo kasnije.',
     },
   },
   standardHeaders: true, // X-RateLimit headers

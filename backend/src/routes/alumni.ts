@@ -1,16 +1,16 @@
-import { Router } from "express";
-import { getAllAlumni } from "../repositories/alumniRepo";
-import { paginate } from "../utils/paginate";
+import { Router } from 'express';
+import { getAllAlumni } from '../repositories/alumniRepo';
+import { paginate } from '../utils/paginate';
 
 const r = Router();
 
 // GET /api/alumni?name=&year=&page=&limit=
-r.get("/", (req, res) => {
+r.get('/', (req, res) => {
   const { name, year, page, limit } = req.query;
 
   let list = getAllAlumni();
 
-  if (name && String(name).trim() !== "") {
+  if (name && String(name).trim() !== '') {
     const q = String(name).toLowerCase();
     list = list.filter((a) => a.name.toLowerCase().includes(q));
   }

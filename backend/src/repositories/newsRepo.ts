@@ -1,7 +1,7 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
-const filePath = path.join(__dirname, "../../seed/news.json");
+const filePath = path.join(__dirname, '../../seed/news.json');
 
 export interface News {
   id: number;
@@ -13,7 +13,7 @@ export interface News {
 let news: News[] = [];
 
 export function loadNews() {
-  const data = fs.readFileSync(filePath, "utf-8");
+  const data = fs.readFileSync(filePath, 'utf-8');
   news = JSON.parse(data);
   console.log(`✅ News loaded: ${news.length}`);
 }

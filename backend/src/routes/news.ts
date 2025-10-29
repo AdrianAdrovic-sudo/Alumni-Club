@@ -1,11 +1,11 @@
-import { Router } from "express";
-import { getAllNews } from "../repositories/newsRepo";
-import { paginate } from "../utils/paginate";
+import { Router } from 'express';
+import { getAllNews } from '../repositories/newsRepo';
+import { paginate } from '../utils/paginate';
 
 const r = Router();
 
 // GET /api/news?page=&limit=
-r.get("/", (req, res) => {
+r.get('/', (req, res) => {
   const { page, limit } = req.query;
 
   const sorted = [...getAllNews()].sort(

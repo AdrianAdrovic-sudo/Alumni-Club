@@ -1,7 +1,7 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
-const filePath = path.join(__dirname, "../../seed/alumni.json");
+const filePath = path.join(__dirname, '../../seed/alumni.json');
 
 export interface Alumni {
   id: number;
@@ -12,7 +12,7 @@ export interface Alumni {
 let alumni: Alumni[] = [];
 
 export function loadAlumni() {
-  const data = fs.readFileSync(filePath, "utf-8");
+  const data = fs.readFileSync(filePath, 'utf-8');
   alumni = JSON.parse(data);
   console.log(`✅ Alumni loaded: ${alumni.length}`);
 }

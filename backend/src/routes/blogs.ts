@@ -1,11 +1,11 @@
-import { Router } from "express";
-import { getAllBlogs } from "../repositories/blogsRepo";
-import { paginate } from "../utils/paginate";
+import { Router } from 'express';
+import { getAllBlogs } from '../repositories/blogsRepo';
+import { paginate } from '../utils/paginate';
 
 const r = Router();
 
 // GET /api/blogs?page=&limit=
-r.get("/", (req, res) => {
+r.get('/', (req, res) => {
   const { page, limit } = req.query;
 
   const sorted = [...getAllBlogs()].sort(
