@@ -137,7 +137,6 @@ BEFORE UPDATE ON private_messages
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at_column();
 
-<<<<<<< HEAD
 -- ==============================================================
 --  POST_LIKES tabela
 -- ==============================================================
@@ -202,20 +201,4 @@ CREATE INDEX IF NOT EXISTS idx_comments_user_id ON comments(user_id);
 -- ==============================================================
 --  KRAJ
 -- ==============================================================
-=======
-create table event_registration(
-	id SERIAL primary key,
-	event_id INT not null,
-	user_id INT not null,
-	registered_at timestamp default now(),
-	status VARCHAR(255) not null,
-	foreign key(event_id) references event(id) on delete cascade,
-	foreign key(user_id) references users(id) on delete cascade
-);
-
-CREATE TRIGGER set_comments_updated_at
-BEFORE UPDATE ON event_registration
-FOR EACH ROW
-EXECUTE FUNCTION set_updated_at_column();
->>>>>>> 309def2ee1ec487eba4631f43b220f42717a9ec6
 
