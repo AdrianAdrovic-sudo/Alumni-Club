@@ -1,22 +1,23 @@
-import { ZodObject, ZodRawShape } from "zod";
-import { Request, Response, NextFunction } from "express";
+import { ZodSchema } from 'zod';
+import { Request, Response, NextFunction } from 'express';
 
 export const validate =
-  (schema: ZodObject<ZodRawShape>) =>
+  (schema: ZodSchema<any>) =>
   (req: Request, res: Response, next: NextFunction) => {
-    try {
-      schema.parse({
-        body: req.body,
-        query: req.query,
-        params: req.params,
-      });
-      next();
-    } catch (err: any) {
+    const result = schema.safeParse({
+      body: req.body,
+      params: req.params,
+      query: req.query
+    });
+
+    if (!result.success) {
       return res.status(400).json({
         error: {
-          message: "Validacija nije prošla.",
-          details: err.errors,
-        },
+          code: 'VALIDATION_ERROR',
+          message: 'Neispravan unos.',
+          details: result.error.flatten()
+        }
       });
     }
+    next();
   };
