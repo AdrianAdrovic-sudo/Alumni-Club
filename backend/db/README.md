@@ -1,5 +1,3 @@
-```markdown
-
 \# 🎓 Alumni Klub — Dokumentacija baze podataka
 
 
@@ -10,7 +8,7 @@
 
 \*\*Datum kreiranja:\*\* 27.10.2025.  
 
-\*\*Poslednja izmena:\*\* 29.10.2025.  
+\*\*Poslednja izmena:\*\* 27.10.2025.  
 
 
 
