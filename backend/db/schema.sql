@@ -68,3 +68,52 @@ CREATE TRIGGER set_comments_updated_at
 BEFORE UPDATE ON comments
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at_column();
+
+create table event(
+	id SERIAL primary key,
+	title VARCHAR(255) not null,
+	description TEXT,
+	location VARCHAR(255),
+	start_time timestamp not null,
+	end_time timestamp not null,
+	created_by INT not null,
+	updated_at TIMESTAMP default now(),
+	foreign key (created_by) references users(id) on delete cascade
+);
+
+create table private_message(
+	id SERIAL primary key,
+	subject VARCHAR(255) not null,
+	content TEXT not null,
+	sent_date timestamp default now(),
+	is_read BOOLEAN default false,
+	sender INT not null,
+	receiver INT not null,
+	foreign key (sender) references users(id) on delete cascade,
+	foreign key (receiver) references users(id) on delete cascade
+);
+
+CREATE TRIGGER set_posts_updated_at
+BEFORE UPDATE ON event
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at_column();
+
+CREATE TRIGGER set_comments_updated_at
+BEFORE UPDATE ON private_message
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at_column();
+
+CREATE TABLE post_likes (
+    id SERIAL PRIMARY KEY,
+    post_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT now(),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TRIGGER set_comments_updated_at
+BEFORE UPDATE ON post_likes
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at_column();
+
