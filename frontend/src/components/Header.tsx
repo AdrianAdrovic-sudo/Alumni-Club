@@ -7,7 +7,7 @@ function Header() {
       <div className="header-container">
         {/* Logo */}
         <div className="logo-container">
-          <a href="#" className="logo-link">
+          <a href="/Home" className="logo-link">
             <img src="/src/assets/akfit.png" alt="Udruzenje Logo" className="logo-img" />
           </a>
         </div>
