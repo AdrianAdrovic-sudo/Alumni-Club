@@ -1,0 +1,122 @@
+.home-main-content {
+  background: #39577A;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  min-height: calc(100vh - 200px); /* Adjust if needed for header/footer height */
+}
+
+/* Aktuelno Section */
+.aktu-section {
+  margin: 38px 0 48px 0;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.aktu-title {
+  color: #E5B342;
+  font-weight: bold;
+  font-size: 2.1rem;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.aktu-cards {
+  display: flex;
+  gap: 44px;
+  width: 74vw;
+  justify-content: center;
+}
+.aktu-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px #324d6b22;
+  width: 208px;
+  min-height: 112px;
+  padding: 24px 10px 35px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.16s, box-shadow 0.16s;
+}
+.aktu-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 8px 28px #E5B34255, 0 4px 18px #324d6b22;
+}
+.aktu-card-title {
+  font-size: 1.22rem;
+  font-weight: bold;
+  color: #39577A;
+}
+.aktu-card-desc {
+  font-size: 1.02rem;
+  color: #494848;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Editorial Section */
+.editorial-section {
+  width: 100vw;
+  background: #fff;
+  box-shadow: 0 1px 8px #324d6b22;
+  padding: 38px 0 38px 0;
+  margin-bottom: 25px;
+}
+.editorial-content {
+  width: 70vw;
+  margin: 0 auto;
+  display: flex;
+  gap: 55px;
+  align-items: center;
+}
+.editorial-left {
+  flex: 2;
+  min-width: 210px;
+}
+.editorial-left p {
+  font-size: 1.09rem;
+  margin-bottom: 22px;
+  color: #39577A;
+}
+.editorial-left button {
+  background: #F6C354;
+  color: #fff;
+  font-weight: 500;
+  padding: 11px 29px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1.05rem;
+  cursor: pointer;
+  box-shadow: 0 1.5px 8px #fee44033;
+  transition: background 0.18s;
+}
+.editorial-left button:hover {
+  background: #E5B342;
+}
+.editorial-image {
+  flex: 1;
+}
+.editorial-image img {
+  width: 230px;
+  border-radius: 17px;
+  box-shadow: 0 4px 16px #324d6b33;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 950px) {
+  .aktu-cards,
+  .editorial-content {
+    flex-direction: column;
+    align-items: center;
+    width: 98vw;
+    gap: 22px;
+  }
+  .editorial-image img {
+    width: 88vw;
+    min-width: 120px;
+    max-width: 250px;
+  }
+}
