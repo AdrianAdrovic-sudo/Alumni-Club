@@ -14,7 +14,7 @@ function Header() {
 
         {/* Navigacija */}
         <nav className="nav-menu">
-          <a href="#" className="nav-link">Udruženje</a>
+          <Link to="/Blog" className="nav-link">Blog</Link>
           <Link to="/AlumniDirectory" className="nav-link">Alumnisti</Link>
           <a href="#" className="nav-link">Oglasi za posao</a>
           <a href="#" className="nav-link">Kontakt</a>

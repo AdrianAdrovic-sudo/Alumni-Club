@@ -3,6 +3,7 @@ import Footer from "./components/Footer.tsx";
 import Home from "./pages/Home.tsx";
 import { Routes, Route } from "react-router-dom";
 import AlumniDirectory from "./pages/AlumniDirectory";
+import Blog from "./pages/Blog.tsx";
 
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
             <Route path="/Home" element={<Home />} />
             <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
+            <Route path="/Blog" element={<Blog />} />
         </Routes>
       </main>
       <Footer />
