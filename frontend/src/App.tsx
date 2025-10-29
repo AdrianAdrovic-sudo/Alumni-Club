@@ -3,17 +3,18 @@ import Footer from "./components/Footer.tsx";
 import Home from "./pages/Home.tsx";
 import { Routes, Route } from "react-router-dom";
 import AlumniDirectory from "./pages/AlumniDirectory";
+import Login from "./pages/Login.tsx";
 
 
 export default function App() {
   return (
-    <div className="bg-[#324D6B] min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'white' }}>
       <Header />
-      <main className="flex-1 w-full pt-16 pb-32 bg-[#324D6B]">
+      <main className="flex-1 flex justify-center items-center py-8" style={{ backgroundColor: '#324D6B' }}>
         <Routes>
           <Route path="/" element={<Home />} />
-            <Route path="/Home" element={<Home />} />
-            <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
+          <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </main>
       <Footer />

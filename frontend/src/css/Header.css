@@ -6,6 +6,7 @@
   top: 0;
   left: 0;
   z-index: 50;
+  border-bottom:  #ffab1f 3px solid;
 }
 
 .header-container {
@@ -43,7 +44,9 @@
 }
 
 .nav-link:hover {
-  color: #2563eb;
+  color:  #294a70; 
+  font-weight: bold;
+  transition: width 1s, height 1s, background-color 2s;
 }
 
 .signup-container {
@@ -52,8 +55,8 @@
 
 .signup-btn {
   background: #fff;
-  border: 2px solid #2563eb;
-  color: #2563eb;
+  border: 2px solid #294a70; 
+  color:  #294a70; 
   padding: 8px 16px;
   border-radius: 9999px;
   font-weight: 500;
@@ -61,6 +64,7 @@
   cursor: pointer;
   position: relative;
   z-index: 1;
+  margin-top: -20px;
 }
 
 .signup-btn:hover {
@@ -71,7 +75,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #1e40af;
+  background:  #294a70; 
   clip-path: polygon(0 100%, 100% 0, 100% 100%);
   transform: translateY(4px);
   opacity: 0.5;
