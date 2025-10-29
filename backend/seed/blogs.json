@@ -1,0 +1,17 @@
+[
+  { "id": 1, "author": "Ansar", "title": "Iskustvo sa fakulteta" },
+  { "id": 2, "author": "Adrian", "title": "Kako smo pokrenuli Alumni Club" },
+
+  {
+    "id": 1,
+    "author": "Ansar",
+    "title": "Iskustvo sa fakulteta",
+    "date": "2025-02-10T12:00:00Z"
+  },
+  {
+    "id": 2,
+    "author": "Adrian",
+    "title": "Kako smo pokrenuli Alumni Club",
+    "date": "2025-02-18T17:00:00Z"
+  }
+]
