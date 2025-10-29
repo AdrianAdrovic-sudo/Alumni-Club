@@ -103,17 +103,18 @@ BEFORE UPDATE ON private_message
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at_column();
 
-CREATE TABLE post_likes (
-    id SERIAL PRIMARY KEY,
-    post_id INT NOT NULL,
-    user_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT now(),
-    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,    
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+create table event_registration(
+	id SERIAL primary key,
+	event_id INT not null,
+	user_id INT not null,
+	registered_at timestamp default now(),
+	status VARCHAR(255) not null,
+	foreign key(event_id) references event(id) on delete cascade,
+	foreign key(user_id) references users(id) on delete cascade
 );
 
 CREATE TRIGGER set_comments_updated_at
-BEFORE UPDATE ON post_likes
+BEFORE UPDATE ON event_registration
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at_column();
 
