@@ -4,7 +4,6 @@ import '../css/Home.css';
 function Home() {
   return (
     <main className="home-main-content">
-      {/* Aktuelno Section */}
       <section className="aktu-section">
         <div className="aktu-title">
           Aktuelno
@@ -20,7 +19,6 @@ function Home() {
         </div>
       </section>
 
-      {/* Editorial Section Below Aktuelno */}
       <section className="editorial-section">
         <div className="editorial-content">
           <div className="editorial-left">
