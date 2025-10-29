@@ -12,7 +12,8 @@ export default function App() {
       <main className="flex-1 w-full pt-16 pb-32 bg-[#324D6B]">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
+            <Route path="/Home" element={<Home />} />
+            <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
         </Routes>
       </main>
       <Footer />
