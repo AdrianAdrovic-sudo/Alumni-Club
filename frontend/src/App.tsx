@@ -8,9 +8,9 @@ import Blog from "./pages/Blog.tsx";
 
 export default function App() {
   return (
-    <div className="bg-[#324D6B] min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'white' }}>
       <Header />
-      <main className="flex-1 w-full pt-16 pb-32 bg-[#324D6B]">
+      <main className="flex-1 flex justify-center items-center py-8" style={{ backgroundColor: '#324D6B' }}>
         <Routes>
           <Route path="/" element={<Home />} />
             <Route path="/Home" element={<Home />} />

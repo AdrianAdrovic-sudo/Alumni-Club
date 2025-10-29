@@ -22,7 +22,9 @@ function Header() {
 
         {/* Prijavi se dugme */}
         <div className="signup-container">
+          <Link to="/login">
           <button className="signup-btn">Prijavi se</button>
+          </Link>
           <div className="diagonal-bg" />
         </div>
       </div>
