@@ -24,13 +24,13 @@ Ovaj dokument opisuje strukturu baze podataka za web aplikaciju \*\*Alumni Klub\
 
 Baza je dizajnirana tako da omogući:
 
-\- komunikaciju između članova alumnija,  
+\- komunikaciju između članova alumnija,
 
-\- objavljivanje i komentarisanje postova,  
+\- objavljivanje i komentarisanje postova,
 
-\- organizaciju i prijavu na događaje,  
+\- organizaciju i prijavu na događaje,
 
-\- slanje privatnih poruka,  
+\- slanje privatnih poruka,
 
 \- i diferencijaciju korisnika po ulozi (alumni / admin).
 
@@ -74,6 +74,8 @@ Baza je dizajnirana tako da omogući:
 
 \### 👤 \*\*users\*\*
 
+
+
 | Kolona | Tip | Opis |
 
 |---------|------|------|
@@ -112,11 +114,9 @@ Baza je dizajnirana tako da omogući:
 
 
 
----
-
-
-
 \### 📝 \*\*posts\*\*
+
+
 
 | Kolona | Tip | Opis |
 
@@ -140,11 +140,9 @@ Baza je dizajnirana tako da omogući:
 
 
 
----
-
-
-
 \### 💬 \*\*comments\*\*
+
+
 
 | Kolona | Tip | Opis |
 
@@ -168,11 +166,9 @@ Baza je dizajnirana tako da omogući:
 
 
 
----
-
-
-
 \### 📅 \*\*events\*\*
+
+
 
 | Kolona | Tip | Opis |
 
@@ -202,11 +198,9 @@ Baza je dizajnirana tako da omogući:
 
 
 
----
-
-
-
 \### ✉️ \*\*private\_messages\*\*
+
+
 
 | Kolona | Tip | Opis |
 
@@ -232,11 +226,9 @@ Baza je dizajnirana tako da omogući:
 
 
 
----
-
-
-
 \### ❤️ \*\*post\_likes\*\*
+
+
 
 | Kolona | Tip | Opis |
 
@@ -252,11 +244,9 @@ Baza je dizajnirana tako da omogući:
 
 
 
----
-
-
-
 \### 🧾 \*\*event\_registration\*\*
+
+
 
 | Kolona | Tip | Opis |
 
@@ -299,6 +289,4 @@ BEGIN
 END;
 
 $$ LANGUAGE plpgsql;
-
-
 
