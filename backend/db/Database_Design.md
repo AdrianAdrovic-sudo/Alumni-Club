@@ -3,7 +3,7 @@
 **Autori:** Filip Čokovski, Milija Knežević  
 **Baza:** PostgreSQL (`alumni_club_dev`)  
 **Datum kreiranja:** 27.10.2025.  
-**Poslednja izmena:** 27.10.2025.  
+**Poslednja izmena:** 29.10.2025.  
 
 ---
 
