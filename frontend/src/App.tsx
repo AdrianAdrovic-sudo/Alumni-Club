@@ -4,6 +4,7 @@ import Home from "./pages/Home.tsx";
 import { Routes, Route } from "react-router-dom";
 import AlumniDirectory from "./pages/AlumniDirectory";
 import Blog from "./pages/Blog.tsx";
+import Login from "./pages/Login.tsx";
 
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
             <Route path="/Home" element={<Home />} />
             <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
             <Route path="/Blog" element={<Blog />} />
+            <Route path="/Login" element={<Login />} />
         </Routes>
       </main>
       <Footer />

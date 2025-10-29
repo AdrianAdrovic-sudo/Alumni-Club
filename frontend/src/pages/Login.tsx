@@ -14,38 +14,36 @@ export default function Login(){
       setShowPassword(true);
     }
   }
-    return(
-    
-        <div>
-        
-        <div className='login'>
-            <h2>Login</h2>
-            <h4>Unesite svoje podatke kako biste nastavili.</h4>
+    return (
+  <div className="login-container">
+    <div className="login">
+      <h2>Login</h2>
+      <h4>Unesite svoje podatke kako biste nastavili.</h4>
+      <form>
+        <label htmlFor="username">Korisničko ime:</label>
+        <input
+          type="text"
+          placeholder="Korisničko ime"
+          id="username"
+        />
 
-            <form>
-                <label>Korisničko ime:</label><br></br>
-                <input type="text" placeholder='Korisničko ime' id='username'></input><br></br>
-
-                <label>Šifra:</label><br></br>
-                <div className='passwordContainer'>
-                 <input
-            type={showPassword ? 'text' : 'password'}
+        <label htmlFor="password">Šifra:</label>
+        <div className="passwordContainer">
+          <input
+            type={showPassword ? "text" : "password"}
             placeholder="Šifra"
-            id="password"></input>
-          
-          <span onClick={togglePassword} className='toggleEye'>
+            id="password"
+          />
+          <span onClick={togglePassword} className="toggleEye">
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
-        <br />
+        </div>
+
+        <button type="submit">Potvrdi</button>
+        <p>Zaboravili ste sifru?</p> {/* Razraditi ideju, poslati formu preko mail-a */}
+      </form>
     </div>
+  </div>
+);
 
-                <button type="submit">Potvrdi</button>
-                <p>Zaboravili ste sifru?</p> {/* razraditi ideju, poslati formu preko mail-a */}
-
-            </form>
-
-            </div> 
-
-      </div>
-    );
 }
