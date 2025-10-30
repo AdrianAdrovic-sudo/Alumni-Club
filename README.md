@@ -1,5 +1,6 @@
 # Alumni Club
 
+
 #  Alumni Club – Monorepo
 
 Ovo je monorepo projekat za **Alumni Club**, koji sadrži frontend i backend deo aplikacije.

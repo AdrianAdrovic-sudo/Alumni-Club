@@ -5,24 +5,23 @@ function Header() {
   return (
     <header className="header">
       <div className="header-container">
-        {/* Logo */}
         <div className="logo-container">
-          <a href="#" className="logo-link">
+          <a href="/Home" className="logo-link">
             <img src="/src/assets/akfit.png" alt="Udruzenje Logo" className="logo-img" />
           </a>
         </div>
 
-        {/* Navigacija */}
         <nav className="nav-menu">
-          <a href="#" className="nav-link">Udruženje</a>
+          <Link to="/Blog" className="nav-link">Blog</Link>
           <Link to="/AlumniDirectory" className="nav-link">Alumnisti</Link>
-          <a href="#" className="nav-link">Oglasi za posao</a>
+          <Link to="/AboutUs" className="nav-link">O nama</Link>
           <a href="#" className="nav-link">Kontakt</a>
         </nav>
 
-        {/* Prijavi se dugme */}
         <div className="signup-container">
+          <Link to="/login">
           <button className="signup-btn">Prijavi se</button>
+          </Link>
           <div className="diagonal-bg" />
         </div>
       </div>
