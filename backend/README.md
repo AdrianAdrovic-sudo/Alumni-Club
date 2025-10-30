@@ -1,149 +1,114 @@
-## **backend/README.md**
+# 🎓 Alumni Club – Backend
 
-```markdown
-# Alumni Club – Backend
+## 📘 Overview
+This is the **backend service** for the **Alumni Club** project, developed as part of Sprint 1.  
+It provides the foundation for a modular, scalable API built with **Node.js**, **Express**, and **TypeScript**.
 
-Backend deo projekta **Alumni Club**, razvijen u **Node.js + Express + TypeScript**.
-
-## Pokretanje projekta
-
-cd backend
-npm install
-npm run dev
-
-Server će se pokrenuti na:
-http://localhost:3000
-
-Struktura
-backend/
-│
-├── src/
-│ ├── routes/ # Modularne rute (npr. health, users, news)
-│ ├── middlewares/ # Error handler, not found, sigurnosni slojevi
-│ ├── utils/ # Logger, pomoćne funkcije
-│ ├── config/ # Povezivanje sa bazom, okruženje
-│ ├── app.ts # Express aplikacija
-│ └── server.ts # Ulazna tačka servera
-│
-├── .env.example # Šablon konfiguracije
-├── package.json # Skripte i zavisnosti
-└── tsconfig.json # TypeScript konfiguracija
-
-Implementirano (Sprint 1)
-
-Osnovna projektna struktura (src/, config/, routes/)
-
-Express server sa CORS, Helmet i JSON parsingom
-
-Health i Version API rute
-
-Globalni error handler i 404 odgovor
-
-Logger (pino)
-
-Sledeće faze
-
-Konekcija sa bazom (ORM – Prisma ili TypeORM)
-
-CRUD operacije za korisnike, vesti, blogove
-
-Autentifikacija i RBAC
-
-Swagger dokumentacija i CI pipeline
+At this stage, the backend is fully structured and functional, using **mock in-memory repositories** to simulate database operations.  
+The architecture is complete — routes, middlewares, validation, error handling, and CI/CD are all active — awaiting connection to the real database.
 
 ---
 
-Dodata Swagger (OpenAPI) dokumentacija:
+## 🧩 Current Features
+✅ **Express + TypeScript setup**  
+✅ **Mock repositories** for users, alumni, news, and blogs  
+✅ **Authentication system (mock data)**  
+✅ **Rate limiting**, **Helmet**, **CORS**, and **Compression** middleware  
+✅ **Request ID** and structured **logging**  
+✅ **Swagger (OpenAPI)** documentation  
+✅ **Zod validation layer**  
+✅ **Error handling** with friendly responses  
+✅ **GitHub Actions CI** (linting, type checking, build verification)
 
--Podešen `swagger-ui-express` i `swagger-jsdoc`
--Kreiran `src/config/swagger.ts`
--Integrisan Swagger u `app.ts` (ruta `/api/docs`)
--Dokumentovane rute `/health` i `/version`
+---
 
-Dokumentacija dostupna na:
-(http://localhost:3000/api/docs)
-```
-
-Validacija podataka (Zod middleware)
-
-Implementirana je validacija unosa pomoću biblioteke Zod, kroz prilagođeni Express middleware.
-
-dodata struktura
-src/
-├── middlewares/
-│ └── validate.ts # Middleware za validaciju pomoću Zod šema
-├── validations/
-│ └── auth.validation.ts # Šeme za registraciju i login
-├── routes/
-│ └── auth.ts # Rute koje koriste validaciju (register, login)
-
-In-memory repositories i mock data
-
-U ovoj fazi implementirani su jednostavni in-memory repozitorijumi (privremena baza podataka u memoriji) koji koriste statičke .json fajlove kao početne podatke.
-Ovi fajlovi se učitavaju pri pokretanju servera i omogućavaju testiranje API-ja bez prave baze podataka.
-dodata struktura
+## 🗂️ Project Structure
 backend/
-├── seed/ # Staticki .json fajlovi (mock podaci)
-│ ├── users.json
-│ ├── alumni.json
-│ ├── news.json
-│ └── blogs.json
 │
 ├── src/
-│ ├── repositories/ # Privremeni "repozitorijumi" koji čuvaju podatke u memoriji
-│ │ ├── usersRepo.ts
-│ │ ├── alumniRepo.ts
-│ │ ├── newsRepo.ts
-│ │ └── blogsRepo.ts
-│ │
-│ ├── routes/ # API rute
-│ │ ├── users.ts # /api/users – vraća i dodaje korisnike
-│ │ ├── health.ts
-│ │ ├── auth.ts
-│ │ └── index.ts
-│ │
-│ ├── app.ts
-│ └── server.ts # Učitava mock podatke pre starta servera
+│ ├── config/ # Swagger setup, environment config
+│ ├── middlewares/ # Security, request ID, error handlers, rate limiter
+│ ├── repositories/ # Mock in-memory data stores
+│ ├── routes/ # Express route modules
+│ ├── schemas/ # Zod validation schemas
+│ ├── tests/ # Jest tests
+│ ├── utils/ # Logger and helpers
+│ └── validations/ # App + server entry points
+│
+├── .github/workflows/ # CI pipeline
+├── package.json
+├── tsconfig.json
+└── README.md
 
-Autentifikacija (JWT + bcrypt)
+---
 
-Implementiran kompletan auth sistem sa sledećim funkcionalnostima:
+## ⚙️ Technology Stack
+- **Language:** TypeScript  
+- **Runtime:** Node.js (v20+)  
+- **Framework:** Express.js  
+- **Validation:** Zod  
+- **Documentation:** Swagger UI  
+- **Testing:** Jest (basic setup)  
+- **Linting:** ESLint v9 (flat config)  
+- **CI/CD:** GitHub Actions  
 
-Registracija korisnika (POST /api/auth/register)
-→ Validacija unosa, hashiranje lozinke i kreiranje korisnika.
+---
 
-Prijava korisnika (POST /api/auth/login)
-→ Provera kredencijala, generisanje JWT tokena pomoću jsonwebtoken.
+##Getting Started
 
-Zaštićena ruta (GET /api/auth/me)
-→ Dostupna samo uz validan token.
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/<your-org-or-user>/Alumni-Club.git
+cd Alumni-Club/backend
 
-Sigurnosni mehanizmi:
+2️⃣ Install dependencies
 
-bcryptjs za šifrovanje lozinki
+npm install
 
-jsonwebtoken za autentifikaciju
+3️⃣ Build the TypeScript code
 
-.env fajl za čuvanje tajnih ključeva
+npm run build
 
-Middleware requireAuth za proveru tokena
+4️⃣ Start the development server
 
-Feature routes with filters and pagination (mocked)
-dodate su rute za alumni, news i blogs sa filtriranjem, sortiranjem i paginacijom mock podataka iz memorije.
+npm run dev
 
-Testiranje middleware-a (x-request-id i Rate Limiter)
+Server runs at:
 
-U ovom koraku su implementirana i testirana dva ključna Express middleware-a:
+http://localhost:3000
 
-1. x-request-id
+🧭 Available Routes
+Endpoint	Method	Description
+/api/health	GET	Check if the API is running
+/api/version	GET	Get current API version
+/api/users	GET	Get all mock users
+/api/alumni	GET	Get all mock alumni
+/api/news	GET	Get mock news
+/api/blogs	GET	Get mock blogs
+/api/auth/register	POST	Mock register
+/api/auth/login	POST	Mock login
 
-Dodaje jedinstveni identifikator svakom API zahtevu pomoću crypto.randomUUID().
-Ovaj ID se vraća u response headeru pod imenom x-request-id.
-Koristi se za praćenje i dijagnostiku zahteva u logovima.
-Testirano komandama Invoke-WebRequest i curl -I, header se uspešno prikazuje.
+Swagger Docs → http://localhost:3000/api-docs
 
-2. authRateLimiter
+🧠 Future Development
+Introduce a real database (PostgreSQL / MySQL)
 
-Sprečava prekomerno slanje zahteva prema rutama /api/auth.
-Ograničenje: maksimalno 5 zahteva u 1 minutu po IP adresi.
-Pri prekoračenju, API vraća previse pokusaja
+Implement ORM (Prisma or TypeORM)
+
+Replace mock repositories with persistent models
+
+Expand CRUD operations for all entities
+
+🧑‍💻 Team Guidelines
+Always branch from main
+
+Follow the naming pattern: feature/..., fix/..., or chore/...
+
+Ensure CI passes before opening a pull request
+
+Keep commits descriptive and atomic
+
+🏁 Status
+✅ Sprint 1 complete – backend foundation ready
+🕓 Next milestone: Connect to the real database and implement CRUD
+
