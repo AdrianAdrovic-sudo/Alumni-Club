@@ -1,0 +1,223 @@
+.contact-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: white;
+}
+
+.contact-hero {
+  background: linear-gradient(135deg, #294a70 0%, #324D6B 100%);
+  color: white;
+  padding: 80px 20px 60px;
+  text-align: center;
+}
+
+.contact-hero h1 {
+  font-size: 48px;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  opacity: 0.9;
+}
+
+.contact-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.contact-info-section h2 {
+  font-size: 36px;
+  color: #294a70;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  margin-bottom: 80px;
+}
+
+/* Zajednički stil za sve info kartice */
+.adress,
+.phone,
+.email,
+.working-hours {
+  background: white;
+  padding: 30px 20px;
+  border-radius: 16px;
+  text-align: center;
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.adress:hover,
+.phone:hover,
+.email:hover,
+.working-hours:hover {
+  border-color: #ffab1f;
+  box-shadow: 0 8px 24px rgba(255, 171, 31, 0.15);
+  transform: translateY(-5px);
+}
+
+.info-icon {
+  font-size: 40px;
+  color: #ffab1f;
+  margin-bottom: 20px;
+}
+
+.adress h3,
+.phone h3,
+.email h3,
+.working-hours h3 {
+  font-size: 20px;
+  color: #294a70;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.adress p,
+.phone p,
+.email p,
+.working-hours p {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.6;
+  margin: 4px 0;
+}
+
+.contact-form-section {
+  max-width: 800px;
+  margin: 0 auto 80px;
+}
+
+.contact-form-section h2 {
+  font-size: 36px;
+  color: #294a70;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.contact-form {
+  background: #f9f9f9;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #294a70;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+  color: #333;
+  background-color: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #ffab1f;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #294a70 0%, #324D6B 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, #ffab1f 0%, #ff9500 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(255, 171, 31, 0.3);
+}
+
+.map-section {
+  margin-top: 80px;
+}
+
+.map-section h2 {
+  font-size: 36px;
+  color: #294a70;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.map-container {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.map-container iframe {
+  border: none;
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .info-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-hero h1 {
+    font-size: 36px;
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+  }
+
+  .info-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-form-section h2,
+  .contact-info-section h2,
+  .map-section h2 {
+    font-size: 28px;
+  }
+
+  .contact-form {
+    padding: 30px 20px;
+  }
+
+  .map-container iframe {
+    height: 350px;
+  }
+}
