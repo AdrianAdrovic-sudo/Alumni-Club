@@ -1,6 +1,7 @@
 # 🎓 Alumni Club – Backend
 
 ## 📘 Overview
+
 This is the **backend service** for the **Alumni Club** project, developed as part of Sprint 1.  
 It provides the foundation for a modular, scalable API built with **Node.js**, **Express**, and **TypeScript**.
 
@@ -10,6 +11,7 @@ The architecture is complete — routes, middlewares, validation, error handling
 ---
 
 ## 🧩 Current Features
+
 ✅ **Express + TypeScript setup**  
 ✅ **Mock repositories** for users, alumni, news, and blogs  
 ✅ **Authentication system (mock data)**  
@@ -23,6 +25,7 @@ The architecture is complete — routes, middlewares, validation, error handling
 ---
 
 ## 🗂️ Project Structure
+
 backend/
 │
 ├── src/
@@ -43,20 +46,22 @@ backend/
 ---
 
 ## ⚙️ Technology Stack
-- **Language:** TypeScript  
-- **Runtime:** Node.js (v20+)  
-- **Framework:** Express.js  
-- **Validation:** Zod  
-- **Documentation:** Swagger UI  
-- **Testing:** Jest (basic setup)  
-- **Linting:** ESLint v9 (flat config)  
-- **CI/CD:** GitHub Actions  
+
+- **Language:** TypeScript
+- **Runtime:** Node.js (v20+)
+- **Framework:** Express.js
+- **Validation:** Zod
+- **Documentation:** Swagger UI
+- **Testing:** Jest (basic setup)
+- **Linting:** ESLint v9 (flat config)
+- **CI/CD:** GitHub Actions
 
 ---
 
 ##Getting Started
 
 ### 1️⃣ Clone the repository
+
 ```bash
 git clone https://github.com/<your-org-or-user>/Alumni-Club.git
 cd Alumni-Club/backend
@@ -112,3 +117,8 @@ Keep commits descriptive and atomic
 ✅ Sprint 1 complete – backend foundation ready
 🕓 Next milestone: Connect to the real database and implement CRUD
 
+
+Sprint 2
+
+Dodate poruke o greškama, implementiran rate limiter i povezan Swagger za prikaz Auth API-ja.
+```
