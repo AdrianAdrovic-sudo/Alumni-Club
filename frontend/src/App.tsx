@@ -6,6 +6,7 @@ import AlumniDirectory from "./pages/AlumniDirectory";
 import Blog from "./pages/Blog.tsx";
 import Login from "./pages/Login.tsx";
 import AboutUs from "./pages/AboutUs.tsx";
+import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/Blog" element={<Blog />} />
             <Route path="/Login" element={<Login />} />
             <Route path="/AboutUs" element={<AboutUs/>} />
+            <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
         </Routes>
       </main>
       <Footer />
