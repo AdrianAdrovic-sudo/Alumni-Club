@@ -117,8 +117,9 @@ Keep commits descriptive and atomic
 ✅ Sprint 1 complete – backend foundation ready
 🕓 Next milestone: Connect to the real database and implement CRUD
 
+🏁 Sprint 2
 
-Sprint 2
-
-Dodate poruke o greškama, implementiran rate limiter i povezan Swagger za prikaz Auth API-ja.
+✅ Added user-friendly error messages
+✅ Implemented rate limiter for login attempts
+✅ Integrated Swagger documentation for Auth API
 ```
