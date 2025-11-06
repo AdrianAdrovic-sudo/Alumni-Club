@@ -1,185 +1,27 @@
-.blog-container {
-  display: flex;
-  gap: 2rem;
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2rem 0;
+/* Animacija za dropdown menu */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.blog-main {
-  flex: 3;
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out;
 }
 
-.blog-subtitle {
-  color: #57606f;
-  font-size: 1em;
-  margin-bottom: 1.5rem;
-}
-
-.blog-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-}
-
-.blog-card {
-  background: #fff;
-  padding: 1.4rem 1.2rem 1rem 1.2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(30,47,70,0.07);
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-}
-.blog-card:hover {
-  box-shadow: 0 4px 24px rgba(30,47,70,0.12);
-}
-.blog-card small {
-  font-size: 0.85em;
-  color: #787c82;
-}
-.blog-card-date {
-  color: #adb5bd;
-  font-size: 0.83em;
-  margin-bottom: 0.4em;
-}
-.blog-card h3 {
-  margin: 0.15em 0;
-  font-size: 1.12em;
-  font-weight: 600;
-}
-.blog-read-more {
-  color: #506af5;
-  font-size: 0.95em;
-}
-
-.blog-pagination {
-  margin-top: 1.5em;
-  display: flex;
-  gap: 0.5em;
-  font-size: 1em;
-  align-items: center;
-}
-.blog-pagination span {
+.default-blog-btn{
+  width: auto;
   display: inline-block;
-  padding: 0.35em 0.8em;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #57606f;
-  background: #f5f6fa;
 }
 
-.blog-pagination .active {
-  background: #506af5;
-  color: #fff;
-  font-weight: bold;
-}
+/* -------------------------------- */
 
-.blog-sidebar {
-  flex: 1;
-  min-width: 220px;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.blog-search {
-  padding: 0.7em 1em;
-  border-radius: 6px;
-  border: 1px solid #e0e1e6;
-  margin-bottom: 1em;
-  font-size: 1em;
-}
-
-.blog-widget {
-  background: #fff;
-  border-radius: 10px;
-  padding: 1em;
-  box-shadow: 0 2px 6px rgba(30,47,70,0.06);
-}
-.blog-widget h4 {
-  margin-bottom: 0.5em;
-  font-size: 1.11em;
-  color: #222844;
-}
-
-.blog-widget ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.blog-widget ul li {
-  margin: 0.27em 0;
-}
-
-.blog-cat-btn {
-  padding: 0.4em 1.05em;
-  background: #f9fafc;
-  border-radius: 7px;
-  border: 1px solid #ededed;
-  margin-right: 0.6em;
-  color: #506af5;
-  margin-bottom: 0.5em;
-  cursor: pointer;
-  font-size: 0.98em;
-}
-
-.blog-post-detail {
-  background: #fff;
-  border-radius: 11px;
-  box-shadow: 0 2px 8px rgba(30,47,70,0.08);
-  padding: 2rem 2rem 1.6rem 2rem;
-  max-width: 500px;
-  margin: 0 auto;
-  margin-top: 3rem;
-}
-
-.blog-post-detail h3 {
-  font-size: 1.25em;
-  margin-bottom: 0.6em;
-  color: #1c2341;
-}
-.blog-post-detail .blog-card-date {
-  margin-bottom: 1em;
-}
-.blog-post-detail h4 {
-  margin-top: 2em;
-  font-size: 1.08em;
-  color: #36427a;
-}
-.blog-comments {
-  margin-bottom: 1.4em;
-}
-.blog-comment {
-  font-size: 0.98em;
-  margin: 0.4em 0;
-}
-.blog-comment-form textarea {
-  width: 100%;
-  border-radius: 6px;
-  border: 1px solid #e0e1e6;
-  margin: 0.55em 0;
-  padding: 0.7em;
-  font-size: 1em;
-}
-.blog-comment-form button {
-  background: #506af5;
-  color: #fff;
-  border: none;
-  padding: 0.5em 1.3em;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.blog-back-btn {
-  margin-top: 1.8em;
-  color: #506af5;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1em;
-  text-decoration: underline;
-}
 
 /* From Uiverse.io by satyamchaudharydev */ 
 /* From uiverse.io by @satyamchaudharydev */
@@ -301,18 +143,3 @@
   transform: scale(1);
   transition: 0s;
 }
-
-/* To overwrite all text color to black */
-
-body, .blog-container, .blog-main, .blog-subtitle, .blog-grid, .blog-card, 
-.blog-card small, .blog-card-date, .blog-card h3, .blog-read-more, 
-.blog-pagination, .blog-pagination span, .blog-pagination .active, 
-.blog-sidebar, .blog-search, .blog-widget, .blog-widget h4, 
-.blog-widget ul, .blog-widget ul li, .blog-cat-btn, .blog-post-detail, 
-.blog-post-detail h3, .blog-post-detail .blog-card-date, .blog-post-detail h4, 
-.blog-comments, .blog-comment, .blog-comment-form textarea, 
-.blog-comment-form button, .blog-back-btn, .form, .form label, .form input, 
-.form svg, .icon, .close-btn {
-  color: #000 !important;
-}
-

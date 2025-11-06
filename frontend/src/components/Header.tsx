@@ -15,7 +15,7 @@ function Header() {
           <Link to="/Blog" className="nav-link">Blog</Link>
           <Link to="/AlumniDirectory" className="nav-link">Alumnisti</Link>
           <Link to="/AboutUs" className="nav-link">O nama</Link>
-          <a href="#" className="nav-link">Kontakt</a>
+          <a href="/Contact" className="nav-link">Kontakt</a>
         </nav>
 
         <div className="signup-container">
