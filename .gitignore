@@ -151,3 +151,7 @@ vite.config.ts.timestamp-*
 backend/.eslintcache
 backend/NUL
 backend/nul
+
+backend/node_modules
+backend/dist
+.env
