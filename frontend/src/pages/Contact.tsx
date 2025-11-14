@@ -1,6 +1,6 @@
 import '../css/Contact.css';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
-import { useState } from 'react';
+
 
 function Contact() {
   return (

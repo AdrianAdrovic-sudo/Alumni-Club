@@ -7,6 +7,7 @@ import Blog from "./pages/Blog.tsx";
 import Login from "./pages/Login.tsx";
 import AboutUs from "./pages/AboutUs.tsx";
 import Contact from "./pages/Contact.tsx";
+import Theses from "./pages/Theses.tsx";
 
 
 export default function App() {
@@ -22,6 +23,8 @@ export default function App() {
             <Route path="/Login" element={<Login />} />
             <Route path="/AboutUs" element={<AboutUs/>} />
             <Route path="/Contact" element={<Contact/>} />
+            <Route path="/Theses" element={<Theses/>} />
+
         </Routes>
       </main>
       <Footer />
