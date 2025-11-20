@@ -1,7 +1,13 @@
 import "../css/Header.css"
 import { Link } from "react-router-dom";
 
+// Dummy session data
+const currentUser = "Marin"; //Neka bude admin, stavi "" za logged out
+
 function Header() {
+
+   const isAdmin = currentUser;
+
   return (
     <header className="header">
       <div className="header-container">
@@ -15,13 +21,21 @@ function Header() {
           <Link to="/Blog" className="nav-link">Blog</Link>
           <Link to="/AlumniDirectory" className="nav-link">Alumnisti</Link>
           <Link to="/AboutUs" className="nav-link">O nama</Link>
-          <a href="/Contact" className="nav-link">Kontakt</a>
+          <Link to="/Contact" className="nav-link">Kontakt</Link>
+          <Link to="/Theses" className="nav-link">Diplomski radovi</Link>
         </nav>
 
         <div className="signup-container">
+          {isAdmin ? (
+            <Link to="/dashboard">
+              <button className="dashboard-btn">Dashboard</button>
+            </Link>
+          ) : (
           <Link to="/login">
-          <button className="signup-btn">Prijavi se</button>
+            <button className="signup-btn">Prijavi se</button>
           </Link>
+          )
+        }
           <div className="diagonal-bg" />
         </div>
       </div>

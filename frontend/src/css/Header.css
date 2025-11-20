@@ -67,7 +67,25 @@
   margin-top: -20px;
 }
 
+.dashboard-btn {
+  background: #fff;
+  border: 2px solid #294a70; 
+  color:  #294a70; 
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  margin-top: -20px;
+}
+
 .signup-btn:hover {
+  background: #eef2ff;
+}
+
+.dashboard-btn:hover {
   background: #eef2ff;
 }
 

@@ -11,8 +11,24 @@
   }
 }
 
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.animate-slide-out {
+  animation: slideOut 1.5s ease-in;
+  
+}
+
 .animate-slide-in {
-  animation: slideIn 0.5s ease-out;
+  animation: slideIn 1s ease-out;
 }
 
 .default-blog-btn{
