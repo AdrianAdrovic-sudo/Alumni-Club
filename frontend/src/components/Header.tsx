@@ -2,11 +2,11 @@ import "../css/Header.css"
 import { Link } from "react-router-dom";
 
 // Dummy session data
-const currentUser = "Marin"; //Neka bude admin, stavi "" za logged out
+const currentUser = ""; //Neka bude admin, stavi "" za logged out
 
 function Header() {
 
-   const isAdmin = currentUser;
+   const isAdmin = false;
 
   return (
     <header className="header">
