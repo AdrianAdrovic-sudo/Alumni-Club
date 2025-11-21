@@ -1,24 +1,28 @@
 # Alumni Club Backend
 
-This is the backend for the Alumni Club project.  
-Built with **Node.js**, **Express**, **TypeScript**, and **PostgreSQL**.
+Backend for Alumni Club project.  
+Built with Node.js, Express, TypeScript, PostgreSQL.
 
-### Setup
-1. Go to the backend folder:
-   ```bash
-   cd backend
-   
-Install dependencies:
-npm install
-Create .env (see .env.example) with your database URL.
+## Setup
+cd backend  
+npm install  
 
-Run the database scripts:
-psql -U postgres -d alumni_club_dev -f ./db/schema.sql
-psql -U postgres -d alumni_club_dev -f ./db/seed.sql
+Create .env with:
+DATABASE_URL=your_connection_string  
+JWT_SECRET=secret  
+JWT_EXPIRES_IN=7d  
+PORT=4000  
 
-Start the server:
-npm run dev
+Run DB setup:
+psql "YOUR_DB_URL" -f db/schema.sql  
+Insert test users manually (bcrypt hashes already generated)
 
-Test
-Health check: http://localhost:4000/api/health
-Database check: http://localhost:4000/api/health/db
+Start server:
+npm run dev  
+Runs on http://localhost:4000
+
+## Latest Update
+- Added full login system (JWT + bcrypt)
+- Added requireAuth and requireRole middleware
+- Protected alumni routes under /api/alumni
+- Admin-only route examples added
