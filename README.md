@@ -1,38 +1,32 @@
 # Alumni Club
 
+Alumni Club is a monorepo containing both the frontend and backend for the project.
 
-#  Alumni Club – Monorepo
+## Project Structure
+- frontend/ → React + TypeScript (Vite)
+- backend/  → Node.js + Express + PostgreSQL
 
-Ovo je monorepo projekat za **Alumni Club**, koji sadrži frontend i backend deo aplikacije.
+## How to Run
+### Frontend
+cd frontend  
+npm install  
+npm run dev  
+Runs on: http://localhost:5173
 
-##  Struktura projekta
+### Backend
+cd backend  
+npm install  
+npm run dev  
+Runs on: http://localhost:4000
 
-Alumni-Club/
-│
-├── frontend/ # React + TypeScript (UI deo aplikacije)
-├── backend/ # Node.js + Express + TypeScript (API server)
-└── README.md # Ovaj fajl
+## Latest Update
+- Backend login fully implemented (JWT, bcrypt, roles)
+- Role-based access: alumni + admin
+- Protected API routes under /api/*
+- Frontend successfully connected to backend login
+- Test users added to database
 
-
-## Uloge timova
-
-| Tim | Odgovornost | Osobe |
-|------|--------------|----------|
-| Frontend | Izgled i korisnički interfejs aplikacije | Mia Vraneš, Lazar Marinović |
-| Backend | API, validacija podataka, povezivanje sa bazom | Adrian Adrović, Ansar Kurbardović|
-| Database | Dizajn i održavanje baze podataka | Filip Cokovski, Milija Knežević |
-
-## Pokretanje projekta
-
-```bash
-cd frontend
-npm install
-npm run dev
-
-cd backend
-npm install
-npm run dev
-
-!!!!
-Molimo timove da ne menjaju direktorijume drugih timova.
-Svaki deo projekta ima svoj README.md fajl sa detaljima o pokretanju i konfiguraciji.
+## Test Accounts
+alumni_one / AlumniPass1!  
+alumni_two / AlumniPass2!  
+admin_one / AdminPass1!
