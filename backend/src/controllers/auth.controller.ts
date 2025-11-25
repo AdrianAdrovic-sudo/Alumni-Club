@@ -1,39 +1,49 @@
-// backend/src/controllers/auth.controller.ts
-import { Request, Response } from "express";
-import { loginService } from "../services/auth.service";
-import { LoginRequestBody } from "../types/auth.types";
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { AuthRequest } from '../types/auth.types';
 
-export async function loginController(req: Request, res: Response) {
-  try {
-    const { username, password } = req.body as LoginRequestBody;
+const prisma = new PrismaClient();
 
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ message: "username and password are required" });
+class AuthController {
+    async register(req: Request, res: Response) {
+        const { email, password } = req.body;
+
+        try {
+            const user = await prisma.user.create({
+                data: {
+                    email,
+                    password, // Ensure to hash the password before saving in production
+                },
+            });
+            res.status(201).json(user);
+        } catch (error) {
+            res.status(500).json({ error: 'User registration failed' });
+        }
     }
 
-    const result = await loginService({ username, password });
-    return res.status(200).json(result);
-  } catch (err: unknown) {
-  if (err instanceof Error) {
-    if (err.message === "INVALID_CREDENTIALS") {
-      return res
-        .status(401)
-        .json({ message: "Invalid username or password" });
+    async login(req: AuthRequest, res: Response) {
+        const { email, password } = req.body;
+
+        try {
+            const user = await prisma.user.findUnique({
+                where: { email },
+            });
+
+            if (!user || user.password !== password) { // Implement proper password hashing and comparison
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
+
+            // Generate and return a token (not implemented here)
+            res.status(200).json({ message: 'Login successful' });
+        } catch (error) {
+            res.status(500).json({ error: 'Login failed' });
+        }
     }
 
-    if (err.message === "INACTIVE_ACCOUNT") {
-      return res.status(403).json({ message: "Account is inactive" });
+    async logout(req: AuthRequest, res: Response) {
+        // Implement logout logic (e.g., invalidate token)
+        res.status(200).json({ message: 'Logout successful' });
     }
-
-    console.error("loginController error:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
-
-  // fallback for non-Error throws
-  console.error("loginController error:", err);
-  return res.status(500).json({ message: "Server error" });
 }
 
-}
+export default new AuthController();

@@ -1,41 +1,32 @@
-import { Request, Response, NextFunction } from "express";
-import { verify, type Secret } from "jsonwebtoken";
-import { ENV } from "../config/env";
-import { JwtUserPayload, UserRole } from "../types/auth.types";
+import { NextFunction, Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-// Middleware: Require user to be logged in (token required)
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const auth = req.headers.authorization;
+const prisma = new PrismaClient();
 
-  if (!auth || !auth.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Missing token" });
-  }
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers['authorization'];
 
-  const token = auth.slice(7);
-  const secret: Secret = ENV.JWT_SECRET;
-
-  try {
-    const decoded = verify(token, secret) as JwtUserPayload;
-    req.user = decoded;
-    next();
-  } catch {
-    return res.status(401).json({ message: "Invalid or expired token" });
-  }
-}
-
-// Middleware: Allow only specific roles (admin / alumni)
-export function requireRole(...roles: UserRole[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
-
-    if (!user) {
-      return res.status(401).json({ message: "Not authenticated" });
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
     }
 
-    if (!roles.includes(user.role)) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
+    try {
+        // Here you would verify the token and extract user information
+        // For example, using a JWT library to decode the token
+        const user = await verifyToken(token); // Implement this function based on your auth strategy
 
-    next();
-  };
+        // Attach user information to the request object
+        req.user = user;
+
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+};
+
+// Example function to verify token (you need to implement this)
+async function verifyToken(token: string) {
+    // Logic to verify the token and return user information
+    // This is just a placeholder
+    return { id: 1, name: 'John Doe' }; // Replace with actual user data
 }

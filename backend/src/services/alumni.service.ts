@@ -1,42 +1,34 @@
-import { pool } from "../db/pool";
+import { PrismaClient } from '@prisma/client';
 
-export async function getAllAlumni(search?: string){
-    if (search) {
-    const keyword = `%${search}%`;
+const prisma = new PrismaClient();
 
-    const result = await pool.query(
-      `SELECT 
-        id, first_name, last_name, occupation, profile_picture
-       FROM users
-       WHERE role = 'alumni'
-         AND (first_name ILIKE $1 OR last_name ILIKE $1 OR occupation ILIKE $1)
-       ORDER BY last_name ASC`,
-      [keyword]
-    );
+export const AlumniService = {
+    async getAllAlumni() {
+        return await prisma.alumni.findMany();
+    },
 
-    return result.rows;
-}
+    async getAlumniById(id: number) {
+        return await prisma.alumni.findUnique({
+            where: { id },
+        });
+    },
 
-const result = await pool.query(
-    `SELECT 
-      id, first_name, last_name, occupation, profile_picture
-     FROM users
-     WHERE role = 'alumni'
-     ORDER BY last_name ASC`
-  );
+    async createAlumni(data: { name: string; email: string; graduationYear: number }) {
+        return await prisma.alumni.create({
+            data,
+        });
+    },
 
-  return result.rows;
+    async updateAlumni(id: number, data: { name?: string; email?: string; graduationYear?: number }) {
+        return await prisma.alumni.update({
+            where: { id },
+            data,
+        });
+    },
 
-}
-
-export async function getAlumniById(id: number) {
-  const result = await pool.query(
-    `SELECT 
-      id, first_name, last_name, email, occupation, profile_picture, enrollment_year
-     FROM users
-     WHERE id = $1 AND role = 'alumni'`,
-    [id]
-  );
-
-  return result.rows[0] || null;
-}
+    async deleteAlumni(id: number) {
+        return await prisma.alumni.delete({
+            where: { id },
+        });
+    },
+};

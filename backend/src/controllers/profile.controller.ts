@@ -1,42 +1,47 @@
-// backend/src/controllers/profile.controller.ts
-import { Request, Response } from "express";
-import {
-  getProfileById,
-  updateProfileById,
-} from "../services/profile.services";
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-export async function getProfileController(req: Request, res: Response) {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
+const prisma = new PrismaClient();
+
+export class ProfileController {
+    async getProfile(req: Request, res: Response) {
+        const { id } = req.params;
+        try {
+            const profile = await prisma.profile.findUnique({
+                where: { id: Number(id) },
+            });
+            if (!profile) {
+                return res.status(404).json({ message: 'Profile not found' });
+            }
+            return res.json(profile);
+        } catch (error) {
+            return res.status(500).json({ message: 'Error retrieving profile', error });
+        }
     }
 
-    const userId = req.user.id;
-    const profile = await getProfileById(userId);
-
-    if (!profile) {
-      return res.status(404).json({ message: "User not found" });
+    async updateProfile(req: Request, res: Response) {
+        const { id } = req.params;
+        const { name, email, bio } = req.body;
+        try {
+            const updatedProfile = await prisma.profile.update({
+                where: { id: Number(id) },
+                data: { name, email, bio },
+            });
+            return res.json(updatedProfile);
+        } catch (error) {
+            return res.status(500).json({ message: 'Error updating profile', error });
+        }
     }
 
-    return res.json(profile);
-  } catch (err) {
-    console.error("getProfileController:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
-}
-
-export async function updateProfileController(req: Request, res: Response) {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
+    async deleteProfile(req: Request, res: Response) {
+        const { id } = req.params;
+        try {
+            await prisma.profile.delete({
+                where: { id: Number(id) },
+            });
+            return res.status(204).send();
+        } catch (error) {
+            return res.status(500).json({ message: 'Error deleting profile', error });
+        }
     }
-
-    const userId = req.user.id;
-    const updated = await updateProfileById(userId, req.body);
-
-    return res.json(updated);
-  } catch (err) {
-    console.error("updateProfileController:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
 }

@@ -1,71 +1,62 @@
-// backend/src/services/auth.service.ts
-import * as bcrypt from "bcrypt";
-import { sign, type Secret, type SignOptions } from "jsonwebtoken";
-import { pool } from "../db/pool";
-import { ENV } from "../config/env";
-import {
-  JwtUserPayload,
-  LoginRequestBody,
-  LoginResponse,
-  UserRole
-} from "../types/auth.types";
+import { PrismaClient } from '@prisma/client';
 
-type DbUserRow = {
-  id: number;
-  username: string;
-  email: string;
-  password_hash: string;
-  role: UserRole;
-  is_active: boolean;
+const prisma = new PrismaClient();
+
+export const registerUser = async (data) => {
+    try {
+        const user = await prisma.user.create({
+            data,
+        });
+        return user;
+    } catch (error) {
+        throw new Error('Error registering user: ' + error.message);
+    }
 };
 
-export async function loginService(
-  body: LoginRequestBody
-): Promise<LoginResponse> {
-  const { username, password } = body;
+export const loginUser = async (email, password) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        // Add password verification logic here
+        return user;
+    } catch (error) {
+        throw new Error('Error logging in: ' + error.message);
+    }
+};
 
-  // 1) Fetch user
-  const userRes = await pool.query(
-    `SELECT id, username, email, password_hash, role, is_active
-     FROM users
-     WHERE username = $1
-     LIMIT 1`,
-    [username]
-  );
+export const getUserById = async (id) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id },
+        });
+        return user;
+    } catch (error) {
+        throw new Error('Error fetching user: ' + error.message);
+    }
+};
 
-  const user = userRes.rows[0] as DbUserRow | undefined;
+export const updateUser = async (id, data) => {
+    try {
+        const user = await prisma.user.update({
+            where: { id },
+            data,
+        });
+        return user;
+    } catch (error) {
+        throw new Error('Error updating user: ' + error.message);
+    }
+};
 
-  if (!user) {
-    throw new Error("INVALID_CREDENTIALS");
-  }
-
-  if (!user.is_active) {
-    throw new Error("INACTIVE_ACCOUNT");
-  }
-
-  // 2) Check password
-  const ok = await bcrypt.compare(password, user.password_hash);
-  if (!ok) {
-    throw new Error("INVALID_CREDENTIALS");
-  }
-
-  // 3) JWT payload
-  const payload: JwtUserPayload = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    role: user.role
-  };
-
-  // 4) JWT options FIXED
-  const secret: Secret = ENV.JWT_SECRET;
-
-  // strict TS fix: cast expiresIn to SignOptions["expiresIn"]
-  const options: SignOptions = {
-    expiresIn: ENV.JWT_EXPIRES_IN as SignOptions["expiresIn"]
-  };
-
-  const token = sign(payload, secret, options);
-
-  return { token, user: payload };
-}
+export const deleteUser = async (id) => {
+    try {
+        await prisma.user.delete({
+            where: { id },
+        });
+    } catch (error) {
+        throw new Error('Error deleting user: ' + error.message);
+    }
+};

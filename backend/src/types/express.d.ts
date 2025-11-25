@@ -1,12 +1,11 @@
-// backend/src/types/express.d.ts
-import { JwtUserPayload } from "./auth.types";
+// This file extends the express library's types to include custom request properties.
+
+import { Request } from 'express';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtUserPayload;
+      user?: any; // You can replace 'any' with a specific user type if you have one
     }
   }
 }
-
-export {};

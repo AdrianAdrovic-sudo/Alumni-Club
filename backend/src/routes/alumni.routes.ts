@@ -1,19 +1,14 @@
-import { Router } from "express";
-import { getAlumni, getOneAlumni } from "../controllers/alumni.controller";
-import { requireAuth, requireRole } from "../middlewares/auth.middleware";
+import { Router } from 'express';
+import { AlumniController } from '../controllers/alumni.controller';
 
 const router = Router();
+const alumniController = new AlumniController();
 
-// Only logged-in users can see alumni list
-router.get("/alumni", requireAuth, getAlumni);
-
-// Only logged-in users can view a specific alumni profile
-router.get("/alumni/:id", requireAuth, getOneAlumni);
-
-// Admin-only example (optional)
-router.delete("/alumni/:id", requireAuth, requireRole("admin"), async (req, res) => {
-  const { id } = req.params;
-  return res.json({ message: `Admin deleted alumni with id ${id}` });
-});
+// Define routes for alumni
+router.get('/', alumniController.getAllAlumni);
+router.get('/:id', alumniController.getAlumniById);
+router.post('/', alumniController.createAlumni);
+router.put('/:id', alumniController.updateAlumni);
+router.delete('/:id', alumniController.deleteAlumni);
 
 export default router;
