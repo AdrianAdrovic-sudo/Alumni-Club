@@ -9,13 +9,12 @@ import AboutUs from "./pages/AboutUs.tsx";
 import Contact from "./pages/Contact.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Theses from "./pages/Theses.tsx";
+import Inbox from "./pages/Inbox.tsx";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import React from "react";
 
-
 // Minimal admin-only route guard
 function AdminRoute({ children }: { children: React.ReactNode }) {
-
   const { user } = useAuth();
 
   if (!user) {
@@ -26,6 +25,17 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   if (user.role !== "admin") {
     // Logged in but not admin → send to home
     return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
+// General protected route (for logged-in non-guest users)
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+
+  if (!user || user.role === "guest") {
+    return <Navigate to="/login" replace />;
   }
 
   return children;
@@ -46,6 +56,15 @@ export default function App() {
             <Route path="/AboutUs" element={<AboutUs />} />
             <Route path="/Contact" element={<Contact />} />
             <Route path="/Theses" element={<Theses />} />
+
+            <Route
+              path="/Inbox"
+              element={
+                <ProtectedRoute>
+                  <Inbox />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/Dashboard"
