@@ -47,3 +47,17 @@ export async function getPostById(id: number): Promise<DbPostRow | null> {
 
   return (result.rows[0] as DbPostRow) || null;
 }
+export async function createPost(
+  user_id: number,
+  content: string,
+  image_url?: string | null
+) {
+  const result = await pool.query(
+    `INSERT INTO posts (user_id, content, image_url)
+     VALUES ($1, $2, $3)
+     RETURNING id, user_id, content, image_url, created_at, updated_at`,
+    [user_id, content, image_url || null]
+  );
+
+  return result.rows[0];
+}
