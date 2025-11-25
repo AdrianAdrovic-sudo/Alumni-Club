@@ -1,6 +1,8 @@
-import '../css/Login.css';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useState } from 'react';
+import "../css/Login.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -8,8 +10,11 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+  const { login, loginGuest } = useAuth();
+
   function togglePassword() {
-    setShowPassword(v => !v);
+    setShowPassword((v) => !v);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -20,20 +25,26 @@ export default function Login() {
       const res = await fetch("http://localhost:4000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message);
+        throw new Error(data.message || "Login failed");
       }
 
-      // Store token + user data
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // Backend returns: { token, user: { id, username, email, role } }
+      login(data.user, data.token);
 
-      setMsg(`Logged in as ${data.user.role}`);
+      setMsg(`Ulogovan kao ${data.user.role}`);
+
+      // Redirect by role
+      if (data.user.role === "admin") {
+        navigate("/Dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setMsg(err.message);
@@ -41,6 +52,12 @@ export default function Login() {
         setMsg("Login failed");
       }
     }
+  }
+
+  function handleGuestLogin() {
+    loginGuest();
+    setMsg("Ušli ste kao gost");
+    navigate("/");
   }
 
   return (
@@ -75,7 +92,15 @@ export default function Login() {
 
           <button type="submit">Potvrdi</button>
 
-          <p>Zaboravili ste sifru?</p>
+          <button
+            type="button"
+            className="guest-btn"
+            onClick={handleGuestLogin}
+          >
+            Uđi kao gost
+          </button>
+
+          <p>Zaboravili ste šifru?</p>
         </form>
 
         {msg && <p style={{ marginTop: "10px" }}>{msg}</p>}
