@@ -134,3 +134,16 @@ button:hover {
   box-sizing: border-box;
   height: 45px;
 }
+
+.guest-btn {
+  margin-top: 12px;
+  background: transparent;
+  border: 2px solid #294a70;
+  color: #294a70;
+}
+
+.guest-btn:hover {
+  background: #294a70;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(41, 74, 112, 0.4);
+}
