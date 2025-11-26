@@ -55,11 +55,11 @@ async function testRegisterOnly() {
     console.log('');
 
     // Test 4: Čišćenje - brisanje test korisnika
-    console.log('4. Cleaning up - deleting test user...');
-    await deleteUser(newUser.id);
-    console.log('✅ Test user deleted successfully!');
+    // console.log('4. Cleaning up - deleting test user...');
+    // await deleteUser(newUser.id);
+    // console.log('✅ Test user deleted successfully!');
 
-    console.log('\n🎉 Registration test passed! User creation is working correctly.');
+    // console.log('\n🎉 Registration test passed! User creation is working correctly.');
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

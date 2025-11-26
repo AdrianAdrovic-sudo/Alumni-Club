@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import app from './app';
+import jwt from 'jsonwebtoken';
+
+
 
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 4000;
@@ -17,5 +20,41 @@ const startServer = async () => {
         process.exit(1);
     }
 };
+
+
+// Add this temporary debug route
+app.get('/api/debug-jwt-setup', (req, res) => {
+  const secret = process.env.JWT_SECRET;
+  
+  // Test creating a token with current secret
+  const testToken = jwt.sign(
+    { test: 'debug', userId: 1 }, 
+    secret!
+  );
+  
+  // Try to verify it
+  try {
+    const verified = jwt.verify(testToken, secret!);
+    res.json({
+      status: 'JWT is working',
+      jwtSecret: secret ? 'Set' : 'Not set',
+      secretPreview: secret ? `${secret.substring(0, 10)}...` : 'None',
+      secretLength: secret?.length,
+      testToken: testToken,
+      verification: 'Success'
+    });
+  } catch (error) {
+    // Fix the TypeScript error
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.json({
+      status: 'JWT is BROKEN',
+      jwtSecret: secret ? 'Set' : 'Not set', 
+      secretPreview: secret ? `${secret.substring(0, 10)}...` : 'None',
+      secretLength: secret?.length,
+      error: errorMessage
+    });
+  }
+
+});
 
 startServer();
