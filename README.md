@@ -42,7 +42,7 @@ npm install
 ### Create .env file in backend/ with: 
 ```
 DATABASE_URL="postgresql://username:password@localhost:5432/alumni_club_dev?schema=public"
-PORT=3000
+PORT=4000
 NODE_ENV=development
 JWT_SECRET="your_jwt_secret"
 PRISMA_LOG_LEVEL=info
