@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url= env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model comments {
@@ -64,6 +64,7 @@ model post_likes {
 }
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model posts {
   id         Int          @id @default(autoincrement())
   user_id    Int
@@ -102,7 +103,7 @@ model users {
   email                                                String               @unique @db.VarChar(255)
   password_hash                                        String
   role                                                 String?              @default("user") @db.VarChar(20)
-  username                                             String               @unique @db.VarChar(30)
+  username                                             String               @db.VarChar(30)
   profile_picture                                      String?
   enrollment_year                                      Int
   is_active                                            Boolean              @default(true)

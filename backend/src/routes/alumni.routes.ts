@@ -60,4 +60,26 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.get('/alumni', async (req, res) => {
+  try {
+    const { year, company, field } = req.query;
+
+    const filters: any = {};
+
+    if (year) filters.gradYear = Number(year);
+    if (company) filters.company = { contains: String(company), mode: "insensitive" };
+    if (field) filters.field = { contains: String(field), mode: "insensitive" };
+
+    const alumni = await prisma.users.findMany({
+      where: filters,
+      orderBy: { first_name: 'asc' }
+    });
+
+    res.json(alumni);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;
