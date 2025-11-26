@@ -10,7 +10,7 @@ import AboutUs from "./pages/AboutUs.tsx";
 import Contact from "./pages/Contact.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Theses from "./pages/Theses.tsx";
-import Inbox from "./pages/Inbox.tsx";
+import Messages from './components/messages/Messages';
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import PublicRoute from "./components/common/PublicRoute";
 import AdminRoute from "./components/common/AdminRoute";
@@ -40,6 +40,7 @@ export default function App() {
             <Route path="/AboutUs" element={<AboutUs />} />
             <Route path="/Contact" element={<Contact />} />
             <Route path="/Theses" element={<Theses />} />
+            <Route path="/messages" element={<Messages />} />
 
             <Route
               path="/Dashboard"

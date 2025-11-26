@@ -2,7 +2,6 @@ import "../../css/Header.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-// Header reacts to actual login state
 function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -51,6 +50,10 @@ function Header() {
               <span className="welcome-text">
                 Dobrodošao/la, {user.username}!
               </span>
+              {/* Messages button next to username */}
+              <Link to="/messages" className="messages-btn">
+                Inbox
+              </Link>
               {isAdmin && (
                 <Link to="/Dashboard">
                   <button className="dashboard-btn">Dashboard</button>

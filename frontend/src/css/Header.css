@@ -107,6 +107,20 @@
   align-items: center;
   gap: 1rem;
 }
+.messages-btn {
+  background: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.messages-btn:hover {
+  background: #2563eb;
+}
 
 .welcome-text {
   color: #294a70;
