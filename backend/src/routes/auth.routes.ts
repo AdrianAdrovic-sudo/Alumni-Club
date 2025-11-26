@@ -1,13 +1,17 @@
 import { Router } from 'express';
-import { AuthController } from '../controllers/auth.controller';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { loginUser } from '../services/auth.service'; // Make sure this path is correct
 
 const router = Router();
-const authController = new AuthController();
 
-router.post('/register', authController.register);
-router.post('/login', authController.login);
-router.get('/profile', authMiddleware, authController.getProfile);
-router.post('/logout', authMiddleware, authController.logout);
+// User login
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const result = await loginUser(username, password);
+    res.json(result);
+  } catch (error: any) {
+    res.status(401).json({ error: error.message });
+  }
+});
 
 export default router;

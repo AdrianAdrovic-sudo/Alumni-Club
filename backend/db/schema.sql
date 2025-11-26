@@ -35,7 +35,7 @@ CREATE TABLE users (
   last_name VARCHAR(100) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
-  role VARCHAR(20) DEFAULT 'alumni',
+  role VARCHAR(20) DEFAULT 'user',
   username VARCHAR(30) NOT NULL,
   profile_picture TEXT,
   enrollment_year INT NOT NULL,

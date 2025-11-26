@@ -1,0 +1,57 @@
+{
+  "timestamp": "2025-11-26T00:33:40.225Z",
+  "userCount": 3,
+  "users": [
+    {
+      "id": 3,
+      "first_name": "Test",
+      "last_name": "User",
+      "email": "test1764116345135@example.com",
+      "password_hash": "$2b$10$BuiHRkLxaHkRvEUeEDA2AeKQE.QaXVs5xTgmcKvNYGgkb6llv79t2",
+      "role": "user",
+      "username": "testuser_1764116345135",
+      "profile_picture": null,
+      "enrollment_year": 2020,
+      "is_active": true,
+      "occupation": "Software Developer",
+      "created_at": "2025-11-26T00:19:05.287Z",
+      "updated_at": "2025-11-26T00:19:05.287Z",
+      "posts": [],
+      "events": []
+    },
+    {
+      "id": 6,
+      "first_name": "System",
+      "last_name": "Administrator",
+      "email": "",
+      "password_hash": "$2b$10$XQahyc.BZ8va2Qz4ww8HY.TYcMFeptsmqpXCqqPcW31HDaGQG2ICG",
+      "role": "admin",
+      "username": "admin",
+      "profile_picture": null,
+      "enrollment_year": 2020,
+      "is_active": true,
+      "occupation": "System Administrator",
+      "created_at": "2025-11-26T00:24:51.558Z",
+      "updated_at": "2025-11-26T00:24:51.558Z",
+      "posts": [],
+      "events": []
+    },
+    {
+      "id": 7,
+      "first_name": "Test",
+      "last_name": "User",
+      "email": "test1764116811452@example.com",
+      "password_hash": "$2b$10$xFiIbVDXFA2aq1Df/qXGZ.T28x4vb1H9xWWULopKOyygwbV0oPyW6",
+      "role": "user",
+      "username": "testuser_1764116811452",
+      "profile_picture": null,
+      "enrollment_year": 2020,
+      "is_active": true,
+      "occupation": "Software Developer",
+      "created_at": "2025-11-26T00:26:51.618Z",
+      "updated_at": "2025-11-26T00:26:51.618Z",
+      "posts": [],
+      "events": []
+    }
+  ]
+}

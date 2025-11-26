@@ -101,8 +101,8 @@ model users {
   last_name                                            String               @db.VarChar(100)
   email                                                String               @unique @db.VarChar(255)
   password_hash                                        String
-  role                                                 String?              @default("alumni") @db.VarChar(20)
-  username                                             String               @db.VarChar(30)
+  role                                                 String?              @default("user") @db.VarChar(20)
+  username                                             String               @unique @db.VarChar(30)
   profile_picture                                      String?
   enrollment_year                                      Int
   is_active                                            Boolean              @default(true)

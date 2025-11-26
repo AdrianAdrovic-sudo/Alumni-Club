@@ -9,9 +9,10 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { login, loginGuest } = useAuth();
+  const { login } = useAuth();
 
   function togglePassword() {
     setShowPassword((v) => !v);
@@ -20,9 +21,10 @@ export default function Login() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
+    setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:4000/auth/login", {
+      const res = await fetch("http://localhost:4000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -31,39 +33,36 @@ export default function Login() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Login failed");
+        throw new Error(data.error || data.message || "Neuspešna prijava");
       }
 
-      // Backend returns: { token, user: { id, username, email, role } }
       login(data.user, data.token);
 
-      setMsg(`Ulogovan kao ${data.user.role}`);
+      setMsg(`Dobrodošao/la, ${data.user.username}!`);
 
-      // Redirect by role
-      if (data.user.role === "admin") {
-        navigate("/Dashboard");
-      } else {
-        navigate("/");
-      }
+      setTimeout(() => {
+        if (data.user.role === "admin") {
+          navigate("/Dashboard");
+        } else {
+          navigate("/");
+        }
+      }, 1000);
+
     } catch (err: unknown) {
       if (err instanceof Error) {
         setMsg(err.message);
       } else {
-        setMsg("Login failed");
+        setMsg("Neuspešna prijava");
       }
+    } finally {
+      setLoading(false);
     }
-  }
-
-  function handleGuestLogin() {
-    loginGuest();
-    setMsg("Ušli ste kao gost");
-    navigate("/");
   }
 
   return (
     <div className="login-container">
       <div className="login">
-        <h2>Login</h2>
+        <h2>Prijava</h2>
         <h4>Unesite svoje podatke kako biste nastavili.</h4>
 
         <form onSubmit={handleSubmit}>
@@ -74,6 +73,7 @@ export default function Login() {
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            required
           />
 
           <label htmlFor="password">Šifra:</label>
@@ -84,26 +84,25 @@ export default function Login() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
             <span onClick={togglePassword} className="toggleEye">
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
 
-          <button type="submit">Potvrdi</button>
-
-          <button
-            type="button"
-            className="guest-btn"
-            onClick={handleGuestLogin}
-          >
-            Uđi kao gost
+          <button type="submit" disabled={loading}>
+            {loading ? "Prijavljujem..." : "Prijavi se"}
           </button>
 
-          <p>Zaboravili ste šifru?</p>
+          <p className="forgot-password">Zaboravili ste šifru?</p>
         </form>
 
-        {msg && <p style={{ marginTop: "10px" }}>{msg}</p>}
+        {msg && (
+          <div className={`message ${msg.includes("Dobrodošao") ? "success" : "error"}`}>
+            {msg}
+          </div>
+        )}
       </div>
     </div>
   );

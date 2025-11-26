@@ -1,5 +1,5 @@
-import Header from "./components/Header.tsx";
-import Footer from "./components/Footer.tsx";
+import Header from "./components/Layout/Header.tsx";
+import Footer from "./components/Layout/Footer.tsx";
 import Home from "./pages/Home.tsx";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AlumniDirectory from "./pages/AlumniDirectory";
@@ -10,21 +10,25 @@ import Contact from "./pages/Contact.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Theses from "./pages/Theses.tsx";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import PublicRoute from "./components/common/PublicRoute";
 import React from "react";
-
-
 // Minimal admin-only route guard
 function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
 
-  const { user } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#324D6B] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   if (!user) {
-    // Not logged in → go to login
     return <Navigate to="/login" replace />;
   }
 
   if (user.role !== "admin") {
-    // Logged in but not admin → send to home
     return <Navigate to="/" replace />;
   }
 
@@ -42,7 +46,17 @@ export default function App() {
             <Route path="/Home" element={<Home />} />
             <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
             <Route path="/Blog" element={<Blog />} />
-            <Route path="/login" element={<Login />} />
+            
+            {/* Protect login route - redirect if already authenticated */}
+            <Route 
+              path="/login" 
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              } 
+            />
+            
             <Route path="/AboutUs" element={<AboutUs />} />
             <Route path="/Contact" element={<Contact />} />
             <Route path="/Theses" element={<Theses />} />
