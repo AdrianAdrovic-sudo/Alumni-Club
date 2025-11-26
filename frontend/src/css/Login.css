@@ -74,6 +74,10 @@ input {
   border-color: #ffab1f;
 }
 
+.flex.space-x-3 button {
+  width: auto;
+}
+
 button {
   margin-top: 24px;
   padding: 14px 32px;

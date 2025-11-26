@@ -90,29 +90,36 @@ export class AdminService {
     });
   }
 
-  static async createUser(userData: CreateUserInput) {
-    const hashedPassword = await bcrypt.hash(userData.password, 12);
-    
-    return prisma.users.create({
-      data: {
-        ...userData,
-        password_hash: hashedPassword,
-        role: userData.role || 'user'
-      },
-      select: {
-        id: true,
-        first_name: true,
-        last_name: true,
-        email: true,
-        username: true,
-        role: true,
-        enrollment_year: true,
-        occupation: true,
-        is_active: true,
-        created_at: true
-      }
-    });
-  }
+  // In admin.service.ts - FIXED VERSION
+static async createUser(userData: CreateUserInput) {
+  const hashedPassword = await bcrypt.hash(userData.password, 12);
+  
+  return prisma.users.create({
+    data: {
+      first_name: userData.first_name,
+      last_name: userData.last_name,
+      email: userData.email,
+      username: userData.username,
+      password_hash: hashedPassword, // Keep as password_hash
+      enrollment_year: userData.enrollment_year,
+      role: userData.role || 'user',
+      occupation: userData.occupation,
+      is_active: true
+    },
+    select: {
+      id: true,
+      first_name: true,
+      last_name: true,
+      email: true,
+      username: true,
+      role: true,
+      enrollment_year: true,
+      occupation: true,
+      is_active: true,
+      created_at: true
+    }
+  });
+}
 
   static async updateUser(userId: number, userData: UpdateUserInput) {
     return prisma.users.update({

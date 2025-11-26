@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminService from '../../services/adminService';
+import { generateUsername } from '../utils/UsernameGenerator';
 
 interface User {
   id: number;
@@ -38,9 +39,12 @@ export default function UserManagement() {
     search: '',
     is_active: ''
   });
+  const [showBulkImportModal, setShowBulkImportModal] = useState(false);
+  const [csvData, setCsvData] = useState('');
+  const [bulkImportLoading, setBulkImportLoading] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 20, // Increased from 10 to 20 to show more users
+    limit: 20,
     total: 0,
     pages: 0
   });
@@ -65,19 +69,24 @@ export default function UserManagement() {
     try {
       setLoading(true);
       
-      // Convert empty strings to undefined for the backend
       const backendFilters = {
         role: filters.role || undefined,
         search: filters.search || undefined,
-        is_active: filters.is_active === '' ? undefined : filters.is_active
+        is_active: filters.is_active === '' ? undefined : filters.is_active === 'true'
       };
       
       const data = await AdminService.getUsers(backendFilters, pagination.page, pagination.limit);
-      setUsers(data.users);
-      setPagination(data.pagination);
+      setUsers(data.users || []);
+      setPagination(data.pagination || {
+        page: 1,
+        limit: 20,
+        total: 0,
+        pages: 0
+      });
     } catch (error) {
       console.error('Error loading users:', error);
-      alert('Error loading users');
+      alert('Error loading users. Please check the console for details.');
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -146,17 +155,159 @@ export default function UserManagement() {
     }
   };
 
+  const handleBulkImport = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    setBulkImportLoading(true);
+    
+    console.log('Raw CSV data:', csvData);
+    
+    // Parse CSV data
+    const rows = csvData.split('\n').filter(row => row.trim());
+    console.log('Rows found:', rows.length);
+    
+    if (rows.length < 2) {
+      alert('No data found in CSV. Please check the format.');
+      return;
+    }
+
+    // Parse headers and map to our field names
+    const headers = rows[0].split(',').map(header => 
+      header.trim().replace(/"/g, '').toLowerCase()
+    );
+    console.log('CSV Headers:', headers);
+
+    // Get existing usernames for collision checking
+    const existingUsernames = users.map(user => user.username);
+    const usersToCreate = [];
+    
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i].split(',').map(field => field.trim().replace(/"/g, ''));
+      console.log(`Processing row ${i}:`, row);
+      
+      if (row.length !== headers.length) {
+        console.warn(`Skipping row ${i} - column count mismatch`);
+        continue;
+      }
+
+      // Create user data object from CSV row
+      const userData: any = {};
+      headers.forEach((header, index) => {
+        userData[header] = row[index];
+      });
+
+      console.log('Parsed user data:', userData);
+
+      // Map CSV columns to our field names
+      const firstName = userData['ime'] || '';
+      const lastName = userData['prezime'] || '';
+      const email = userData['email'] || '';
+      const enrollmentYear = userData['godina upisa'] || new Date().getFullYear();
+
+      // Validate required fields
+      if (firstName && lastName && email) {
+        const username = generateUsername(firstName, lastName, [
+          ...existingUsernames, 
+          ...usersToCreate.map(u => u.username)
+        ]);
+        
+        usersToCreate.push({
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          username: username,
+          password: 'alumni123', // Default password
+          enrollment_year: parseInt(enrollmentYear) || new Date().getFullYear(),
+          role: 'user',
+          occupation: '' // Can be filled later by user
+        });
+        
+        console.log(`Added user: ${firstName} ${lastName}`);
+      } else {
+        console.warn(`Skipping row ${i} - missing required fields:`, { firstName, lastName, email });
+      }
+    }
+
+    console.log('Users to create:', usersToCreate);
+
+    if (usersToCreate.length === 0) {
+      alert('No valid users found. Please check your CSV format.\n\nRequired columns: Ime, Prezime, Email');
+      return;
+    }
+
+    // Create users in batch
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const userData of usersToCreate) {
+      try {
+        await AdminService.createUser(userData);
+        successCount++;
+      } catch (error) {
+        console.error(`Error creating user ${userData.email}:`, error);
+        errorCount++;
+      }
+    }
+
+    setShowBulkImportModal(false);
+    setCsvData('');
+    loadUsers();
+    
+    if (errorCount > 0) {
+      alert(`Import completed with ${successCount} successes and ${errorCount} errors. Check console for details.`);
+    } else {
+      alert(`Successfully imported ${successCount} users!`);
+    }
+    
+  } catch (error: any) {
+    console.error('Error in bulk import:', error);
+    alert(`Error during bulk import: ${error.message}`);
+  } finally {
+    setBulkImportLoading(false);
+  }
+};
+
+  const handleFirstNameChange = (firstName: string) => {
+    const updatedData = { ...createUserData, first_name: firstName };
+    
+    if (firstName && createUserData.last_name) {
+      const existingUsernames = users.map(user => user.username);
+      updatedData.username = generateUsername(firstName, createUserData.last_name, existingUsernames);
+    }
+    
+    setCreateUserData(updatedData);
+  };
+
+  const handleLastNameChange = (lastName: string) => {
+    const updatedData = { ...createUserData, last_name: lastName };
+    
+    if (createUserData.first_name && lastName) {
+      const existingUsernames = users.map(user => user.username);
+      updatedData.username = generateUsername(createUserData.first_name, lastName, existingUsernames);
+    }
+    
+    setCreateUserData(updatedData);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-      {/* Header with Create Button */}
+      {/* Header with Create Buttons */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">User Management</h2>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition duration-200"
-        >
-          Create User
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowBulkImportModal(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition duration-200"
+          >
+            Bulk Import
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition duration-200"
+          >
+            Create User
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -303,7 +454,7 @@ export default function UserManagement() {
           </div>
 
           {/* Pagination */}
-          {pagination.pages > 1 && (
+           {pagination.pages > 1 && (
             <div className="flex justify-between items-center mt-6">
               <button
                 onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
@@ -327,77 +478,79 @@ export default function UserManagement() {
         </>
       )}
 
-      {/* Create User Modal */}
+      {/* Create User Modal - FIXED */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Create New User</h3>
             <form onSubmit={handleCreateUser}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
                   <input
                     type="text"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.first_name}
-                    onChange={(e) => setCreateUserData({ ...createUserData, first_name: e.target.value })}
+                    onChange={(e) => handleFirstNameChange(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
                   <input
                     type="text"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.last_name}
-                    onChange={(e) => setCreateUserData({ ...createUserData, last_name: e.target.value })}
+                    onChange={(e) => handleLastNameChange(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                   <input
                     type="email"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.email}
                     onChange={(e) => setCreateUserData({ ...createUserData, email: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Username *</label>
                   <input
                     type="text"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-gray-50"
                     value={createUserData.username}
                     onChange={(e) => setCreateUserData({ ...createUserData, username: e.target.value })}
+                    placeholder="Auto-generated from name"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Auto-generated, but you can modify if needed</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
                   <input
                     type="password"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.password}
                     onChange={(e) => setCreateUserData({ ...createUserData, password: e.target.value })}
+                    placeholder="Set initial password"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Enrollment Year</label>
                   <input
                     type="number"
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.enrollment_year}
-                    onChange={(e) => setCreateUserData({ ...createUserData, enrollment_year: parseInt(e.target.value) })}
+                    onChange={(e) => setCreateUserData({ ...createUserData, enrollment_year: parseInt(e.target.value) || new Date().getFullYear() })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                   <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.role}
                     onChange={(e) => setCreateUserData({ ...createUserData, role: e.target.value })}
                   >
@@ -409,9 +562,10 @@ export default function UserManagement() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
                   <input
                     type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.occupation}
                     onChange={(e) => setCreateUserData({ ...createUserData, occupation: e.target.value })}
+                    placeholder="Optional - user can set later"
                   />
                 </div>
               </div>
@@ -429,6 +583,70 @@ export default function UserManagement() {
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
                 >
                   {createLoading ? 'Creating...' : 'Create User'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Import Modal - FIXED */}
+      {showBulkImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Bulk Import Users</h3>
+            
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-semibold text-gray-800 mb-2">Instructions:</h4>
+              <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
+                <li>Export Google Forms responses as CSV</li>
+                <li>Ensure CSV has columns for: <strong>First Name, Last Name, Email</strong></li>
+                <li>Optional columns: Enrollment Year, Occupation</li>
+                <li>Usernames will be auto-generated as firstName.lastName</li>
+                <li>All users will be created with default password "alumni123"</li>
+              </ol>
+              <div className="mt-3 text-sm">
+                <strong className="text-gray-800">Example CSV format:</strong>
+                <pre className="bg-gray-100 p-2 rounded mt-1 text-xs text-gray-800 border">
+                  First Name,Last Name,Email,Enrollment Year,Occupation{'\n'}
+                  John,Doe,john.doe@example.com,2020,Software Engineer{'\n'}
+                  Jane,Smith,jane.smith@example.com,2021,Data Analyst
+                </pre>
+              </div>
+            </div>
+
+            <form onSubmit={handleBulkImport}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Paste CSV Data:
+                </label>
+                <textarea
+                  value={csvData}
+                  onChange={(e) => setCsvData(e.target.value)}
+                  rows={10}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm text-gray-700 bg-white"
+                  placeholder="Paste your CSV data here..."
+                  required
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowBulkImportModal(false);
+                    setCsvData('');
+                  }}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={bulkImportLoading || !csvData.trim()}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+                >
+                  {bulkImportLoading ? 'Importing...' : 'Import Users'}
                 </button>
               </div>
             </form>

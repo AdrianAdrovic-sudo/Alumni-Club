@@ -10,15 +10,16 @@ const app = express();
 app.use(cors({
   origin: 'http://localhost:5173', // Your frontend URL
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // ADD PATCH HERE
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'] // Added X-Requested-With
 }));
+
+app.options('*', cors()); // Handle preflight requests for all routes
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/alumni', alumniRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/admin', adminRoutes);
-
 
 export default app;

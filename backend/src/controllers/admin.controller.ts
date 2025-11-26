@@ -41,16 +41,26 @@ export class AdminController {
     }
   }
 
-  static async createUser(req: Request, res: Response) {
-    try {
-      const userData: CreateUserInput = req.body;
-      const newUser = await AdminService.createUser(userData);
-      
-      res.status(201).json(newUser);
-    } catch (error) {
-      res.status(500).json({ message: 'Error creating user', error: (error as Error).message });
-    }
+  // In admin.controller.ts - IMPROVED VERSION
+static async createUser(req: Request, res: Response) {
+  try {
+    const userData: CreateUserInput = req.body;
+    console.log('Creating user with data:', userData);
+    
+    const newUser = await AdminService.createUser(userData);
+    
+    console.log('User created successfully:', newUser);
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error('Detailed error creating user:', error);
+    res.status(500).json({ 
+      message: 'Error creating user', 
+      error: (error as Error).message,
+      // Add stack trace in development
+      stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
+    });
   }
+}
 
   static async updateUser(req: Request, res: Response) {
     try {
