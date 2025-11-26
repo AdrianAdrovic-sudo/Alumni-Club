@@ -13,6 +13,7 @@ function Header() {
   }
 
   const isAdmin = user?.role === "admin";
+  const isLoggedIn = !!user && user.role !== "guest";
 
   return (
     <header className="header">
@@ -43,6 +44,11 @@ function Header() {
           <Link to="/Theses" className="nav-link">
             Diplomski radovi
           </Link>
+          {isLoggedIn && (
+            <Link to="/Inbox" className="nav-link">
+              Inbox
+            </Link>
+          )}
         </nav>
 
         <div className="signup-container">

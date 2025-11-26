@@ -1,3 +1,4 @@
+import React from "react";
 import Header from "./components/Layout/Header.tsx";
 import Footer from "./components/Layout/Footer.tsx";
 import Home from "./pages/Home.tsx";
@@ -9,9 +10,10 @@ import AboutUs from "./pages/AboutUs.tsx";
 import Contact from "./pages/Contact.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Theses from "./pages/Theses.tsx";
-import { AuthProvider } from "./context/AuthContext";
+import Inbox from "./pages/Inbox.tsx";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import PublicRoute from "./components/common/PublicRoute";
-import AdminRoute from "./components/common/AdminRoute"; // Import from separate file
+import AdminRoute from "./components/common/AdminRoute";
 
 export default function App() {
   return (

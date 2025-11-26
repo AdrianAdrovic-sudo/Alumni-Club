@@ -4,6 +4,7 @@ import authRoutes from './routes/auth.routes';
 import alumniRoutes from './routes/alumni.routes';
 import healthRoutes from './routes/health.routes';
 import adminRoutes from './routes/admin.routes';
+import messageRoutes from "./routes/messages.routes";
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.use(cors({
 app.options('*', cors()); // Handle preflight requests for all routes
 app.use(express.json());
 
+app.use(express.json());
+app.use("/api/messages", messageRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/alumni', alumniRoutes);
 app.use('/api/health', healthRoutes);
