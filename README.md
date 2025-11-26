@@ -51,6 +51,7 @@ PRISMA_LOG_LEVEL=info
 
 ### Set up database
 ```
+npx prisma db pull
 npx prisma generate
 npx prisma db push
 ```
