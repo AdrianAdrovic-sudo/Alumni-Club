@@ -1,41 +1,69 @@
-import { Request, Response, NextFunction } from "express";
-import { verify, type Secret } from "jsonwebtoken";
-import { ENV } from "../config/env";
-import { JwtUserPayload, UserRole } from "../types/auth.types";
+import { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
 
-// Middleware: Require user to be logged in (token required)
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const auth = req.headers.authorization;
+const prisma = new PrismaClient();
 
-  if (!auth || !auth.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Missing token" });
+interface JwtPayload {
+  sub: number;        // Changed from userId to sub
+  email: string;
+  role: string;
+  username?: string;  // Add this since it's in your token
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: number;
+        email: string;
+        role: string;
+      };
+    }
   }
+}
 
-  const token = auth.slice(7);
-  const secret: Secret = ENV.JWT_SECRET;
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Access token required' });
+  }
 
   try {
-    const decoded = verify(token, secret) as JwtUserPayload;
-    req.user = decoded;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const userId = decoded.sub || decoded.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: 'Invalid token: no user ID' });
+    }
+
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, role: true, is_active: true }
+    });
+
+    if (!user || !user.is_active) {
+      return res.status(401).json({ message: 'User not found or inactive' });
+    }
+
+    req.user = {
+      id: user.id,
+      email: user.email,
+      role: user.role || 'user'
+    };
+
     next();
-  } catch {
-    return res.status(401).json({ message: "Invalid or expired token" });
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    return res.status(401).json({ message: 'Invalid token' });
   }
-}
-
-// Middleware: Allow only specific roles (admin / alumni)
-export function requireRole(...roles: UserRole[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
-
-    if (!user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    if (!roles.includes(user.role)) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
-
-    next();
-  };
-}
+};
+// Admin authorization middleware
+export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Admin access required' });
+  }
+  next();
+};

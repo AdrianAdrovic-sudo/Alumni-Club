@@ -1,11 +1,16 @@
-import { Request, Response } from "express";
-import { pingDB } from "../db/pool";
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-export function health(req: Request, res: Response) {
-  res.json({ status: "ok", service: "alumni-backend" });
-}
+const prisma = new PrismaClient();
 
-export async function dbCheck(req: Request, res: Response) {
-  const ok = await pingDB();
-  res.status(ok ? 200 : 500).json({ database: ok ? "connected" : "unreachable" });
-}
+export const healthCheck = async (req: Request, res: Response) => {
+    try {
+        // Check database connection
+        await prisma.$connect();
+        res.status(200).json({ status: 'UP' });
+    } catch (error) {
+        res.status(500).json({ status: 'DOWN', error: error.message });
+    } finally {
+        await prisma.$disconnect();
+    }
+};

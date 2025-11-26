@@ -1,5 +1,6 @@
-import Header from "./components/Header.tsx";
-import Footer from "./components/Footer.tsx";
+import React from "react";
+import Header from "./components/Layout/Header.tsx";
+import Footer from "./components/Layout/Footer.tsx";
 import Home from "./pages/Home.tsx";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AlumniDirectory from "./pages/AlumniDirectory";
@@ -11,24 +12,8 @@ import Dashboard from "./pages/Dashboard.tsx";
 import Theses from "./pages/Theses.tsx";
 import Inbox from "./pages/Inbox.tsx";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import React from "react";
-
-// Minimal admin-only route guard
-function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
-
-  if (!user) {
-    // Not logged in → go to login
-    return <Navigate to="/login" replace />;
-  }
-
-  if (user.role !== "admin") {
-    // Logged in but not admin → send to home
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-}
+import PublicRoute from "./components/common/PublicRoute";
+import AdminRoute from "./components/common/AdminRoute";
 
 // General protected route (for logged-in non-guest users)
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -38,7 +23,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 }
 
 export default function App() {
@@ -52,11 +37,22 @@ export default function App() {
             <Route path="/Home" element={<Home />} />
             <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
             <Route path="/Blog" element={<Blog />} />
-            <Route path="/login" element={<Login />} />
+
+            {/* Login protected by PublicRoute – redirects if already authenticated */}
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+
             <Route path="/AboutUs" element={<AboutUs />} />
             <Route path="/Contact" element={<Contact />} />
             <Route path="/Theses" element={<Theses />} />
 
+            {/* Inbox – only for logged-in non-guest users */}
             <Route
               path="/Inbox"
               element={
@@ -66,6 +62,7 @@ export default function App() {
               }
             />
 
+            {/* Dashboard – admin-only, handled by shared AdminRoute component */}
             <Route
               path="/Dashboard"
               element={

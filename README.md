@@ -1,32 +1,116 @@
-# Alumni Club
+# Alumni Club Platform
 
-Alumni Club is a monorepo containing both the frontend and backend for the project.
+A full-stack alumni management platform built with React + TypeScript frontend and Node.js + Express + Prisma backend.
 
-## Project Structure
-- frontend/ → React + TypeScript (Vite)
-- backend/  → Node.js + Express + PostgreSQL
+## 🚀 Tech Stack
 
-## How to Run
 ### Frontend
-cd frontend  
-npm install  
-npm run dev  
-Runs on: http://localhost:5173
+- **React 18** with TypeScript
+- **Vite** for fast development
+- **Tailwind CSS** for styling
+- **React Router** for navigation
+- **React Icons** for icons
 
 ### Backend
-cd backend  
-npm install  
-npm run dev  
-Runs on: http://localhost:4000
+- **Node.js** with Express
+- **TypeScript**
+- **Prisma** ORM with PostgreSQL
+- **JWT** for authentication
+- **bcrypt** for password hashing
+- **CORS** for cross-origin requests
 
-## Latest Update
-- Backend login fully implemented (JWT, bcrypt, roles)
-- Role-based access: alumni + admin
-- Protected API routes under /api/*
-- Frontend successfully connected to backend login
-- Test users added to database
+## 🛠️ Setup Instructions
 
-## Test Accounts
-alumni_one / AlumniPass1!  
-alumni_two / AlumniPass2!  
-admin_one / AdminPass1!
+### Prerequisites
+- Node.js (v18 or higher)
+- PostgreSQL database
+- npm or yarn
+
+# 1. Backend Setup
+
+
+### Navigate to backend directory
+```
+cd backend
+```
+### Install dependencies
+```
+npm install
+```
+
+## Set up environment variables
+### Create .env file in backend/ with: 
+```
+DATABASE_URL="postgresql://username:password@localhost:5432/alumni_club_dev?schema=public"
+PORT=4000
+NODE_ENV=development
+JWT_SECRET="your_jwt_secret"
+PRISMA_LOG_LEVEL=info
+```
+# 
+
+### Set up database
+```
+npx prisma db pull
+npx prisma generate
+npx prisma db push
+```
+
+### Start the backend server
+```
+npm run dev
+```
+
+### Backend will run on ``` http://localhost:4000 ```
+
+# 2. Frontend Setup
+
+### Navigate to frontend directory (in a new terminal)
+```
+cd frontend
+```
+
+### Install dependencies
+```
+npm install
+```
+
+### Start the development server
+```
+npm run dev
+```
+### Frontend will run on ``` http://localhost:5173 ```
+
+# 🔐 Authentication
+
+### The platform uses JWT-based authentication:
+    Login: POST /api/auth/login with username and password
+    Protected Routes: Admin dashboard requires admin role
+    Auto-logout: Token expiration after 1 hours
+
+### Default Admin user
+#### To create an admin user, run the admin creation script:
+```
+# From backend directory
+npx ts-node src/scripts/create-admin.ts
+```
+#### Or use the interactive version:
+```
+npx ts-node src/scripts/create-admin-interactive.ts
+```
+# 📊 API Endpoints
+#### Authentication
+
+    POST /api/auth/login - User login
+
+#### Alumni Management
+
+    GET /api/alumni - Get all alumni members
+
+    GET /api/alumni/:id - Get specific alumni
+
+#### Health Check
+
+    GET /api/health - Check API status
+
+

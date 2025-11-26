@@ -1,25 +1,8 @@
-// backend/src/config/env.ts
-import * as dotenv from "dotenv";
-dotenv.config();
+// This file manages environment variables and configurations for the application.
 
-const JWT_SECRET = process.env.JWT_SECRET;
+import { config } from 'dotenv';
 
-export const ENV = {
-  PORT: process.env.PORT ? Number(process.env.PORT) : 4000,
-  DATABASE_URL: process.env.DATABASE_URL || "",
-  JWT_SECRET: JWT_SECRET || "",
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
-  BCRYPT_ROUNDS: process.env.BCRYPT_ROUNDS
-    ? Number(process.env.BCRYPT_ROUNDS)
-    : 10
-};
+config();
 
-if (!ENV.DATABASE_URL) {
-  console.error("DATABASE_URL is missing in .env");
-  process.exit(1);
-}
-
-if (!ENV.JWT_SECRET) {
-  console.error("JWT_SECRET is missing in .env");
-  process.exit(1);
-}
+export const DATABASE_URL = process.env.DATABASE_URL || '';
+export const PORT = process.env.PORT || 3000;

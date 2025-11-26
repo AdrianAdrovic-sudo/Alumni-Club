@@ -1,5 +1,6 @@
 // src/services/messages.service.ts
-import { pool } from "../db/pool";
+import prisma from "../prisma";
+import { Prisma } from "@prisma/client";
 
 export interface PrivateMessageRow {
   id: number;
@@ -15,6 +16,38 @@ export interface PrivateMessageRow {
   receiver_last_name?: string;
 }
 
+// This matches your schema relation names for private_messages
+// and selects only first_name / last_name from users
+type PrivateMessageWithUsers = Prisma.private_messagesGetPayload<{
+  include: {
+    users_private_messages_sender_idTousers: {
+      select: { first_name: true; last_name: true };
+    };
+    users_private_messages_receiver_idTousers: {
+      select: { first_name: true; last_name: true };
+    };
+  };
+}>;
+
+// Helper to map Prisma result → shape expected by frontend
+function mapMessage(m: PrivateMessageWithUsers): PrivateMessageRow {
+  return {
+    id: m.id,
+    subject: m.subject,
+    content: m.content,
+    sent_date: m.sent_date
+      ? m.sent_date.toISOString()
+      : new Date().toISOString(),
+    read_at: m.read_at ? m.read_at.toISOString() : null,
+    sender_id: m.sender_id,
+    receiver_id: m.receiver_id,
+    sender_first_name: m.users_private_messages_sender_idTousers.first_name,
+    sender_last_name: m.users_private_messages_sender_idTousers.last_name,
+    receiver_first_name: m.users_private_messages_receiver_idTousers.first_name,
+    receiver_last_name: m.users_private_messages_receiver_idTousers.last_name,
+  };
+}
+
 // Create a new private message
 export async function createPrivateMessage(
   senderId: number,
@@ -22,54 +55,66 @@ export async function createPrivateMessage(
   subject: string,
   content: string
 ): Promise<PrivateMessageRow> {
-  const query = `
-    INSERT INTO private_messages (subject, content, sender_id, receiver_id)
-    VALUES ($1, $2, $3, $4)
-    RETURNING *
-  `;
+  const msg = await prisma.private_messages.create({
+    data: {
+      subject,
+      content,
+      sender_id: senderId,
+      receiver_id: receiverId,
+    },
+    include: {
+      users_private_messages_sender_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+      users_private_messages_receiver_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+    },
+  });
 
-  const values = [subject, content, senderId, receiverId];
-
-  const result = await pool.query(query, values);
-  return result.rows[0];
+  return mapMessage(msg as PrivateMessageWithUsers);
 }
 
 // Inbox: messages received by the current user
 export async function getInboxMessages(
   userId: number
 ): Promise<PrivateMessageRow[]> {
-  const query = `
-    SELECT 
-      pm.*,
-      u_sender.first_name AS sender_first_name,
-      u_sender.last_name AS sender_last_name
-    FROM private_messages pm
-    JOIN users u_sender ON u_sender.id = pm.sender_id
-    WHERE pm.receiver_id = $1
-    ORDER BY pm.sent_date DESC
-  `;
+  const msgs: PrivateMessageWithUsers[] =
+    await prisma.private_messages.findMany({
+      where: { receiver_id: userId },
+      orderBy: { sent_date: "desc" },
+      include: {
+        users_private_messages_sender_idTousers: {
+          select: { first_name: true, last_name: true },
+        },
+        users_private_messages_receiver_idTousers: {
+          select: { first_name: true, last_name: true },
+        },
+      },
+    });
 
-  const result = await pool.query(query, [userId]);
-  return result.rows;
+  return msgs.map((m) => mapMessage(m));
 }
 
 // Sent messages: messages sent by the current user
 export async function getSentMessages(
   userId: number
 ): Promise<PrivateMessageRow[]> {
-  const query = `
-    SELECT 
-      pm.*,
-      u_receiver.first_name AS receiver_first_name,
-      u_receiver.last_name AS receiver_last_name
-    FROM private_messages pm
-    JOIN users u_receiver ON u_receiver.id = pm.receiver_id
-    WHERE pm.sender_id = $1
-    ORDER BY pm.sent_date DESC
-  `;
+  const msgs: PrivateMessageWithUsers[] =
+    await prisma.private_messages.findMany({
+      where: { sender_id: userId },
+      orderBy: { sent_date: "desc" },
+      include: {
+        users_private_messages_sender_idTousers: {
+          select: { first_name: true, last_name: true },
+        },
+        users_private_messages_receiver_idTousers: {
+          select: { first_name: true, last_name: true },
+        },
+      },
+    });
 
-  const result = await pool.query(query, [userId]);
-  return result.rows;
+  return msgs.map((m) => mapMessage(m));
 }
 
 // Mark message as read
@@ -77,21 +122,39 @@ export async function markMessageAsRead(
   messageId: number,
   userId: number
 ): Promise<PrivateMessageRow | null> {
-  const query = `
-    UPDATE private_messages
-    SET read_at = NOW()
-    WHERE id = $1
-      AND receiver_id = $2
-      AND read_at IS NULL
-    RETURNING *
-  `;
+  // First, update only if this user is the receiver and message is unread
+  const updated = await prisma.private_messages.updateMany({
+    where: {
+      id: messageId,
+      receiver_id: userId,
+      read_at: null,
+    },
+    data: {
+      read_at: new Date(),
+    },
+  });
 
-  const values = [messageId, userId];
-  const result = await pool.query(query, values);
-
-  if (result.rows.length === 0) {
+  if (updated.count === 0) {
+    // No row matched → either not found, not this user, or already read
     return null;
   }
 
-  return result.rows[0];
+  // Fetch the updated row with relations
+  const msg = await prisma.private_messages.findUnique({
+    where: { id: messageId },
+    include: {
+      users_private_messages_sender_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+      users_private_messages_receiver_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+    },
+  });
+
+  if (!msg) {
+    return null;
+  }
+
+  return mapMessage(msg as PrivateMessageWithUsers);
 }

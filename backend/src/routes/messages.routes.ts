@@ -1,25 +1,17 @@
-// src/routes/messages.routes.ts
-import express from "express";
+import { Router } from "express";
+import { authenticate } from "../middlewares/auth.middleware";
 import {
-  createMessageHandler,
-  getInboxHandler,
-  getSentHandler,
-  markReadHandler,
+  getInbox,
+  getSent,
+  sendMessage,
+  markAsRead
 } from "../controllers/messages.controller";
-import { requireAuth } from "../middlewares/auth.middleware";
 
-const router = express.Router();
+const router = Router();
 
-// Create new message
-router.post("/", requireAuth, createMessageHandler);
-
-// Inbox (received messages)
-router.get("/inbox", requireAuth, getInboxHandler);
-
-// Sent messages
-router.get("/sent", requireAuth, getSentHandler);
-
-// Mark a message as read
-router.patch("/:id/read", requireAuth, markReadHandler);
+router.get("/inbox", authenticate, getInbox);
+router.get("/sent", authenticate, getSent);
+router.post("/", authenticate, sendMessage);
+router.patch("/:id/read", authenticate, markAsRead);
 
 export default router;

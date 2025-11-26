@@ -1,8 +1,17 @@
-import { Router } from "express";
-import { health, dbCheck } from "../controllers/health.controller";
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
 
 const router = Router();
-router.get("/health", health);
-router.get("/health/db", dbCheck);
+const prisma = new PrismaClient();
+
+router.get('/', async (req, res) => {
+    try {
+        // Simple database connection check
+        await prisma.$connect();
+        res.json({ status: 'OK', database: 'connected' });
+    } catch (error) {
+        res.status(500).json({ status: 'ERROR', database: 'disconnected' });
+    }
+});
 
 export default router;

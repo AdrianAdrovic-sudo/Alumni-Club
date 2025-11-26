@@ -1,18 +1,24 @@
-export type UserRole = "admin" | "alumni";
+export type User = {
+    id: string;
+    email: string;
+    password: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+};
 
-export interface JwtUserPayload {
-  id: number;
-  username: string;
-  email: string;
-  role: UserRole;
-}
+export type AuthResponse = {
+    user: User;
+    token: string;
+};
 
-export interface LoginRequestBody {
-  username: string;
-  password: string;
-}
+export type LoginCredentials = {
+    email: string;
+    password: string;
+};
 
-export interface LoginResponse {
-  token: string;
-  user: JwtUserPayload;
-}
+export type RegisterCredentials = {
+    email: string;
+    password: string;
+    name: string;
+};

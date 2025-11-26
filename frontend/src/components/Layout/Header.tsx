@@ -1,6 +1,6 @@
-import "../css/Header.css";
+import "../../css/Header.css";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 // Header reacts to actual login state
 function Header() {
@@ -53,7 +53,10 @@ function Header() {
 
         <div className="signup-container">
           {user ? (
-            <>
+            <div className="user-menu">
+              <span className="welcome-text">
+                Dobrodošao/la, {user.username}!
+              </span>
               {isAdmin && (
                 <Link to="/Dashboard">
                   <button className="dashboard-btn">Dashboard</button>
@@ -62,7 +65,7 @@ function Header() {
               <button className="signup-btn" onClick={handleLogout}>
                 Odjavi se
               </button>
-            </>
+            </div>
           ) : (
             <Link to="/login">
               <button className="signup-btn">Prijavi se</button>
