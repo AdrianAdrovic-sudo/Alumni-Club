@@ -60,7 +60,7 @@ npx prisma db push
 npm run dev
 ```
 
-### Backend will run on ``` http://localhost:3000 ```
+### Backend will run on ``` http://localhost:4000 ```
 
 # 2. Frontend Setup
 
