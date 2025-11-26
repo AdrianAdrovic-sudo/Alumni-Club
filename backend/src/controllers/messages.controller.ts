@@ -31,7 +31,7 @@ export async function sendMessage(req: Request, res: Response) {
   }
 
   // First, find the user by username
-  const receiver = await prisma.users.findFirst({
+  const receiver = await prisma.users.findUnique({
     where: { username: receiverUsername }
   });
 
