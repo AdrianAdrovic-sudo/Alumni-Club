@@ -103,7 +103,7 @@ model users {
   email                                                String               @unique @db.VarChar(255)
   password_hash                                        String
   role                                                 String?              @default("user") @db.VarChar(20)
-  username                                             String               @db.VarChar(30)
+  username                                             String               @unique @db.VarChar(30)
   profile_picture                                      String?
   enrollment_year                                      Int
   is_active                                            Boolean              @default(true)
