@@ -36,7 +36,7 @@ CREATE TABLE users (
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   role VARCHAR(20) DEFAULT 'user',
-  username VARCHAR(30) NOT NULL,
+  username VARCHAR(30) UNIQUE NOT NULL,
   profile_picture TEXT,
   enrollment_year INT NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
