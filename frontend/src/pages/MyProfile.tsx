@@ -123,7 +123,7 @@ export default function MojProfil() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-base font-semibold text-[#294a70] mb-2">
+            <label className="block text-base font-semibold text-black mb-2">
               Godina diplomiranja *
             </label>
             <select
@@ -131,11 +131,11 @@ export default function MojProfil() {
               value={profileData.godinaZavrsetka}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-[#ffab1f] bg-white transition-colors"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black text-base focus:outline-none focus:border-[#ffab1f] bg-white transition-colors"
             >
-              <option value="">Izaberite godinu</option>
+              <option className="text-black" value="">Izaberite godinu</option>
               {years.map(year => (
-                <option key={year} value={year}>{year}</option>
+                <option className="text-black" key={year} value={year}>{year}</option>
               ))}
             </select>
           </div>

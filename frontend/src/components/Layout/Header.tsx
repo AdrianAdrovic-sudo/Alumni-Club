@@ -12,6 +12,7 @@ function Header() {
   }
 
   const isAdmin = user?.role === "admin";
+  const isRegularUser = user?.role === "user";
 
   return (
     <header className="header">
@@ -50,15 +51,26 @@ function Header() {
               <span className="welcome-text">
                 Dobrodošao/la, {user.username}!
               </span>
-              {/* Messages button next to username */}
+
+              {/* Inbox */}
               <Link to="/messages" className="messages-btn">
                 Inbox
               </Link>
+
+              {/* MyProfile samo za običnog usera */}
+              {isRegularUser && (
+                <Link to="/MyProfile" className="profile-btn">
+                  <button className="dashboard-btn">MyProfile</button>
+                </Link>
+              )}
+
+              {/* Admin Dashboard */}
               {isAdmin && (
                 <Link to="/Dashboard">
                   <button className="dashboard-btn">Dashboard</button>
                 </Link>
               )}
+
               <button className="signup-btn" onClick={handleLogout}>
                 Odjavi se
               </button>
