@@ -185,8 +185,8 @@ export default function UserManagement() {
       const row = rows[i].split(',').map(field => field.trim().replace(/"/g, ''));
       console.log(`Processing row ${i}:`, row);
       
-      if (row.length !== headers.length) {
-        console.warn(`Skipping row ${i} - column count mismatch`);
+      if (row.length < 3) {
+        console.warn(`Skipping row ${i} - not enough columns`);
         continue;
       }
 
@@ -202,7 +202,6 @@ export default function UserManagement() {
       const firstName = userData['ime'] || '';
       const lastName = userData['prezime'] || '';
       const email = userData['email'] || '';
-      const enrollmentYear = userData['godina upisa'] || new Date().getFullYear();
 
       // Validate required fields
       if (firstName && lastName && email) {
@@ -217,9 +216,9 @@ export default function UserManagement() {
           email: email,
           username: username,
           password: 'alumni123', // Default password
-          enrollment_year: parseInt(enrollmentYear) || new Date().getFullYear(),
+          enrollment_year: new Date().getFullYear(), // Current year - FIXED: removed enrollmentYear variable
           role: 'user',
-          occupation: '' // Can be filled later by user
+          occupation: '' // Default empty occupation
         });
         
         console.log(`Added user: ${firstName} ${lastName}`);
@@ -601,16 +600,15 @@ export default function UserManagement() {
               <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
                 <li>Export Google Forms responses as CSV</li>
                 <li>Ensure CSV has columns for: <strong>First Name, Last Name, Email</strong></li>
-                <li>Optional columns: Enrollment Year, Occupation</li>
                 <li>Usernames will be auto-generated as firstName.lastName</li>
                 <li>All users will be created with default password "alumni123"</li>
               </ol>
               <div className="mt-3 text-sm">
                 <strong className="text-gray-800">Example CSV format:</strong>
                 <pre className="bg-gray-100 p-2 rounded mt-1 text-xs text-gray-800 border">
-                  First Name,Last Name,Email,Enrollment Year,Occupation{'\n'}
-                  John,Doe,john.doe@example.com,2020,Software Engineer{'\n'}
-                  Jane,Smith,jane.smith@example.com,2021,Data Analyst
+                  Timestamp,Ime,"Prezime,Email{'\n'}
+                  2025/11/26 5:46:06 PM GMT+1,John,Doe,john.doe@example.com{'\n'}
+                  2025/11/26 5:46:06 PM GMT+1,Jane,Smith,jane.smith@example.com
                 </pre>
               </div>
             </div>
