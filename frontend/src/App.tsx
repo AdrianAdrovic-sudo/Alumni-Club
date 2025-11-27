@@ -10,7 +10,10 @@ import AboutUs from "./pages/AboutUs.tsx";
 import Contact from "./pages/Contact.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Theses from "./pages/Theses.tsx";
-
+import Messages from './components/messages/Messages';
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import PublicRoute from "./components/common/PublicRoute";
+import AdminRoute from "./components/common/AdminRoute";
 
 export default function App() {
   return (
@@ -23,15 +26,34 @@ export default function App() {
             <Route path="/Home" element={<Home />} />
             <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
             <Route path="/Blog" element={<Blog />} />
-            <Route path="/Login" element={<Login />} />
-            <Route path="/AboutUs" element={<AboutUs/>} />
-            <Route path="/Contact" element={<Contact/>} />
-            <Route path="/Theses" element={<Theses/>} />
             
+            {/* Protect login route - redirect if already authenticated */}
+            <Route 
+              path="/login" 
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              } 
+            />
+            
+            <Route path="/AboutUs" element={<AboutUs />} />
+            <Route path="/Contact" element={<Contact />} />
+            <Route path="/Theses" element={<Theses />} />
+            <Route path="/messages" element={<Messages />} />
 
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+            <Route
+              path="/Dashboard"
+              element={
+                <AdminRoute>
+                  <Dashboard />
+                </AdminRoute>
+              }
+            />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </AuthProvider>
   );
 }
