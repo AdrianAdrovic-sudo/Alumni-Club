@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { FaSearch } from "react-icons/fa";
-import "../css/Theses.css";
 
 interface DiplomskiRad {
   ime: string;
@@ -17,7 +15,7 @@ export default function DiplomskiRadovi() {
 
   useEffect(() => {
     // Zamijeni URL sa svojim endpointom za diplomce
-    fetch("/api/diplomski-radovi") 
+    fetch("/api/diplomski-radovi")
       .then((res) => res.json())
       .then((data: DiplomskiRad[]) => {
         setRadovi(data);
