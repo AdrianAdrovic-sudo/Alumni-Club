@@ -6,6 +6,7 @@ import healthRoutes from './routes/health.routes';
 import adminRoutes from './routes/admin.routes';
 import messageRoutes from "./routes/messages.routes";
 import userRoutes from "./routes/users.routes";
+import postsRoutes from "./routes/posts.routes";
 
 
 const app = express();
@@ -29,5 +30,6 @@ app.use('/api/admin', adminRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/users", userRoutes); // add this line
 app.use('/api/auth', authRoutes);
+app.use("/api", postsRoutes);
 
 export default app;
