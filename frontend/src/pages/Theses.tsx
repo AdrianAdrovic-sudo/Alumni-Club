@@ -1,23 +1,25 @@
-import { FaSearch } from "react-icons/fa"; 
-import "../css/Theses.css";
-import { useState } from 'react';
+import { FaSearch, FaFilter } from "react-icons/fa";
+import { useState } from "react";
 
 export default function DiplomskiRadovi() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("datum-desc");
+  const [showFilter, setShowFilter] = useState(false);
 
   const podaci = [
-    {ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009." },
-    {ime: "Tripo", prezime: "Matijević", naziv: "Prikupljanje činjenica za informacioni sistem studentske službe", datum: "10.07.2009." },
-    {ime: "Zoran", prezime: "Ćorović", naziv: "Model, objekti i veze informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Dženan", prezime: "Strujić", naziv: "Relacioni model informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Novak", prezime: "Radulović", naziv: "Forme i izvještaj informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Igor", prezime: "Pekić", naziv: "Sigurnost informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Ana", prezime: "Jovanović", naziv: "Web aplikacija za studentsku službu", datum: "10.07.2009." },
-    {ime: "Jelena", prezime: "Marković", naziv: "Implementacija informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Marko", prezime: "Nikolić", naziv: "Testiranje informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2009." },
+    { ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009." },
+    { ime: "Tripo", prezime: "Matijević", naziv: "Prikupljanje činjenica za informacioni sistem studentske službe", datum: "10.07.2009." },
+    { ime: "Zoran", prezime: "Ćorović", naziv: "Model, objekti i veze informacionog sistema studentske službe", datum: "10.07.2009." },
+    { ime: "Dženan", prezime: "Strujić", naziv: "Relacioni model informacionog sistema studentske službe", datum: "10.07.2009." },
+    { ime: "Novak", prezime: "Radulović", naziv: "Forme i izvještaj informacionog sistema studentske službe", datum: "10.07.2009." },
+    { ime: "Igor", prezime: "Pekić", naziv: "Sigurnost informacionog sistema studentske službe", datum: "10.07.2009." },
+    { ime: "Ana", prezime: "Jovanović", naziv: "Web aplikacija za studentsku službu", datum: "10.07.2009." },
+    { ime: "Jelena", prezime: "Marković", naziv: "Implementacija informacionog sistema studentske službe", datum: "10.07.2009." },
+    { ime: "Marko", prezime: "Nikolić", naziv: "Testiranje informacionog sistema studentske službe", datum: "10.07.2009." },
+    { ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2009." },
   ];
 
+  // Filtriranje
   const filtrirani = podaci.filter(
     (p) =>
       p.ime.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -25,39 +27,142 @@ export default function DiplomskiRadovi() {
       p.naziv.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  return (
-    <div className="theses-container">
-        <div className="theses-hero">
-        <h1 >Diplomski radovi </h1>
-            <p>
-                Pregledajte bazu diplomskih radova naših studenata. Koristite pretragu da biste brzo pronašli radove po imenu, prezimenu ili nazivu rada.
-            </p><br></br>
-        </div>
-     
+  // Sortiranje
+  const sortirani = [...filtrirani].sort((a, b) => {
+    switch (sortBy) {
+      case "datum-asc":
+        return new Date(a.datum.split('.').reverse().join('-')) - new Date(b.datum.split('.').reverse().join('-'));
+      case "datum-desc":
+        return new Date(b.datum.split('.').reverse().join('-')) - new Date(a.datum.split('.').reverse().join('-'));
+      case "ime-asc":
+        return a.ime.localeCompare(b.ime);
+      case "prezime-asc":
+        return a.prezime.localeCompare(b.prezime);
+      case "naziv-asc":
+        return a.naziv.localeCompare(b.naziv);
+      default:
+        return 0;
+    }
+  });
 
-      <div className="search-container">
-        <input type="text" placeholder="Pretraga..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
+  return (
+    <div className="w-full min-h-screen bg-white flex flex-col">
+      {/* HERO */}
+      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white px-4 py-16 md:py-20 text-center">
+        <h1 className="text-3xl md:text-5xl font-bold mb-4">
+          Diplomski radovi
+        </h1>
+        <p className="text-base md:text-lg opacity-90 max-w-3xl mx-auto">
+          Pregledajte bazu diplomskih radova naših studenata. Koristite
+          pretragu da biste brzo pronašli radove po imenu, prezimenu ili
+          nazivu rada.
+        </p>
       </div>
 
-      <div className="table-wrapper">
-      <table>
-          <tr>
-            <th>Ime</th>
-            <th>Prezime</th>
-            <th>Naziv diplomskog rada</th>
-            <th>Datum diplomiranja</th>
-          </tr>
-        <tbody>
-          {filtrirani.map((p) => (
-            <tr>
-              <td>{p.ime}</td>
-              <td>{p.prezime}</td>
-              <td>{p.naziv}</td>
-              <td>{p.datum}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* SEARCH & FILTER */}
+      <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 px-4 md:px-16 mt-8">
+        {/* Filter Button */}
+        <div className="relative">
+          <button
+            onClick={() => setShowFilter(!showFilter)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors"
+          >
+            <FaFilter />
+            <span>Sortiraj</span>
+          </button>
+
+          {showFilter && (
+            <div className="absolute top-full left-0 mt-2 w-56 bg-[#294a70] rounded-lg shadow-xl overflow-hidden z-10">
+              <button
+                onClick={() => { setSortBy("datum-desc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "datum-desc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+               Datum (najnoviji prvo)
+              </button>
+              <button
+                onClick={() => { setSortBy("datum-asc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "datum-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+              Datum (najstariji prvo)
+              </button>
+              <button
+                onClick={() => { setSortBy("ime-asc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "ime-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+              Ime (A-Z)
+              </button>
+              <button
+                onClick={() => { setSortBy("prezime-asc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "prezime-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+              Prezime (A-Z)
+              </button>
+              <button
+                onClick={() => { setSortBy("naziv-asc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "naziv-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+                Naziv rada (A-Z)
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center w-full sm:w-96">
+         
+          <input
+            type="text"
+            placeholder="Pretraga..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 h-[45px] border border-gray-300 border-l-0 rounded-r-md text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#ffab1f] focus:border-[#ffab1f]"
+          />
+        </div>
+      </div>
+
+      <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8">
+        <div className="w-full max-w-6xl shadow-md rounded-2xl overflow-hidden bg-white">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full border-collapse table-auto">
+              <thead className="bg-[#294a70] text-white">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Ime
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Prezime
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Naziv diplomskog rada
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Datum diplomiranja
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortirani.map((p, idx) => (
+                  <tr
+                    key={idx}
+                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                  >
+                    <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
+                      {p.ime}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
+                      {p.prezime}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
+                      {p.naziv}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
+                      {p.datum}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,103 +1,123 @@
-import '../css/AboutUs.css';
-
 function AboutUs() {
-  return(
-    <div className="about-us-container">
-      <div className="about-us-hero">
-        <h1>O Nama</h1>
-        <p className="hero-subtitle">Alumni zajednica Fakulteta za informacione tehnologije</p>
+  return (
+    <div className="w-full min-h-screen bg-white">
+
+      {/* HERO */}
+      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white py-16 md:py-24 px-4 text-center">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+          O Nama
+        </h1>
+
+        <p className="text-sm sm:text-base md:text-lg opacity-90 max-w-xl mx-auto">
+          Alumni zajednica Fakulteta za informacione tehnologije
+        </p>
       </div>
 
-      <div className="about-us-content">
-        <div className="about-section">
-          <div className="about-text">
-            <h2>Kako je nastao Alumni Klub</h2>
-            <p>
-              Alumni FIT je nastao kao projekat koji su realizovali studenti 3. godine Fakulteta za 
-              informacione tehnologije na Univerzitetu Mediteran. Projekat je razvijen u okviru predmeta 
-              Distribuirani razvoj softvera, sa ciljem da kreira platformu koja će dugoročno služiti 
-              povezivanju bivših studenata i akademske zajednice.
-            </p>
-            <p>
-              Ono što je počelo kao studentski projekat, preraslo je u vitalni alat za networking, 
-              razmjenu znanja i profesionalni razvoj svih generacija FIT-a.
-            </p>
-          </div>
-         
-        </div>
+      {/* WRAPPER */}
+      <div className="max-w-7xl mx-auto py-12 md:py-20 px-4">
 
-        <div className="about-section reverse">
-          
-          <div className="about-text">
-            <h2>Naša Misija</h2>
-            <p>
-              Alumni FIT je platforma koja povezuje bivše studente Fakulteta za informacione tehnologije 
-              Univerziteta Mediteran. Naš cilj je da izgradimo snažnu mrežu profesionalaca koji će 
-              podržavati jedni druge, dijeliti iskustva i pomoći novim generacijama studenata.
+        {/* SECTION 1 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24">
+          <div className="space-y-5 text-justify">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#294a70]">
+              Kako je nastao Alumni Klub
+            </h2>
+            <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
+              Alumni FIT je nastao kao projekat koji su realizovali studenti 3. godine Fakulteta...
             </p>
-            <p>
-              Vjerujemo u snagu zajednice i želimo da svaki alumni član ima pristup resursima, 
-              mentorstvu i prilikama koje će im pomoći da ostvare svoje profesionalne ciljeve.
+            <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
+              Ono što je počelo kao studentski projekat, preraslo je u vitalni alat za networking...
             </p>
           </div>
         </div>
 
-        <div className="about-section reverse">
-          
-          <div className="about-text">
-            <h2>Šta Nudimo</h2>
-            <p>
-              Kroz našu platformu možete pronaći stare kolege, pratiti njihovu karijeru, 
-              učestvovati u networking događajima, pristupiti mentorskim programima i 
-              ostati povezani sa fakultetom i njegovim aktivnostima.
+        {/* SECTION 2 (REVERSED) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24 lg:[direction:rtl]">
+          <div className="space-y-5 lg:[direction:ltr] text-justify">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#294a70]">
+              Naša Misija
+            </h2>
+
+            <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
+              Alumni FIT je platforma koja povezuje bivše studente...
+            </p>
+
+            <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
+              Vjerujemo u snagu zajednice i želimo da svaki alumni član ima pristup resursima...
             </p>
           </div>
         </div>
 
-        <div className="stats-section">
-          <div className="stat-card">
-            <h3>500+</h3>
-            <p>Alumni članova</p>
-          </div>
-          <div className="stat-card">
-            <h3>50+</h3>
-            <p>Kompanija</p>
-          </div>
-          <div className="stat-card">
-            <h3>20+</h3>
-            <p>Država</p>
-          </div>
-          <div className="stat-card">
-            <h3>15+</h3>
-            <p>Godina tradicije</p>
+        {/* SECTION 3 (REVERSED) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24 lg:[direction:rtl]">
+          <div className="space-y-5 lg:[direction:ltr] text-justify">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#294a70]">
+              Šta Nudimo
+            </h2>
+
+            <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
+              Kroz našu platformu možete pronaći stare kolege, pratiti njihovu karijeru...
+            </p>
           </div>
         </div>
 
-        <div className="values-section">
-          <h2>Naše Vrijednosti</h2>
-          <div className="values-grid">
-            <div className="value-card">
-              <div className="value-icon">🤝</div>
-              <h3>Povezanost</h3>
-              <p>Gradimo mostove između generacija i profesionalaca</p>
+        {/* STATS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10 my-20">
+
+          {[
+            { number: "500+", label: "Alumni članova" },
+            { number: "50+", label: "Kompanija" },
+            { number: "20+", label: "Država" },
+            { number: "15+", label: "Godina tradicije" },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-8 md:p-10 rounded-2xl text-center shadow-md transition-transform hover:-translate-y-2"
+            >
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#ffab1f] mb-2">
+                {item.number}
+              </h3>
+              <p className="text-sm sm:text-base opacity-90">
+                {item.label}
+              </p>
             </div>
-            <div className="value-card">
-              <div className="value-icon">💡</div>
-              <h3>Inovacija</h3>
-              <p>Podsticanje kreativnosti i novih ideja</p>
-            </div>
-            <div className="value-card">
-              <div className="value-icon">🎓</div>
-              <h3>Obrazovanje</h3>
-              <p>Kontinuirano učenje i razvoj</p>
-            </div>
-            <div className="value-card">
-              <div className="value-icon">🌟</div>
-              <h3>Izvrsnost</h3>
-              <p>Težnja ka vrhunskim rezultatima</p>
-            </div>
+          ))}
+
+        </div>
+
+        {/* VALUES */}
+        <div className="mt-20">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#294a70] text-center mb-14">
+            Naše Vrijednosti
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+            {[
+              { icon: "🤝", title: "Povezanost", text: "Gradimo mostove između generacija i profesionalaca" },
+              { icon: "💡", title: "Inovacija", text: "Podsticanje kreativnosti i novih ideja" },
+              { icon: "🎓", title: "Obrazovanje", text: "Kontinuirano učenje i razvoj" },
+              { icon: "🌟", title: "Izvrsnost", text: "Težnja ka vrhunskim rezultatima" },
+            ].map((v, i) => (
+              <div
+                key={i}
+                className="bg-white p-8 md:p-10 rounded-2xl text-center border-2 border-gray-200 
+                           hover:border-[#ffab1f] shadow-sm hover:shadow-xl 
+                           transition-all hover:-translate-y-1"
+              >
+                <div className="text-5xl mb-4">{v.icon}</div>
+                <h3 className="text-xl md:text-2xl font-semibold text-[#294a70] mb-3">
+                  {v.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                  {v.text}
+                </p>
+              </div>
+            ))}
+
           </div>
         </div>
+
       </div>
     </div>
   );
