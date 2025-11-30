@@ -7,16 +7,15 @@ interface DiplomskiRad {
   prezime: string;
   naziv: string;
   datum: string;
-  pdfUrl?: string; // opcionalno, ako postoji PDF verzija
+  pdfUrl?: string; // Optional URL to the PDF file
 }
 
-export default function DiplomskiRadovi() {
+export default function Theses() {
   const [searchTerm, setSearchTerm] = useState("");
   const [radovi, setRadovi] = useState<DiplomskiRad[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Zamijeni URL sa svojim endpointom za diplomce
     fetch("/api/diplomski-radovi") 
       .then((res) => res.json())
       .then((data: DiplomskiRad[]) => {
