@@ -16,9 +16,16 @@ export interface Message {
 }
 
 export interface SendMessageData {
-  receiverUsername: string; // Changed from receiverId to receiverUsername
+  receiverUsername: string;
   subject: string;
   content: string;
+}
+
+export interface UserSuggestion {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
 }
 
 class MessagesService {
@@ -37,8 +44,17 @@ class MessagesService {
     return response.data;
   }
 
-  async markAsRead(messageId: number): Promise<{ message: Message }> {
-    const response = await api.patch(`/messages/${messageId}/read`);
+ async markAsRead(messageId: number): Promise<void> {
+  // Read status is handled locally on the frontend (localStorage).
+  // No backend call to avoid Prisma / schema issues.
+  return;
+}
+
+
+  async searchUsers(query: string): Promise<{ users: UserSuggestion[] }> {
+    const response = await api.get('/users/search', {
+      params: { query },
+    });
     return response.data;
   }
 }

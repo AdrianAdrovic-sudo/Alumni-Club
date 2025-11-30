@@ -11,6 +11,26 @@ export default function Messages() {
   const [sent, setSent] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [deletedInboxIds, setDeletedInboxIds] = useState<number[]>([]);
+  const [deletedSentIds, setDeletedSentIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    const di = JSON.parse(localStorage.getItem('deletedInboxMessages') || '[]');
+    const ds = JSON.parse(localStorage.getItem('deletedSentMessages') || '[]');
+    setDeletedInboxIds(di);
+    setDeletedSentIds(ds);
+  }, []);
+
+  const saveDeletedInbox = (ids: number[]) => {
+    setDeletedInboxIds(ids);
+    localStorage.setItem('deletedInboxMessages', JSON.stringify(ids));
+  };
+
+  const saveDeletedSent = (ids: number[]) => {
+    setDeletedSentIds(ids);
+    localStorage.setItem('deletedSentMessages', JSON.stringify(ids));
+  };
+
   const loadMessages = async () => {
     try {
       setLoading(true);
@@ -34,8 +54,25 @@ export default function Messages() {
 
   const handleMessageSent = () => {
     setActiveTab('inbox');
-    loadMessages(); // Refresh messages
+    loadMessages();
   };
+
+  const handleDeleteInboxLocal = (id: number) => {
+    if (!deletedInboxIds.includes(id)) {
+      const updated = [...deletedInboxIds, id];
+      saveDeletedInbox(updated);
+    }
+  };
+
+  const handleDeleteSentLocal = (id: number) => {
+    if (!deletedSentIds.includes(id)) {
+      const updated = [...deletedSentIds, id];
+      saveDeletedSent(updated);
+    }
+  };
+
+  const visibleInbox = inbox.filter(m => !deletedInboxIds.includes(m.id));
+  const visibleSent = sent.filter(m => !deletedSentIds.includes(m.id));
 
   if (loading) {
     return (
@@ -70,7 +107,7 @@ export default function Messages() {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Inbox ({inbox.length})
+              Inbox ({visibleInbox.length})
             </button>
             <button
               onClick={() => setActiveTab('sent')}
@@ -80,18 +117,25 @@ export default function Messages() {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Sent ({sent.length})
+              Sent ({visibleSent.length})
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 bg-slate-50">
           {activeTab === 'inbox' && (
-            <Inbox messages={inbox} onRefresh={loadMessages} />
+            <Inbox
+              messages={visibleInbox}
+              onRefresh={loadMessages}
+              onDeleteLocal={handleDeleteInboxLocal}
+            />
           )}
           {activeTab === 'sent' && (
-            <Sent messages={sent} />
+            <Sent
+              messages={visibleSent}
+              onDeleteLocal={handleDeleteSentLocal}
+            />
           )}
           {activeTab === 'compose' && (
             <ComposeMessage 

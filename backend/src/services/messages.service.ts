@@ -16,8 +16,6 @@ export interface PrivateMessageRow {
   receiver_last_name?: string;
 }
 
-// This matches your schema relation names for private_messages
-// and selects only first_name / last_name from users
 type PrivateMessageWithUsers = Prisma.private_messagesGetPayload<{
   include: {
     users_private_messages_sender_idTousers: {
@@ -29,7 +27,6 @@ type PrivateMessageWithUsers = Prisma.private_messagesGetPayload<{
   };
 }>;
 
-// Helper to map Prisma result → shape expected by frontend
 function mapMessage(m: PrivateMessageWithUsers): PrivateMessageRow {
   return {
     id: m.id,
@@ -122,39 +119,9 @@ export async function markMessageAsRead(
   messageId: number,
   userId: number
 ): Promise<PrivateMessageRow | null> {
-  // First, update only if this user is the receiver and message is unread
-  const updated = await prisma.private_messages.updateMany({
-    where: {
-      id: messageId,
-      receiver_id: userId,
-      read_at: null,
-    },
-    data: {
-      read_at: new Date(),
-    },
-  });
-
-  if (updated.count === 0) {
-    // No row matched → either not found, not this user, or already read
-    return null;
-  }
-
-  // Fetch the updated row with relations
-  const msg = await prisma.private_messages.findUnique({
-    where: { id: messageId },
-    include: {
-      users_private_messages_sender_idTousers: {
-        select: { first_name: true, last_name: true },
-      },
-      users_private_messages_receiver_idTousers: {
-        select: { first_name: true, last_name: true },
-      },
-    },
-  });
-
-  if (!msg) {
-    return null;
-  }
-
-  return mapMessage(msg as PrivateMessageWithUsers);
+  // Temporarily disabled DB update for read status to avoid Prisma / schema mismatch.
+  // Read status will be handled on the frontend only.
+  return null;
 }
+
+

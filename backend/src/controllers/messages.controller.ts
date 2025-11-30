@@ -10,31 +10,27 @@ import prisma from "../prisma";
 
 export async function getInbox(req: Request, res: Response) {
   const userId = req.user!.id;
-
   const messages = await getInboxMessages(userId);
   return res.json({ messages });
 }
 
 export async function getSent(req: Request, res: Response) {
   const userId = req.user!.id;
-
   const messages = await getSentMessages(userId);
   return res.json({ messages });
 }
 
 export async function sendMessage(req: Request, res: Response) {
   const senderId = req.user!.id;
-  const { receiverUsername, subject, content } = req.body; // Changed from receiverId to receiverUsername
+  const { receiverUsername, subject, content } = req.body;
 
   if (!receiverUsername || !subject || !content) {
     return res.status(400).json({ message: "Missing fields" });
   }
 
-  // First, find the user by username
-const receiver = await prisma.users.findFirst({
-  where: { username: receiverUsername },
-});
-
+  const receiver = await prisma.users.findFirst({
+    where: { username: receiverUsername },
+  });
 
   if (!receiver) {
     return res.status(404).json({ message: "User not found" });
@@ -42,7 +38,7 @@ const receiver = await prisma.users.findFirst({
 
   const message = await createPrivateMessage(
     Number(senderId),
-    receiver.id, // Use the found user's ID
+    receiver.id,
     subject,
     content
   );
