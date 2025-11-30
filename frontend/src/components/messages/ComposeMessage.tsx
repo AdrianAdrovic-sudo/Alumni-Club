@@ -1,6 +1,6 @@
-// src/components/messages/ComposeMessage.tsx
-import React, { useState } from 'react';
-import MessagesService from '../../services/messagesService';
+// src/components/Messages/ComposeMessage.tsx
+import React, { useEffect, useState } from 'react';
+import MessagesService, { UserSuggestion } from '../../services/messagesService';
 
 interface ComposeMessageProps {
   onMessageSent: () => void;
@@ -14,6 +14,34 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
+  const [suggestions, setSuggestions] = useState<UserSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const q = receiverUsername.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const handle = setTimeout(async () => {
+      try {
+        setSearching(true);
+        const res = await MessagesService.searchUsers(q);
+        setSuggestions(res.users);
+        setShowSuggestions(true);
+      } catch (err) {
+        console.error('Error searching users', err);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(handle);
+  }, [receiverUsername]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -26,25 +54,33 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
       setSending(true);
       setError('');
       
-      // We'll send the username and let the backend handle finding the user
       await MessagesService.sendMessage({
         receiverUsername: receiverUsername.trim(),
         subject: subject.trim(),
         content: content.trim()
       });
       
-      // Reset form
       setReceiverUsername('');
       setSubject('');
       setContent('');
+      setSuggestions([]);
+      setShowSuggestions(false);
       
       onMessageSent();
     } catch (error: any) {
       console.error('Error sending message:', error);
-      setError(error.response?.data?.message || 'Error sending message. Please check the username and try again.');
+      setError(
+        error.response?.data?.message ||
+        'Error sending message. Please check the username and try again.'
+      );
     } finally {
       setSending(false);
     }
+  };
+
+  const handlePickSuggestion = (user: UserSuggestion) => {
+    setReceiverUsername(user.username);
+    setShowSuggestions(false);
   };
 
   return (
@@ -72,17 +108,49 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
             <input
               type="text"
               value={receiverUsername}
-              onChange={(e) => setReceiverUsername(e.target.value)}
+              onChange={(e) => {
+                setReceiverUsername(e.target.value);
+                setShowSuggestions(true);
+              }}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-              placeholder="Enter recipient's username (e.g., john.doe)"
+              placeholder="Start typing username or name"
               required
+              autoComplete="off"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3">
               <span className="text-gray-400 text-sm">@</span>
             </div>
+
+            {showSuggestions && (
+              <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {searching && (
+                  <div className="px-4 py-2 text-xs text-gray-400">
+                    Searching...
+                  </div>
+                )}
+                {!searching && suggestions.length === 0 && receiverUsername.trim().length >= 2 && (
+                  <div className="px-4 py-2 text-xs text-gray-400">
+                    No users found.
+                  </div>
+                )}
+                {suggestions.map((user) => (
+                  <button
+                    key={user.id}
+                    type="button"
+                    onClick={() => handlePickSuggestion(user)}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 flex flex-col"
+                  >
+                    <span className="font-medium text-gray-800">{user.username}</span>
+                    <span className="text-xs text-gray-500">
+                      {user.first_name} {user.last_name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            Enter the exact username of the person you want to message
+            Start typing username, first name or last name and pick from the list.
           </p>
         </div>
 

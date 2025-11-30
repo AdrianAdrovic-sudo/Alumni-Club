@@ -1,74 +1,129 @@
 // src/components/Messages/Inbox.tsx
-import React from 'react';
-import { Message } from '../../services/messagesService';
-import MessagesService from '../../services/messagesService';
+import React, { useEffect, useState } from 'react';
+import MessagesService, { Message } from '../../services/messagesService';
 
 interface InboxProps {
   messages: Message[];
   onRefresh: () => void;
+  onDeleteLocal: (id: number) => void;
 }
 
-export default function Inbox({ messages, onRefresh }: InboxProps) {
-  const handleMarkAsRead = async (messageId: number) => {
-    try {
-      await MessagesService.markAsRead(messageId);
-      onRefresh(); // Refresh to update read status
-    } catch (error) {
-      console.error('Error marking message as read:', error);
-    }
+export default function Inbox({ messages, onRefresh, onDeleteLocal }: InboxProps) {
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [readIds, setReadIds] = useState<number[]>([]);
+
+  // Load locally stored "read" messages once
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem('readMessages') || '[]');
+    setReadIds(stored);
+  }, []);
+
+  const saveReadIds = (ids: number[]) => {
+    setReadIds(ids);
+    localStorage.setItem('readMessages', JSON.stringify(ids));
   };
 
   if (messages.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No messages in your inbox</p>
+        <p className="text-gray-500">You have no messages in your inbox.</p>
       </div>
     );
   }
 
+  const handleMarkAsRead = async (id: number) => {
+    try {
+      setBusyId(id);
+
+      // No backend call anymore, we just mark locally
+      if (!readIds.includes(id)) {
+        const updated = [...readIds, id];
+        saveReadIds(updated);
+      }
+
+      // If you still want to refresh from backend for new messages, keep this
+      await onRefresh();
+    } catch (err) {
+      console.error('Error marking as read (local):', err);
+      alert('Could not mark message as read.');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    if (!window.confirm('Delete this message from your inbox on your side')) return;
+    onDeleteLocal(id);
+  };
+
   return (
     <div className="space-y-4">
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={`border rounded-lg p-4 hover:bg-gray-50 transition duration-200 ${
-            !message.read_at ? 'bg-blue-50 border-blue-200' : 'border-gray-200'
-          }`}
-        >
-          <div className="flex justify-between items-start">
+      {messages.map(message => {
+        // A message is "unread" if it is not in local readIds
+        const isUnread = !readIds.includes(message.id);
+
+        return (
+          <div
+            key={message.id}
+            className={`rounded-xl border p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-3 transition
+              ${isUnread ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200 opacity-80'}
+            `}
+          >
             <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="font-semibold text-gray-900">
-                  {message.sender_first_name} {message.sender_last_name}
-                </span>
-                {!message.read_at && (
-                  <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+              <div className="flex items-center gap-2 mb-1">
+                <h3
+                  className={`text-base ${
+                    isUnread ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'
+                  }`}
+                >
+                  {message.subject}
+                </h3>
+                {isUnread && (
+                  <span className="inline-flex items-center rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold text-white">
                     New
                   </span>
                 )}
               </div>
-              <h3 className="font-medium text-gray-800 mb-1">{message.subject}</h3>
-              <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+
+              <div className="text-xs text-gray-500 mb-1">
+                From{' '}
+                <span className="font-medium text-gray-700">
+                  {message.sender_first_name} {message.sender_last_name}
+                </span>
+              </div>
+
+              <p className="text-sm text-gray-600 line-clamp-2 mb-2">
                 {message.content}
               </p>
-              <div className="flex justify-between items-center text-sm text-gray-500">
-                <span>
-                  {new Date(message.sent_date).toLocaleDateString()} at{' '}
-                  {new Date(message.sent_date).toLocaleTimeString()}
-                </span>
-                {!message.read_at && (
-                  <button
-                    onClick={() => handleMarkAsRead(message.id)}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    Mark as read
-                  </button>
-                )}
+
+              <div className="text-xs text-gray-400">
+                Received on{' '}
+                {new Date(message.sent_date).toLocaleDateString()} at{' '}
+                {new Date(message.sent_date).toLocaleTimeString()}
               </div>
             </div>
+
+            <div className="flex flex-row md:flex-col gap-2 md:items-end">
+              {isUnread && (
+                <button
+                  onClick={() => handleMarkAsRead(message.id)}
+                  disabled={busyId === message.id}
+                  className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                >
+                  {busyId === message.id ? 'Working...' : 'Mark as read'}
+                </button>
+              )}
+              <button
+                onClick={() => handleDelete(message.id)}
+                disabled={busyId === message.id}
+                className="px-4 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-60"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

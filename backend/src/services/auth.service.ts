@@ -4,7 +4,7 @@ import prisma from '../prisma';
 import { users } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
-const TOKEN_EXPIRES_IN = '1h';
+const TOKEN_EXPIRES_IN = '7d';
 
 export async function registerUser(payload: { 
   username: string;
