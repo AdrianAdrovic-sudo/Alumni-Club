@@ -1,24 +1,35 @@
-import { FaSearch } from "react-icons/fa"; 
+import { useEffect, useState } from "react";
+import { FaSearch } from "react-icons/fa";
 import "../css/Theses.css";
-import { useState } from 'react';
+
+interface DiplomskiRad {
+  ime: string;
+  prezime: string;
+  naziv: string;
+  datum: string;
+  pdfUrl?: string; // opcionalno, ako postoji PDF verzija
+}
 
 export default function DiplomskiRadovi() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [radovi, setRadovi] = useState<DiplomskiRad[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const podaci = [
-    {ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009." },
-    {ime: "Tripo", prezime: "Matijević", naziv: "Prikupljanje činjenica za informacioni sistem studentske službe", datum: "10.07.2009." },
-    {ime: "Zoran", prezime: "Ćorović", naziv: "Model, objekti i veze informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Dženan", prezime: "Strujić", naziv: "Relacioni model informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Novak", prezime: "Radulović", naziv: "Forme i izvještaj informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Igor", prezime: "Pekić", naziv: "Sigurnost informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Ana", prezime: "Jovanović", naziv: "Web aplikacija za studentsku službu", datum: "10.07.2009." },
-    {ime: "Jelena", prezime: "Marković", naziv: "Implementacija informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Marko", prezime: "Nikolić", naziv: "Testiranje informacionog sistema studentske službe", datum: "10.07.2009." },
-    {ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2009." },
-  ];
+  useEffect(() => {
+    // Zamijeni URL sa svojim endpointom za diplomce
+    fetch("/api/diplomski-radovi") 
+      .then((res) => res.json())
+      .then((data: DiplomskiRad[]) => {
+        setRadovi(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Greška pri učitavanju diplomskih radova:", err);
+        setLoading(false);
+      });
+  }, []);
 
-  const filtrirani = podaci.filter(
+  const filtrirani = radovi.filter(
     (p) =>
       p.ime.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.prezime.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -27,38 +38,58 @@ export default function DiplomskiRadovi() {
 
   return (
     <div className="theses-container">
-        <div className="theses-hero">
-        <h1 >Diplomski radovi </h1>
-            <p>
-                Pregledajte bazu diplomskih radova naših studenata. Koristite pretragu da biste brzo pronašli radove po imenu, prezimenu ili nazivu rada.
-            </p><br></br>
-        </div>
-     
+      <div className="theses-hero">
+        <h1>Diplomski radovi</h1>
+        <p>
+          Pregledajte bazu diplomskih radova naših studenata. Koristite pretragu da biste brzo pronašli radove po imenu, prezimenu ili nazivu rada.
+        </p>
+      </div>
 
       <div className="search-container">
-        <input type="text" placeholder="Pretraga..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
+        <input
+          type="text"
+          placeholder="Pretraga..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
-      <div className="table-wrapper">
-      <table>
-          <tr>
-            <th>Ime</th>
-            <th>Prezime</th>
-            <th>Naziv diplomskog rada</th>
-            <th>Datum diplomiranja</th>
-          </tr>
-        <tbody>
-          {filtrirani.map((p) => (
-            <tr>
-              <td>{p.ime}</td>
-              <td>{p.prezime}</td>
-              <td>{p.naziv}</td>
-              <td>{p.datum}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      </div>
+      {loading ? (
+        <p className="text-center mt-6">Učitavanje...</p>
+      ) : (
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Ime</th>
+                <th>Prezime</th>
+                <th>Naziv diplomskog rada</th>
+                <th>Datum diplomiranja</th>
+                <th>PDF</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtrirani.map((p, i) => (
+                <tr key={i}>
+                  <td>{p.ime}</td>
+                  <td>{p.prezime}</td>
+                  <td>{p.naziv}</td>
+                  <td>{p.datum}</td>
+                  <td>
+                    {p.pdfUrl ? (
+                      <a href={p.pdfUrl} target="_blank" rel="noopener noreferrer">
+                        Pogledaj PDF
+                      </a>
+                    ) : (
+                      "Nema"
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

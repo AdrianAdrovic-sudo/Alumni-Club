@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Camera, Save, Eye, EyeOff, Upload, X } from 'lucide-react';
 
-export default function MojProfil() {
+export default function MyProfile() {
   const [profileData, setProfileData] = useState({
     ime: '',
     prezime: '',
@@ -55,7 +55,7 @@ export default function MojProfil() {
   };
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
+  const years = Array.from({ length: 17 }, (_, i) => currentYear - i);
 
   return (
     <div className="w-full min-h-screen bg-white">

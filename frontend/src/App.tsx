@@ -14,7 +14,7 @@ import Messages from './components/messages/Messages';
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import PublicRoute from "./components/common/PublicRoute";
 import AdminRoute from "./components/common/AdminRoute";
-import MyProfile from "./pages/MyProfile.js"
+import MyProfile from "./pages/MyProfile.tsx"  
 
 export default function App() {
   return (
@@ -43,6 +43,7 @@ export default function App() {
             <Route path="/Theses" element={<Theses />} />
             <Route path="/MyProfile" element={<MyProfile />} />
             <Route path="/messages" element={<Messages />} />
+
 
             <Route
               path="/Dashboard"
