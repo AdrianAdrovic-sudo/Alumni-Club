@@ -1,8 +1,10 @@
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaFilter } from "react-icons/fa";
 import { useState } from "react";
 
 export default function DiplomskiRadovi() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("datum-desc");
+  const [showFilter, setShowFilter] = useState(false);
 
   const podaci = [
     { ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009." },
@@ -17,12 +19,31 @@ export default function DiplomskiRadovi() {
     { ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2009." },
   ];
 
+  // Filtriranje
   const filtrirani = podaci.filter(
     (p) =>
       p.ime.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.prezime.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.naziv.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Sortiranje
+  const sortirani = [...filtrirani].sort((a, b) => {
+    switch (sortBy) {
+      case "datum-asc":
+        return new Date(a.datum.split('.').reverse().join('-')) - new Date(b.datum.split('.').reverse().join('-'));
+      case "datum-desc":
+        return new Date(b.datum.split('.').reverse().join('-')) - new Date(a.datum.split('.').reverse().join('-'));
+      case "ime-asc":
+        return a.ime.localeCompare(b.ime);
+      case "prezime-asc":
+        return a.prezime.localeCompare(b.prezime);
+      case "naziv-asc":
+        return a.naziv.localeCompare(b.naziv);
+      default:
+        return 0;
+    }
+  });
 
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
@@ -38,12 +59,56 @@ export default function DiplomskiRadovi() {
         </p>
       </div>
 
-      {/* SEARCH */}
-      <div className="w-full flex justify-end px-4 md:px-16 mt-8">
+      {/* SEARCH & FILTER */}
+      <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 px-4 md:px-16 mt-8">
+        {/* Filter Button */}
+        <div className="relative">
+          <button
+            onClick={() => setShowFilter(!showFilter)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors"
+          >
+            <FaFilter />
+            <span>Sortiraj</span>
+          </button>
+
+          {showFilter && (
+            <div className="absolute top-full left-0 mt-2 w-56 bg-[#294a70] rounded-lg shadow-xl overflow-hidden z-10">
+              <button
+                onClick={() => { setSortBy("datum-desc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "datum-desc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+               Datum (najnoviji prvo)
+              </button>
+              <button
+                onClick={() => { setSortBy("datum-asc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "datum-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+              Datum (najstariji prvo)
+              </button>
+              <button
+                onClick={() => { setSortBy("ime-asc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "ime-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+              Ime (A-Z)
+              </button>
+              <button
+                onClick={() => { setSortBy("prezime-asc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "prezime-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+              Prezime (A-Z)
+              </button>
+              <button
+                onClick={() => { setSortBy("naziv-asc"); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "naziv-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+              >
+                Naziv rada (A-Z)
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="flex items-center w-full sm:w-96">
-          <div className="flex items-center justify-center px-3 py-2 bg-white border border-r-0 border-gray-300 rounded-l-md">
-            <FaSearch className="text-gray-500" />
-          </div>
+         
           <input
             type="text"
             placeholder="Pretraga..."
@@ -54,7 +119,6 @@ export default function DiplomskiRadovi() {
         </div>
       </div>
 
-      {/* TABLE */}
       <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8">
         <div className="w-full max-w-6xl shadow-md rounded-2xl overflow-hidden bg-white">
           <div className="w-full overflow-x-auto">
@@ -76,7 +140,7 @@ export default function DiplomskiRadovi() {
                 </tr>
               </thead>
               <tbody>
-                {filtrirani.map((p, idx) => (
+                {sortirani.map((p, idx) => (
                   <tr
                     key={idx}
                     className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
