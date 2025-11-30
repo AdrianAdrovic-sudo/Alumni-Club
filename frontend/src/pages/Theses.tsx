@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
 import { FaSearch, FaFilter } from "react-icons/fa";
-=======
-import { FaSearch } from "react-icons/fa";
->>>>>>> Stashed changes
 import { useState } from "react";
 
 export default function DiplomskiRadovi() {
@@ -31,7 +27,6 @@ export default function DiplomskiRadovi() {
       p.naziv.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-<<<<<<< Updated upstream
   // Sortiranje
   const sortirani = [...filtrirani].sort((a, b) => {
     switch (sortBy) {
@@ -50,8 +45,6 @@ export default function DiplomskiRadovi() {
     }
   });
 
-=======
->>>>>>> Stashed changes
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
       {/* HERO */}
@@ -66,7 +59,6 @@ export default function DiplomskiRadovi() {
         </p>
       </div>
 
-<<<<<<< Updated upstream
       {/* SEARCH & FILTER */}
       <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 px-4 md:px-16 mt-8">
         {/* Filter Button */}
@@ -117,14 +109,6 @@ export default function DiplomskiRadovi() {
 
         <div className="flex items-center w-full sm:w-96">
          
-=======
-      {/* SEARCH */}
-      <div className="w-full flex justify-end px-4 md:px-16 mt-8">
-        <div className="flex items-center w-full sm:w-96">
-          <div className="flex items-center justify-center px-3 py-2 bg-white border border-r-0 border-gray-300 rounded-l-md">
-            <FaSearch className="text-gray-500" />
-          </div>
->>>>>>> Stashed changes
           <input
             type="text"
             placeholder="Pretraga..."
@@ -135,10 +119,6 @@ export default function DiplomskiRadovi() {
         </div>
       </div>
 
-<<<<<<< Updated upstream
-=======
-      {/* TABLE */}
->>>>>>> Stashed changes
       <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8">
         <div className="w-full max-w-6xl shadow-md rounded-2xl overflow-hidden bg-white">
           <div className="w-full overflow-x-auto">
@@ -160,11 +140,7 @@ export default function DiplomskiRadovi() {
                 </tr>
               </thead>
               <tbody>
-<<<<<<< Updated upstream
                 {sortirani.map((p, idx) => (
-=======
-                {filtrirani.map((p, idx) => (
->>>>>>> Stashed changes
                   <tr
                     key={idx}
                     className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
