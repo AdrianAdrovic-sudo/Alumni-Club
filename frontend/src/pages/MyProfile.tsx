@@ -46,13 +46,32 @@ export default function MyProfile() {
     setCvFile(null);
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append('ime', profileData.ime);
+  formData.append('prezime', profileData.prezime);
+  formData.append('godinaZavrsetka', profileData.godinaZavrsetka);
+  formData.append('mjestoRada', profileData.mjestoRada);
+  formData.append('firma', profileData.firma);
+  formData.append('javniProfil', String(profileData.javniProfil));
+
+  if (cvFile) {
+    formData.append('cv', cvFile);
+  }
+
+  const response = await fetch('/api/profile', {
+    method: 'POST',
+    body: formData
+  });
+
+  if (response.ok) {
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
-    console.log('Podaci profila:', profileData);
-    console.log('CV file:', cvFile);
-  };
+  }
+};
+
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 17 }, (_, i) => currentYear - i);
