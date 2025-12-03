@@ -1,11 +1,36 @@
 import React, { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { Camera, Save, Eye, EyeOff, Upload, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  Camera,
+  Save,
+  Eye,
+  EyeOff,
+  Upload,
+  X,
+  Mail,
+  Briefcase,
+  User,
+  FileText,
+} from "lucide-react";
+
+type ProfileData = {
+  ime: string;
+  prezime: string;
+  email: string;
+  godinaZavrsetka: string;
+  mjestoRada: string;
+  firma: string;
+  javniProfil: boolean;
+};
 
 export default function MyProfile() {
-  const [profileData, setProfileData] = useState({
+  const navigate = useNavigate();
+
+  const [profileData, setProfileData] = useState<ProfileData>({
     ime: "",
     prezime: "",
+    email: "",
     godinaZavrsetka: "",
     mjestoRada: "",
     firma: "",
@@ -50,17 +75,17 @@ export default function MyProfile() {
   const removeCv = () => {
     setCvFile(null);
   };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        console.error("Nema tokena – korisnik vjerovatno nije ulogovan.");
+        console.error("Nema tokena - korisnik vjerovatno nije ulogovan.");
         return;
       }
 
-      // 1) TEKSTUALNI PODACI → PUT /api/profile (JSON)
       const podaciProfila = {
         ime: profileData.ime,
         prezime: profileData.prezime,
@@ -93,7 +118,7 @@ export default function MyProfile() {
       const updated = await respProfil.json();
       console.log("Ažuriran profil sa backend-a:", updated);
 
-      // 2) CV FAJL → POST /api/users/me/cv (multipart/form-data)
+      // CV upload
       if (cvFile) {
         const cvFormData = new FormData();
         cvFormData.append("cv", cvFile);
@@ -118,7 +143,7 @@ export default function MyProfile() {
         }
       }
 
-      // 3) PROFILNA SLIKA → POST /api/users/me/avatar (multipart/form-data)
+      // Avatar upload
       if (avatarFile) {
         const avatarData = new FormData();
         avatarData.append("avatar", avatarFile);
@@ -158,7 +183,7 @@ export default function MyProfile() {
 
   return (
     <div className="w-full min-h-screen bg-white">
-      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white py-20 px-5 text-center">
+      <div className="bg-linear-to-r from-[#294a70] to-[#324D6B] text-white py-20 px-5 text-center">
         <h1 className="text-5xl mb-4 font-bold">Moj Profil</h1>
         <p className="text-xl opacity-90">Pregled svog alumni profila</p>
       </div>
@@ -166,9 +191,10 @@ export default function MyProfile() {
       <div className="max-w-4xl mx-auto py-16 px-5">
         <form
           onSubmit={handleSubmit}
-          className="bg-[#f9f9f9] p-10 rounded-2xl shadow-lg"
+          className="bg-[#f9f9f9] p-10 rounded-2xl shadow-lg space-y-8"
         >
-          <div className="flex flex-col items-center mb-10">
+          {/* Avatar */}
+          <div className="flex flex-col items-center">
             <div className="relative">
               <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-300 border-4 border-white shadow-xl">
                 {profilnaSlika ? (
@@ -178,7 +204,7 @@ export default function MyProfile() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#294a70] to-[#324D6B]">
+                  <div className="w-full h-full flex items-center justify-center bg-linear-to-r from-[#294a70] to-[#324D6B]">
                     <Camera className="w-16 h-16 text-white" />
                   </div>
                 )}
@@ -198,26 +224,15 @@ export default function MyProfile() {
             </p>
           </div>
 
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-white">
-            {profileData.profilnaSlika ? (
-              <img
-                src={profileData.profilnaSlika}
-                className="w-full h-full object-cover"
-                alt="Profil"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
-                <User size={80} />
-              </div>
-            )}
+          {/* Ime + prezime */}
+          <div className="flex flex-col items-center">
+            <h2 className="text-3xl font-bold mt-4 text-[#294a70]">
+              {profileData.ime} {profileData.prezime}
+            </h2>
           </div>
-          <h2 className="text-3xl font-bold mt-4 text-[#294a70]">
-            {profileData.ime} {profileData.prezime}
-          </h2>
-        </div>
 
-          <div className="mb-6">
+          {/* Godina diplomiranja */}
+          <div>
             <label className="block text-base font-semibold text-black mb-2">
               Godina diplomiranja *
             </label>
@@ -239,9 +254,11 @@ export default function MyProfile() {
             </select>
           </div>
 
+          {/* Email */}
           <Item icon={<Mail />} label="Email" value={profileData.email} />
 
-          <div className="mb-6">
+          {/* CV upload */}
+          <div>
             <label className="block text-base font-semibold text-[#294a70] mb-2">
               CV (PDF)
             </label>
@@ -277,7 +294,8 @@ export default function MyProfile() {
             )}
           </div>
 
-          <div className="bg-white p-6 rounded-lg mb-6 border-2 border-gray-300">
+          {/* Vidljivost profila */}
+          <div className="bg-white p-6 rounded-lg border-2 border-gray-300">
             <div className="flex items-center justify-between mb-4">
               <span className="text-base font-semibold text-[#294a70]">
                 Vidljivost profila
@@ -325,36 +343,40 @@ export default function MyProfile() {
             </p>
           </div>
 
+          {/* Firma + vidljivost summary + CV info */}
+          <div className="space-y-4">
+            <Item icon={<Briefcase />} label="Firma" value={profileData.firma} />
+            <Item
+              icon={<User />}
+              label="Vidljivost profila"
+              value={profileData.javniProfil ? "Javan" : "Privatan"}
+            />
+            {cvFile && (
+              <Item icon={<FileText />} label="CV" value={cvFile.name} />
+            )}
+          </div>
+
+          {/* Save */}
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 py-3.5 px-8 bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white rounded-lg text-base font-semibold hover:from-[#ffab1f] hover:to-[#ff9500] transition-all hover:-translate-y-0.5 shadow-md hover:shadow-xl"
+            className="w-full flex items-center justify-center gap-2 py-3.5 px-8 bg-linear-to-r from-[#294a70] to-[#324D6B] text-white rounded-lg text-base font-semibold hover:from-[#ffab1f] hover:to-[#ff9500] transition-all hover:-translate-y-0.5 shadow-md hover:shadow-xl"
           >
             <Save className="w-5 h-5" />
             Sačuvaj promjene
           </button>
 
-          <Item icon={<Briefcase />} label="Firma" value={profileData.firma} />
-
-          <Item
-            icon={<User />}
-            label="Vidljivost profila"
-            value={profileData.javniProfil ? "Javan" : "Privatan"}
-          />
-
-          {profileData.cvFileName && (
-            <Item
-              icon={<FileText />}
-              label="CV"
-              value={profileData.cvFileName}
-            />
+          {saved && (
+            <p className="text-center text-sm text-green-600 mt-2">
+              Promjene sačuvane.
+            </p>
           )}
+        </form>
 
-        </div>
-
+        {/* Edit page button */}
         <button
+          type="button"
           onClick={() => navigate("/MyProfileEdit")}
-          className="mt-8 w-full py-4 bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white 
-          font-semibold rounded-xl shadow-md hover:from-[#ffab1f] hover:to-[#ff9500] transition-all"
+          className="mt-8 w-full py-4 bg-linear-to-r from-[#294a70] to-[#324D6B] text-white font-semibold rounded-xl shadow-md hover:from-[#ffab1f] hover:to-[#ff9500] transition-all"
         >
           Izmijenite profil
         </button>
@@ -363,13 +385,23 @@ export default function MyProfile() {
   );
 }
 
-function Item({ icon, label, value }: { icon: any; label: string; value: any }) {
+function Item({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
       <div className="text-[#ffab1f]">{icon}</div>
       <div>
         <p className="text-sm text-gray-500">{label}</p>
-        <p className="text-lg font-semibold text-[#294a70]">{value || "—"}</p>
+        <p className="text-lg font-semibold text-[#294a70]">
+          {value || "—"}
+        </p>
       </div>
     </div>
   );
