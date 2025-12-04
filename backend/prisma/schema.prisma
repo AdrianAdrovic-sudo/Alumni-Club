@@ -103,13 +103,19 @@ model users {
   email                                                String               @unique @db.VarChar(255)
   password_hash                                        String
   role                                                 String?              @default("user") @db.VarChar(20)
-  username String @unique @db.VarChar(30)
+  username                                             String               @unique @db.VarChar(30)
   profile_picture                                      String?
   enrollment_year                                      Int
   is_active                                            Boolean              @default(true)
   occupation                                           String?              @db.VarChar(255)
   created_at                                           DateTime?            @default(now()) @db.Timestamp(6)
   updated_at                                           DateTime?            @default(now()) @db.Timestamp(6)
+
+  //novo:
+  work_location                                        String?              @db.VarChar(255)
+  is_public                                            Boolean              @default(true)
+  cv_url                                               String?              @db.VarChar(255)
+
   comments                                             comments[]
   event_registration                                   event_registration[]
   events                                               events[]
