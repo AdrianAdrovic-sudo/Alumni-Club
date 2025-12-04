@@ -16,7 +16,9 @@ import PublicRoute from "./components/common/PublicRoute";
 import AdminRoute from "./components/common/AdminRoute";
 import MyProfile from "./pages/MyProfile.tsx";
 import MyProfileEdit from "./pages/MyProfileEdit.tsx";
-import ResetPassword from "./pages/ResetPassword.tsx";   // NEW
+import ResetPassword from "./pages/ResetPassword.tsx"; 
+import PublicProfile from "./pages/PublicProfile";
+  // NEW
 
 export default function App() {
   return (
@@ -56,6 +58,7 @@ export default function App() {
             <Route path="/MyProfile" element={<MyProfile />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/MyProfileEdit" element={<MyProfileEdit />} />
+            <Route path="/alumni/:id" element={<PublicProfile />} />
 
             <Route
               path="/Dashboard"
