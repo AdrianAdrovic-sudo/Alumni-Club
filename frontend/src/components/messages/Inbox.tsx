@@ -26,7 +26,7 @@ export default function Inbox({ messages, onRefresh, onDeleteLocal }: InboxProps
   if (messages.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">You have no messages in your inbox.</p>
+        <p className="text-gray-500">Nemate nijednu poruku u sandučetu.</p>
       </div>
     );
   }
@@ -44,15 +44,15 @@ export default function Inbox({ messages, onRefresh, onDeleteLocal }: InboxProps
       // If you still want to refresh from backend for new messages, keep this
       await onRefresh();
     } catch (err) {
-      console.error('Error marking as read (local):', err);
-      alert('Could not mark message as read.');
+      console.error('Greška pri označavanju kao pročitano (lokalno):', err);
+      alert('Nije bilo moguće označiti poruku kao pročitanu.');
     } finally {
       setBusyId(null);
     }
   };
 
   const handleDelete = (id: number) => {
-    if (!window.confirm('Delete this message from your inbox on your side')) return;
+    if (!window.confirm('Obrišite ovu poruku')) return;
     onDeleteLocal(id);
   };
 
@@ -86,7 +86,7 @@ export default function Inbox({ messages, onRefresh, onDeleteLocal }: InboxProps
               </div>
 
               <div className="text-xs text-gray-500 mb-1">
-                From{' '}
+                Poslato od{' '}
                 <span className="font-medium text-gray-700">
                   {message.sender_first_name} {message.sender_last_name}
                 </span>
@@ -97,7 +97,7 @@ export default function Inbox({ messages, onRefresh, onDeleteLocal }: InboxProps
               </p>
 
               <div className="text-xs text-gray-400">
-                Received on{' '}
+                Primljeno{' '}
                 {new Date(message.sent_date).toLocaleDateString()} at{' '}
                 {new Date(message.sent_date).toLocaleTimeString()}
               </div>
@@ -110,7 +110,7 @@ export default function Inbox({ messages, onRefresh, onDeleteLocal }: InboxProps
                   disabled={busyId === message.id}
                   className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
                 >
-                  {busyId === message.id ? 'Working...' : 'Mark as read'}
+                  {busyId === message.id ? 'Učitavanje...' : 'Označi kao pročitano'}
                 </button>
               )}
               <button

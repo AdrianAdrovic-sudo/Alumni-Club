@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BiLogoDribbble, BiLogoLinkedinSquare } from "react-icons/bi";
 import { FaXTwitter } from "react-icons/fa6";
-import api from "../services/api"; // adjust path if needed
+import api from "../services/api"; // prilagoditi putanju po potrebi
 
 type ImageProps = {
   src: string;
@@ -130,17 +130,15 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // simple check: if token exists, user is logged in
   const isLoggedIn = Boolean(localStorage.getItem("token"));
-
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!formData.name.trim()) newErrors.name = "Ime i prezime je obavezno";
+    if (!formData.email.trim()) newErrors.email = "Email je obavezan";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = "Invalid email";
-    if (!formData.message.trim()) newErrors.message = "Message is required";
+      newErrors.email = "Nevažeći email";
+    if (!formData.message.trim()) newErrors.message = "Poruka je obavezna";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -163,10 +161,12 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
       setSubmitSuccess(true);
       setFormData({ name: "", email: "", message: "" });
       setIsModalOpen(false);
-      alert("Application sent successfully.");
+      alert("Prijava je uspješno poslata.");
     } catch (error) {
-      console.error("Enroll submit error:", error);
-      setSubmitError("Došlo je do greške pri slanju prijave. Pokušajte ponovo.");
+      console.error("Greška pri slanju prijave:", error);
+      setSubmitError(
+        "Došlo je do greške pri slanju prijave. Pokušajte ponovo."
+      );
     } finally {
       setLoading(false);
     }
@@ -198,7 +198,6 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
             ))}
           </div>
 
-          {/* Enroll CTA visible only when NOT logged in */}
           {!isLoggedIn && (
             <div className="mx-auto mt-14 w-full max-w-md text-center md:mt-20 lg:mt-24">
               <h4 className="mb-3 text-2xl font-bold md:mb-4 md:text-3xl md:leading-[1.3] lg:text-4xl">
@@ -218,21 +217,18 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
         </div>
       </section>
 
-      {/* Modal */}
       {isModalOpen && (
         <>
-          {/* Backdrop */}
           <div
             className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setIsModalOpen(false)}
             aria-hidden="true"
           />
-          {/* Modal Content */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200">
               <div className="p-6">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                  Join Alumni Club
+                  Pridružite se Alumni Klubu
                 </h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
@@ -240,7 +236,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       htmlFor="name"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      Full Name *
+                      Ime i prezime *
                     </label>
                     <input
                       id="name"
@@ -254,9 +250,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       required
                     />
                     {errors.name && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.name}
-                      </p>
+                      <p className="mt-1 text-sm text-red-600">{errors.name}</p>
                     )}
                   </div>
 
@@ -279,9 +273,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       required
                     />
                     {errors.email && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.email}
-                      </p>
+                      <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                     )}
                   </div>
 
@@ -290,7 +282,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       htmlFor="message"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      Message *
+                      Poruka *
                     </label>
                     <textarea
                       id="message"
@@ -304,9 +296,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       required
                     />
                     {errors.message && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.message}
-                      </p>
+                      <p className="mt-1 text-sm text-red-600">{errors.message}</p>
                     )}
                   </div>
 
@@ -327,7 +317,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       onClick={() => setIsModalOpen(false)}
                       className="flex-1"
                     >
-                      Cancel
+                      Otkaži
                     </Button>
                     <Button
                       type="submit"
@@ -335,7 +325,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       size="lg"
                       className="flex-1"
                     >
-                      {loading ? "Slanje..." : "Submit Application"}
+                      {loading ? "Slanje..." : "Pošaljite prijavu"}
                     </Button>
                   </div>
                 </form>
@@ -350,16 +340,16 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
 
 export const AlumniDirectoryDefaults: Props = {
   tagline: "Mediteran FIT",
-  heading: "Alumni Club",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  heading: "Alumni Klub",
+  description: "Dobrodošli u naš alumni klub. Povezujemo bivše studente i pratimo njihove uspjehe.",
   alumniMembers: [
     {
       image: {
         src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder image 1",
+        alt: "Slika člana alumni kluba",
       },
-      name: "Full name",
-      jobTitle: "Job title",
+      name: "Puno ime",
+      jobTitle: "Pozicija",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
       socialLinks: [
@@ -368,17 +358,13 @@ export const AlumniDirectoryDefaults: Props = {
         { href: "#", icon: <BiLogoDribbble className="size-6" /> },
       ],
     },
-    // keep your other dummy alumni entries here
+    // dodati ostale dummy alumni članove ako je potrebno
   ],
   footer: {
-    heading: "Join our Alumni Club!",
-    description: "Posaljite prijavu.",
-    button: { title: "Enroll", variant: "secondary", size: "md" },
+    heading: "Pridružite se Alumni Klubu!",
+    description: "Pošaljite prijavu i budite dio naše mreže bivših studenata.",
+    button: { title: "Prijavite se", variant: "secondary", size: "md" },
   },
-
-  
-
-}
+};
 
 export default AlumniDirectory;
-

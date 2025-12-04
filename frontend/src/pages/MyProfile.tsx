@@ -1,15 +1,21 @@
 import React, { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { Camera, Save, Eye, EyeOff, Upload, X } from "lucide-react";
+import { Camera, Save, Eye, EyeOff, Upload, X, Mail, User, Briefcase, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function MyProfile() {
+  const navigate = useNavigate();
+
   const [profileData, setProfileData] = useState({
     ime: "",
     prezime: "",
     godinaZavrsetka: "",
     mjestoRada: "",
     firma: "",
+    email: "",
     javniProfil: true,
+    cvFileName: "",
+    profilnaSlika: "",
   });
 
   const [profilnaSlika, setProfilnaSlika] = useState<string | null>(null);
@@ -44,12 +50,15 @@ export default function MyProfile() {
     const file = e.target.files?.[0];
     if (file) {
       setCvFile(file);
+      setProfileData((prev) => ({ ...prev, cvFileName: file.name }));
     }
   };
 
   const removeCv = () => {
     setCvFile(null);
+    setProfileData((prev) => ({ ...prev, cvFileName: "" }));
   };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -60,7 +69,6 @@ export default function MyProfile() {
         return;
       }
 
-      // 1) TEKSTUALNI PODACI → PUT /api/profile (JSON)
       const podaciProfila = {
         ime: profileData.ime,
         prezime: profileData.prezime,
@@ -93,7 +101,6 @@ export default function MyProfile() {
       const updated = await respProfil.json();
       console.log("Ažuriran profil sa backend-a:", updated);
 
-      // 2) CV FAJL → POST /api/users/me/cv (multipart/form-data)
       if (cvFile) {
         const cvFormData = new FormData();
         cvFormData.append("cv", cvFile);
@@ -118,7 +125,6 @@ export default function MyProfile() {
         }
       }
 
-      // 3) PROFILNA SLIKA → POST /api/users/me/avatar (multipart/form-data)
       if (avatarFile) {
         const avatarData = new FormData();
         avatarData.append("avatar", avatarFile);
@@ -166,8 +172,9 @@ export default function MyProfile() {
       <div className="max-w-4xl mx-auto py-16 px-5">
         <form
           onSubmit={handleSubmit}
-          className="bg-[#f9f9f9] p-10 rounded-2xl shadow-lg"
+          className="bg-[#f9f9f9] p-10 rounded-2xl shadow-lg flex flex-col gap-6"
         >
+          {/* Profilna slika */}
           <div className="flex flex-col items-center mb-10">
             <div className="relative">
               <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-300 border-4 border-white shadow-xl">
@@ -198,25 +205,7 @@ export default function MyProfile() {
             </p>
           </div>
 
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-white">
-            {profileData.profilnaSlika ? (
-              <img
-                src={profileData.profilnaSlika}
-                className="w-full h-full object-cover"
-                alt="Profil"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
-                <User size={80} />
-              </div>
-            )}
-          </div>
-          <h2 className="text-3xl font-bold mt-4 text-[#294a70]">
-            {profileData.ime} {profileData.prezime}
-          </h2>
-        </div>
-
+          {/* Godina diplomiranja */}
           <div className="mb-6">
             <label className="block text-base font-semibold text-black mb-2">
               Godina diplomiranja *
@@ -240,7 +229,9 @@ export default function MyProfile() {
           </div>
 
           <Item icon={<Mail />} label="Email" value={profileData.email} />
+          <Item icon={<Briefcase />} label="Firma" value={profileData.firma} />
 
+          {/* CV upload */}
           <div className="mb-6">
             <label className="block text-base font-semibold text-[#294a70] mb-2">
               CV (PDF)
@@ -277,6 +268,7 @@ export default function MyProfile() {
             )}
           </div>
 
+          {/* Vidljivost profila */}
           <div className="bg-white p-6 rounded-lg mb-6 border-2 border-gray-300">
             <div className="flex items-center justify-between mb-4">
               <span className="text-base font-semibold text-[#294a70]">
@@ -325,6 +317,7 @@ export default function MyProfile() {
             </p>
           </div>
 
+          {/* Submit dugme */}
           <button
             type="submit"
             className="w-full flex items-center justify-center gap-2 py-3.5 px-8 bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white rounded-lg text-base font-semibold hover:from-[#ffab1f] hover:to-[#ff9500] transition-all hover:-translate-y-0.5 shadow-md hover:shadow-xl"
@@ -332,25 +325,9 @@ export default function MyProfile() {
             <Save className="w-5 h-5" />
             Sačuvaj promjene
           </button>
+        </form>
 
-          <Item icon={<Briefcase />} label="Firma" value={profileData.firma} />
-
-          <Item
-            icon={<User />}
-            label="Vidljivost profila"
-            value={profileData.javniProfil ? "Javan" : "Privatan"}
-          />
-
-          {profileData.cvFileName && (
-            <Item
-              icon={<FileText />}
-              label="CV"
-              value={profileData.cvFileName}
-            />
-          )}
-
-        </div>
-
+        {/* Navigaciono dugme van forme */}
         <button
           onClick={() => navigate("/MyProfileEdit")}
           className="mt-8 w-full py-4 bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white 
