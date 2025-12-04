@@ -46,7 +46,7 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
     e.preventDefault();
     
     if (!receiverUsername.trim() || !subject.trim() || !content.trim()) {
-      setError('Please fill in all fields');
+      setError('Morate popuniti sva obavezna polja.');
       return;
     }
 
@@ -68,10 +68,10 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
       
       onMessageSent();
     } catch (error: any) {
-      console.error('Error sending message:', error);
+      console.error('Greška pri slanju poruke:', error);
       setError(
         error.response?.data?.message ||
-        'Error sending message. Please check the username and try again.'
+        'Greška pri slanju poruke. Provjerite korisničko ime i pokušajte ponovo.'
       );
     } finally {
       setSending(false);
@@ -85,8 +85,8 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
 
   return (
     <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm">
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Compose New Message</h2>
-      <p className="text-gray-600 mb-6">Send a message to another alumni member</p>
+      <h2 className="text-2xl font-bold text-gray-800 mb-2">Započni novu prepisku</h2>
+      <p className="text-gray-600 mb-6">Započnite prepisku sa drugim alumni članom</p>
       
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -102,7 +102,7 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            To (Username) *
+              Korisničko ime primaoca *
           </label>
           <div className="relative">
             <input
@@ -113,7 +113,7 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
                 setShowSuggestions(true);
               }}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-              placeholder="Start typing username or name"
+              placeholder="Unesite ime ili korisničko ime primaoca"
               required
               autoComplete="off"
             />
@@ -130,7 +130,7 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
                 )}
                 {!searching && suggestions.length === 0 && receiverUsername.trim().length >= 2 && (
                   <div className="px-4 py-2 text-xs text-gray-400">
-                    No users found.
+                    Korisnik nije pronađen.
                   </div>
                 )}
                 {suggestions.map((user) => (
@@ -150,34 +150,34 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
             )}
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            Start typing username, first name or last name and pick from the list.
+            Na osnovu korisničkog imena, imena ili prezimena izaberite primaoca iz liste.
           </p>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Subject *
+            Tema *
           </label>
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-            placeholder="What is this message about?"
+            placeholder="O čemu se radi u ovoj prepisci?"
             required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Message *
+            Poruka *
           </label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={8}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-none"
-            placeholder="Write your message here..."
+            placeholder="Napišite svoju poruku ovdje..."
             required
           />
         </div>
@@ -188,7 +188,7 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
             onClick={onCancel}
             className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition duration-200"
           >
-            Cancel
+            Poništi
           </button>
           <button
             type="submit"
@@ -201,10 +201,10 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Sending...
+                Slanje...
               </div>
             ) : (
-              'Send Message'
+              'Pošalji poruku'
             )}
           </button>
         </div>
