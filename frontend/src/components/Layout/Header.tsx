@@ -11,148 +11,192 @@ function Header() {
   function handleLogout() {
     logout();
     navigate("/");
+    setOpen(false);
   }
 
   const isAdmin = user?.role === "admin";
   const isRegularUser = user?.role === "user";
 
+  const navLink =
+    "relative text-[#294a70] transition-all duration-300 hover:text-[#1d3652] hover:-translate-y-[2px] " +
+    "after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-[#294a70] " +
+    "after:transition-all after:duration-300 hover:after:w-full";
+
+  const buttonStyle =
+    "px-3 py-1.5 border-2 border-[#294a70] rounded-full text-[#294a70] hover:bg-[#eef2ff] text-sm transition-colors whitespace-nowrap";
+
+  const authButton =
+    "px-4 py-2 rounded-full bg-[#294a70] text-white font-medium hover:bg-[#1d3652] transition text-sm";
+
   return (
     <header className="bg-white shadow-lg border-b-[3px] border-[#ffab1f] fixed top-0 w-full z-50">
-      <div className="w-full px-5 py-4 flex items-center justify-between md:justify-between">
-
-        {/* LOGO */}
-        <div className="flex-shrink-0">
-          <a href="/Home">
-            <img
-              src="/src/assets/akfit.png"
-              alt="Logo"
-              className="h-10 w-auto"
-            />
-          </a>
-        </div>
-
-        {/* DESKTOP NAV */}
-        <nav className="hidden md:flex gap-8 text-gray-600 font-medium">
-          <Link className="hover:text-[#294a70] hover:font-semibold" to="/Blog">Blog</Link>
-          <Link className="hover:text-[#294a70] hover:font-semibold" to="/AlumniDirectory">Alumnisti</Link>
-          <Link className="hover:text-[#294a70] hover:font-semibold" to="/AboutUs">O nama</Link>
-          <Link className="hover:text-[#294a70] hover:font-semibold" to="/Contact">Kontakt</Link>
-          <Link className="hover:text-[#294a70] hover:font-semibold" to="/Theses">Diplomski radovi</Link>
-        </nav>
-
-        {/* USER / LOGIN */}
-        <div className="hidden md:flex items-center gap-4 relative">
-          {user ? (
-            <div className="flex items-center gap-4">
-              <span className="text-[#294a70] font-medium">
-                Dobrodošao/la, {user.username}!
-              </span>
-
-              {/* Inbox */}
-              <Link to="/messages" className="messages-btn">
-                Inbox
-              </Link>
-
-              {/* MyProfile samo za običnog usera */}
-              {
-                isRegularUser && (
-                  <Link to="/MyProfile" className="profile-btn">
-                    <button className="dashboard-btn">MyProfile</button>
-                  </Link>
-                )
-              }
-
-              {/* Admin Dashboard */}
-              {
-                isAdmin && (
-                  <Link to="/Dashboard">
-                    <button className="px-4 py-2 border-2 border-[#294a70] text-[#294a70] rounded-full hover:bg-[#eef2ff]">
-                      Dashboard
-                    </button>
-                  </Link>
-                )
-              }
-
-              <button className="signup-btn" onClick={handleLogout}>
-                Odjavi se
-              </button>
-            </div>
-          ) : (
-            <Link to="/login">
-              <button className="px-4 py-2 border-2 border-[#294a70] text-[#294a70] rounded-full hover:bg-[#eef2ff]">
-                Prijavi se
-              </button>
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+        <div className="flex items-center justify-between gap-4">
+          
+          {/* LOGO */}
+          <div className="flex-shrink-0">
+            <Link to="/Home">
+              <img 
+                src="/src/assets/akfit.png" 
+                alt="Logo" 
+                className="h-12 sm:h-14 lg:h-16 w-auto" 
+              />
             </Link>
-          )
-          }
-        </div >
+          </div>
 
-        {/* MOBILE MENU BUTTON */}
-        < button
-          onClick={() => setOpen(!open)}
-          className="md:hidden text-[#294a70] ml-auto"
-        >
-          {open ? <X size={28} /> : <Menu size={28} />}
-        </button >
-      </div >
+          {/* DESKTOP NAV - Hidden on mobile/tablet */}
+          <nav className="hidden lg:flex gap-6 xl:gap-8 font-medium">
+            <Link className={navLink} to="/Blog">Blog</Link>
+            <Link className={navLink} to="/AlumniDirectory">Alumnisti</Link>
+            <Link className={navLink} to="/AboutUs">O nama</Link>
+            <Link className={navLink} to="/Contact">Kontakt</Link>
+            <Link className={navLink} to="/Theses">Diplomski radovi</Link>
+          </nav>
 
-      {/* MOBILE DROPDOWN */}
-      {
-        open && (
-          <div className="md:hidden bg-white shadow-xl border-t border-gray-200 animate-slideDown">
-            <nav className="flex flex-col p-4 text-gray-600 font-medium gap-3">
-              <Link onClick={() => setOpen(false)} className="py-2" to="/Blog">Blog</Link>
-              <Link onClick={() => setOpen(false)} className="py-2" to="/AlumniDirectory">Alumnisti</Link>
-              <Link onClick={() => setOpen(false)} className="py-2" to="/AboutUs">O nama</Link>
-              <Link onClick={() => setOpen(false)} className="py-2" to="/Contact">Kontakt</Link>
-              <Link onClick={() => setOpen(false)} className="py-2" to="/Theses">Diplomski radovi</Link>
+          {/* DESKTOP USER SECTION - Hidden on mobile/tablet */}
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3 ml-auto text-[#294a70]">
+            {user ? (
+              <div className="flex items-center gap-2 xl:gap-3">
+                <span className="text-sm xl:text-base font-semibold whitespace-nowrap">
+                  Dobrodošao/la, <span className="font-bold">{user.username}</span>!
+                </span>
 
-              {/* AUTH MOBILE */}
-              <div className="mt-4 border-t pt-4">
-                {user ? (
-                  <div className="flex flex-col gap-3">
-                    <span className="text-[#294a70] font-medium">
+                <Link to="/messages" className={buttonStyle}>Inbox</Link>
+
+                {isRegularUser && (
+                  <Link to="/MyProfile" className={buttonStyle}>Profil</Link>
+                )}
+
+                {isAdmin && (
+                  <Link to="/Dashboard" className={buttonStyle}>Dashboard</Link>
+                )}
+
+                <span
+                  onClick={handleLogout}
+                  className={authButton + " cursor-pointer"}
+                >
+                  Odjavi se
+                </span>
+              </div>
+            ) : (
+              <Link to="/login" className={authButton}>
+                Prijavi se
+              </Link>
+            )}
+          </div>
+
+          {/* MOBILE/TABLET BUTTON */}
+          <button
+            onClick={() => setOpen(!open)}
+            className="lg:hidden text-[#294a70] ml-auto p-1.5 hover:bg-gray-100 rounded-lg transition"
+            aria-label="Toggle menu"
+          >
+            {open ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* MOBILE/TABLET MENU */}
+      {open && (
+        <div className="lg:hidden bg-white shadow-xl border-t border-gray-200 animate-slideDown">
+          <nav className="flex flex-col p-4 gap-2 text-[#294a70] font-medium max-h-[calc(100vh-80px)] overflow-y-auto">
+            
+            {/* Navigation Links */}
+            <Link 
+              onClick={() => setOpen(false)} 
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+              to="/Blog"
+            >
+              Blog
+            </Link>
+            <Link 
+              onClick={() => setOpen(false)} 
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+              to="/AlumniDirectory"
+            >
+              Alumnisti
+            </Link>
+            <Link 
+              onClick={() => setOpen(false)} 
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+              to="/AboutUs"
+            >
+              O nama
+            </Link>
+            <Link 
+              onClick={() => setOpen(false)} 
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+              to="/Contact"
+            >
+              Kontakt
+            </Link>
+            <Link 
+              onClick={() => setOpen(false)} 
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+              to="/Theses"
+            >
+              Diplomski radovi
+            </Link>
+
+            {/* User Section */}
+            <div className="mt-4 pt-4 border-t border-gray-200 flex flex-col gap-3">
+              {user ? (
+                <>
+                  <div className="px-2 py-2 bg-gray-50 rounded-lg">
+                    <span className="font-semibold text-base">
                       {user.username}
                     </span>
-
-                    <Link
-                      to="/messages"
-                      className="px-4 py-2 bg-blue-500 text-white rounded-md text-center hover:bg-blue-600"
-                    >
-                      Inbox
-                    </Link>
-
-                    {isAdmin && (
-                      <Link
-                        to="/Dashboard"
-                        className="px-4 py-2 border-2 border-[#294a70] text-[#294a70] rounded-full text-center hover:bg-[#eef2ff]"
-                      >
-                        Dashboard
-                      </Link>
-                    )}
-
-                    <button
-                      onClick={handleLogout}
-                      className="px-4 py-2 border-2 border-[#294a70] text-[#294a70] rounded-full hover:bg-[#eef2ff]"
-                    >
-                      Odjavi se
-                    </button>
                   </div>
-                ) : (
-                  <Link
-                    onClick={() => setOpen(false)}
-                    to="/login"
-                    className="px-4 py-2 border-2 border-[#294a70] text-[#294a70] rounded-full text-center hover:bg-[#eef2ff]"
+
+                  <Link 
+                    onClick={() => setOpen(false)} 
+                    to="/messages" 
+                    className="w-full text-center py-2.5 px-4 border-2 border-[#294a70] rounded-full hover:bg-[#eef2ff] transition"
                   >
-                    Prijavi se
+                    Inbox
                   </Link>
-                )}
-              </div>
-            </nav>
-          </div>
-        )
-      }
-    </header >
+
+                  {isRegularUser && (
+                    <Link 
+                      onClick={() => setOpen(false)} 
+                      to="/MyProfile" 
+                      className="w-full text-center py-2.5 px-4 border-2 border-[#294a70] rounded-full hover:bg-[#eef2ff] transition"
+                    >
+                      Moj Profil
+                    </Link>
+                  )}
+
+                  {isAdmin && (
+                    <Link 
+                      onClick={() => setOpen(false)} 
+                      to="/Dashboard" 
+                      className="w-full text-center py-2.5 px-4 border-2 border-[#294a70] rounded-full hover:bg-[#eef2ff] transition"
+                    >
+                      Dashboard
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full py-2.5 px-4 rounded-full bg-[#294a70] text-white font-medium hover:bg-[#1d3652] transition"
+                  >
+                    Odjavi se
+                  </button>
+                </>
+              ) : (
+                <Link
+                  onClick={() => setOpen(false)}
+                  to="/login"
+                  className="w-full text-center py-2.5 px-4 rounded-full bg-[#294a70] text-white font-medium hover:bg-[#1d3652] transition"
+                >
+                  Prijavi se
+                </Link>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
   );
 }
 

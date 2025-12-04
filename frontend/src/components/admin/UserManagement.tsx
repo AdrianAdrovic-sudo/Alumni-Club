@@ -84,8 +84,8 @@ export default function UserManagement() {
         pages: 0
       });
     } catch (error) {
-      console.error('Error loading users:', error);
-      alert('Error loading users. Please check the console for details.');
+      console.error('Greška prilikom učitavanja korisnika:', error);
+      alert('Neuspješno učitavanje korisnika. Provjerite konzolu..');
       setUsers([]);
     } finally {
       setLoading(false);
@@ -93,14 +93,14 @@ export default function UserManagement() {
   };
 
   const handleDeactivate = async (userId: number) => {
-    if (window.confirm('Are you sure you want to deactivate this user?')) {
+    if (window.confirm('Sigurno želite deaktivirati profil korisnika?')) {
       try {
         await AdminService.deactivateUser(userId);
         loadUsers();
-        alert('User deactivated successfully');
+        alert('Uspješno deaktiviran korisnik');
       } catch (error: any) {
-        console.error('Error deactivating user:', error);
-        alert(`Error deactivating user: ${error.response?.data?.message || error.message}`);
+        console.error('Neuspješno deaktiviranje:', error);
+        alert(`Neuspješno deaktiviranje korisnika: ${error.response?.data?.message || error.message}`);
       }
     }
   };
@@ -109,22 +109,22 @@ export default function UserManagement() {
     try {
       await AdminService.activateUser(userId);
       loadUsers();
-      alert('User activated successfully');
+      alert('Korisnik uspješno aktiviran');
     } catch (error: any) {
-      console.error('Error activating user:', error);
-      alert(`Error activating user: ${error.response?.data?.message || error.message}`);
+      console.error('Greška prilikom aktiviranja korisnika:', error);
+      alert(`Neuspješno aktiviranje korisnika: ${error.response?.data?.message || error.message}`);
     }
   };
 
   const handleDelete = async (userId: number) => {
-    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    if (window.confirm('Da li ste sigurni da želite obrisati korisika? Ovaj postupak se ne može povratiti.')) {
       try {
         await AdminService.deleteUser(userId);
         loadUsers();
-        alert('User deleted successfully');
+        alert('Korisnik uspješno obrisan');
       } catch (error: any) {
-        console.error('Error deleting user:', error);
-        alert(`Error deleting user: ${error.response?.data?.message || error.message}`);
+        console.error('Greška prilikom brisanja korisnika:', error);
+        alert(`Neuspješno brisanje korisnika: ${error.response?.data?.message || error.message}`);
       }
     }
   };
@@ -146,10 +146,10 @@ export default function UserManagement() {
         occupation: ''
       });
       loadUsers();
-      alert('User created successfully');
+      alert('Korisinik uspješno kreiran');
     } catch (error: any) {
-      console.error('Error creating user:', error);
-      alert(`Error creating user: ${error.response?.data?.message || error.message}`);
+      console.error('Greška prilikom kreiranja korinsika:', error);
+      alert(`Neuspješno kreiranje korisnika: ${error.response?.data?.message || error.message}`);
     } finally {
       setCreateLoading(false);
     }
@@ -160,14 +160,14 @@ export default function UserManagement() {
   try {
     setBulkImportLoading(true);
     
-    console.log('Raw CSV data:', csvData);
+    console.log('Neobrađeni CSV podaci:', csvData);
     
     // Parse CSV data
     const rows = csvData.split('\n').filter(row => row.trim());
-    console.log('Rows found:', rows.length);
+    console.log('Rezultati pretrage:', rows.length);
     
     if (rows.length < 2) {
-      alert('No data found in CSV. Please check the format.');
+      alert('CSV fajl ne sadrži podatke. Proverite ispravnost formata.');
       return;
     }
 
@@ -175,7 +175,7 @@ export default function UserManagement() {
     const headers = rows[0].split(',').map(header => 
       header.trim().replace(/"/g, '').toLowerCase()
     );
-    console.log('CSV Headers:', headers);
+    console.log('CSV zaglavlja:', headers);
 
     // Get existing usernames for collision checking
     const existingUsernames = users.map(user => user.username);
@@ -183,10 +183,10 @@ export default function UserManagement() {
     
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i].split(',').map(field => field.trim().replace(/"/g, ''));
-      console.log(`Processing row ${i}:`, row);
+      console.log(`Obrada reda ${i}:`, row);
       
       if (row.length < 3) {
-        console.warn(`Skipping row ${i} - not enough columns`);
+        console.warn(`Preskakanje reda ${i} - not enough columns`);
         continue;
       }
 
@@ -196,7 +196,7 @@ export default function UserManagement() {
         userData[header] = row[index];
       });
 
-      console.log('Parsed user data:', userData);
+      console.log('Obrađeni podaci o korisnicima:', userData);
 
       // Map CSV columns to our field names
       const firstName = userData['ime'] || '';
@@ -221,16 +221,16 @@ export default function UserManagement() {
           occupation: '' // Default empty occupation
         });
         
-        console.log(`Added user: ${firstName} ${lastName}`);
+        console.log(`Dodat korisnik: ${firstName} ${lastName}`);
       } else {
-        console.warn(`Skipping row ${i} - missing required fields:`, { firstName, lastName, email });
+        console.warn(`Preskakanje reda ${i} - nedostaju obavezna polja:`, { firstName, lastName, email });
       }
     }
 
-    console.log('Users to create:', usersToCreate);
+    console.log('Novi korisnici:', usersToCreate);
 
     if (usersToCreate.length === 0) {
-      alert('No valid users found. Please check your CSV format.\n\nRequired columns: Ime, Prezime, Email');
+      alert('Nisu pronađeni važeći korisnici. Proverite format CSV fajla.\n\nObavezne kolone: Ime, Prezime, Email');
       return;
     }
 
