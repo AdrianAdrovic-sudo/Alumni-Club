@@ -2,6 +2,7 @@ import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import { authenticate, requireAdmin } from "../middlewares/auth.middleware";
+import { EventVisibility, EventStatus } from "../types/enums";
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -17,8 +18,8 @@ const eventSchema = z.object({
   location: z.string(),
   venue_id: z.number().nullable(),
   capacity: z.number().nullable(),
-  visibility: z.enum(["Public", "Members", "Private"] as const),
-  status: z.enum(["Draft", "Published", "Archived"] as const),
+  visibility: z.nativeEnum(EventVisibility),
+  status: z.nativeEnum(EventStatus),
 });
 
 // --- POST /api/events (admin only) ---
