@@ -1,24 +1,24 @@
 import React from "react";
-import Header from "./components/Layout/Header.tsx";
-import Footer from "./components/Layout/Footer.tsx";
-import Home from "./pages/Home.tsx";
+import Header from "./components/Layout/Header";
+import Footer from "./components/Layout/Footer";
+import Home from "./pages/Home";
 import { Routes, Route } from "react-router-dom";
 import AlumniDirectory from "./pages/AlumniDirectory";
-import Blog from "./pages/Blog.tsx";
-import Login from "./pages/Login.tsx";
-import AboutUs from "./pages/AboutUs.tsx";
-import Contact from "./pages/Contact.tsx";
-import Dashboard from "./pages/Dashboard.tsx";
-import Theses from "./pages/Theses.tsx";
+import Blog from "./pages/Blog";
+import Login from "./pages/Login";
+import AboutUs from "./pages/AboutUs";
+import Contact from "./pages/Contact";
+import Dashboard from "./pages/Dashboard";
+import Theses from "./pages/Theses";
 import Messages from './components/messages/Messages';
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import PublicRoute from "./components/common/PublicRoute";
 import AdminRoute from "./components/common/AdminRoute";
-import MyProfile from "./pages/MyProfile.tsx";
-import MyProfileEdit from "./pages/MyProfileEdit.tsx";
-import ResetPassword from "./pages/ResetPassword.tsx"; 
-import PublicProfile from "./pages/PublicProfile";
-  // NEW
+import MyProfile from "./pages/MyProfile";
+import MyProfileEdit from "./pages/MyProfileEdit";
+import AddBlog from "./pages/AddBlog";
+import ResetPassword from "./pages/ResetPassword";
+
 
 export default function App() {
   return (
@@ -31,15 +31,16 @@ export default function App() {
             <Route path="/Home" element={<Home />} />
             <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
             <Route path="/Blog" element={<Blog />} />
-            
+            <Route path="/AddBlog" element={<AddBlog />} />
+
             {/* Protect login route - redirect if already authenticated */}
-            <Route 
-              path="/login" 
+            <Route
+              path="/login"
               element={
                 <PublicRoute>
                   <Login />
                 </PublicRoute>
-              } 
+              }
             />
 
             {/* NEW: reset password page, also public */}
@@ -50,6 +51,7 @@ export default function App() {
                   <ResetPassword />
                 </PublicRoute>
               }
+
             />
 
             <Route path="/AboutUs" element={<AboutUs />} />
@@ -58,7 +60,9 @@ export default function App() {
             <Route path="/MyProfile" element={<MyProfile />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/MyProfileEdit" element={<MyProfileEdit />} />
-            <Route path="/alumni/:id" element={<PublicProfile />} />
+
+
+
 
             <Route
               path="/Dashboard"
