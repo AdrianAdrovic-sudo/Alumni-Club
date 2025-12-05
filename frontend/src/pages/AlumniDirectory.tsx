@@ -60,32 +60,32 @@ const Button: React.FC<
   className = "",
   type = "button",
 }) => {
-    const baseClasses =
-      "inline-flex items-center justify-center font-medium transition-all rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const baseClasses =
+    "inline-flex items-center justify-center font-medium transition-all rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2";
 
-    const variantClasses = {
-      primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 border-[3px] border-white",
-      secondary:
-        "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500",
-      link: "text-blue-600 hover:text-blue-700 underline",
-    };
-
-    const sizeClasses = {
-      sm: "px-3 py-1.5 text-sm",
-      md: "px-4 py-2 text-base",
-      lg: "px-6 py-3 text-lg",
-    };
-
-    return (
-      <button
-        type={type}
-        onClick={onClick}
-        className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-      >
-        {children || title}
-      </button>
-    );
+  const variantClasses = {
+    primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+    secondary:
+      "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500",
+    link: "text-blue-600 hover:text-blue-700 underline",
   };
+
+  const sizeClasses = {
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-base",
+    lg: "px-6 py-3 text-lg",
+  };
+
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+    >
+      {children || title}
+    </button>
+  );
+};
 
 const AlumniMemberCard = ({ member }: { member: AlumniMember }) => {
   return (
@@ -248,8 +248,9 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       type="text"
                       value={formData.name}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${errors.name ? "border-red-500" : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
+                        errors.name ? "border-red-500" : "border-gray-300"
+                      }`}
                       required
                     />
                     {errors.name && (
@@ -272,8 +273,9 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${errors.email ? "border-red-500" : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
+                        errors.email ? "border-red-500" : "border-gray-300"
+                      }`}
                       required
                     />
                     {errors.email && (
@@ -296,8 +298,9 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       rows={4}
                       value={formData.message}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical ${errors.message ? "border-red-500" : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical ${
+                        errors.message ? "border-red-500" : "border-gray-300"
+                      }`}
                       required
                     />
                     {errors.message && (

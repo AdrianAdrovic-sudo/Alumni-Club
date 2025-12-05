@@ -87,28 +87,31 @@ export default function Dashboard() {
             <nav className="flex space-x-4">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'overview'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                  }`}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === 'overview'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                }`}
               >
                 Overview
               </button>
               <button
                 onClick={() => setActiveTab('users')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'users'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                  }`}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === 'users'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                }`}
               >
                 User Management
               </button>
               <button
                 onClick={() => setActiveTab('content')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'content'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                  }`}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === 'content'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                }`}
               >
                 Content Management
               </button>
@@ -176,7 +179,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <button
+        <button 
           onClick={logout}
           className="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-lg transition duration-200"
         >
