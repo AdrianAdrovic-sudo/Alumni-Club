@@ -11,12 +11,14 @@ import Contact from "./pages/Contact.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Theses from "./pages/Theses.tsx";
 import Messages from './components/messages/Messages';
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import PublicRoute from "./components/common/PublicRoute";
 import AdminRoute from "./components/common/AdminRoute";
 import MyProfile from "./pages/MyProfile.tsx";
 import MyProfileEdit from "./pages/MyProfileEdit.tsx";
-
+import ResetPassword from "./pages/ResetPassword.tsx"; 
+import PublicProfile from "./pages/PublicProfile";
+  // NEW
 
 export default function App() {
   return (
@@ -39,16 +41,24 @@ export default function App() {
                 </PublicRoute>
               } 
             />
-            
+
+            {/* NEW: reset password page, also public */}
+            <Route
+              path="/reset-password"
+              element={
+                <PublicRoute>
+                  <ResetPassword />
+                </PublicRoute>
+              }
+            />
+
             <Route path="/AboutUs" element={<AboutUs />} />
             <Route path="/Contact" element={<Contact />} />
             <Route path="/Theses" element={<Theses />} />
             <Route path="/MyProfile" element={<MyProfile />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/MyProfileEdit" element={<MyProfileEdit />} />
-
-
-
+            <Route path="/alumni/:id" element={<PublicProfile />} />
 
             <Route
               path="/Dashboard"
