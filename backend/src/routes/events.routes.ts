@@ -11,14 +11,14 @@ const eventSchema = z.object({
   title: z.string(),
   slug: z.string(),
   description: z.string(),
-  start_time: z.string(), // ISO string
+  start_time: z.string(),
   end_time: z.string(),
   timezone: z.string(),
   location: z.string(),
   venue_id: z.number().nullable(),
   capacity: z.number().nullable(),
-  visibility: z.enum(["Public", "Members", "Private"]),
-  status: z.enum(["Draft", "Published", "Archived"]),
+  visibility: z.enum(["Public", "Members", "Private"] as const),
+  status: z.enum(["Draft", "Published", "Archived"] as const),
 });
 
 // --- POST /api/events (admin only) ---
