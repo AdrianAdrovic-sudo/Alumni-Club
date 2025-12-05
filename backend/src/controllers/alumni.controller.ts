@@ -37,7 +37,6 @@ export const getAlumniProfile = async (req: Request, res: Response) => {
         occupation: true,
         enrollment_year: true,
         profile_picture: true,
-        is_public: true,
       },
     });
 
