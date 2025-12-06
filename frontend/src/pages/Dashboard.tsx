@@ -114,6 +114,12 @@ export default function Dashboard() {
               >
                 Upravljanje sadržajem
               </button>
+              <button
+                onClick={() => navigate("/admin/events")}
+                className="px-4 py-2 rounded-lg font-medium transition bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+              >
+                Upravljanje događajima
+              </button>
             </nav>
           </div>
         )}

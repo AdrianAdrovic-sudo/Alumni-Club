@@ -28,9 +28,11 @@ router.post("/", authenticate, requireAdmin, async (req, res) => {
   if (!parsed.success) return res.status(400).json({ errors: parsed.error.issues });
 
   try {
-    const event = await prisma.events.create({
-      data: { ...parsed.data, created_by: req.user!.id },
-    });
+    const eventData = { ...parsed.data, created_by: req.user!.id } as any;
+    if (eventData.start_time) eventData.start_time = new Date(eventData.start_time);
+    if (eventData.end_time) eventData.end_time = new Date(eventData.end_time);
+
+    const event = await prisma.events.create({ data: eventData });
     res.json(event);
   } catch (err) {
     console.error(err);
@@ -83,9 +85,13 @@ router.patch("/:id", authenticate, requireAdmin, async (req, res) => {
   if (!parsed.success) return res.status(400).json({ errors: parsed.error.issues });
 
   try {
+    const dataToUpdate = { ...parsed.data } as any;
+    if (dataToUpdate.start_time) dataToUpdate.start_time = new Date(dataToUpdate.start_time);
+    if (dataToUpdate.end_time) dataToUpdate.end_time = new Date(dataToUpdate.end_time);
+
     const updated = await prisma.events.update({
       where: { id },
-      data: parsed.data,
+      data: dataToUpdate,
     });
     res.json(updated);
   } catch (err) {
@@ -103,7 +109,7 @@ router.delete("/:id", authenticate, requireAdmin, async (req, res) => {
       where: { id },
       data: { status: "Archived" },
     });
-    res.json({ message: "Event archived successfully", event: deleted });
+    res.json({ message: "Događaj arhiviran", event: deleted });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Database error or event not found" });
