@@ -116,6 +116,10 @@ model users {
   is_public                                            Boolean              @default(true)
   cv_url                                               String?              @db.VarChar(255)
 
+  position                                             String?              @db.VarChar(255)
+  study_direction                                      String?              @db.VarChar(255)
+  study_level                                          String?              @db.VarChar(255)
+
   comments                                             comments[]
   event_registration                                   event_registration[]
   events                                               events[]

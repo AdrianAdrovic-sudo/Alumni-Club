@@ -52,6 +52,9 @@ export async function getMyProfile(req: Request, res: Response) {
         work_location: true,
         is_public: true,
         cv_url: true,
+        position: true,
+        study_level: true,
+        study_direction: true,
         role: true,
         is_active: true,
         created_at: true,
@@ -99,6 +102,21 @@ export async function updateMyProfile(req: Request, res: Response) {
       if (!Number.isNaN(yearNumber)) {
         data.enrollment_year = yearNumber;
       }
+    }
+
+    // Pozicija
+    if (typeof body.pozicija === "string" && body.pozicija.trim()) {
+      data.position = body.pozicija.trim();
+    }
+
+    // Nivo studija
+    if (typeof body.nivoStudija === "string" && body.nivoStudija.trim()) {
+      data.study_level = body.nivoStudija.trim();
+    }
+
+    // Smjer
+    if (typeof body.smjer === "string" && body.smjer.trim()) {
+      data.study_direction = body.smjer.trim();
     }
 
     // Firma / zanimanje: "firma" ili "occupation"
@@ -149,6 +167,9 @@ export async function updateMyProfile(req: Request, res: Response) {
         work_location: true,
         is_public: true,
         cv_url: true,
+        position: true,
+        study_level: true,
+        study_direction: true,
         role: true,
         is_active: true,
         created_at: true,
