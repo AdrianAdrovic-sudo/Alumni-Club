@@ -1,8 +1,16 @@
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, RSVPStatus } from "@prisma/client";
 import { z } from "zod";
 import { authenticate, requireAdmin } from "../middlewares/auth.middleware";
 import { EventVisibility, EventStatus } from "../types/enums";
+import {
+  rsvpEvent,
+  cancelRsvp,
+  listAttendees,
+  publishEvent,
+  archiveEvent,
+  generateICalFeed,
+} from "../services/events.service";
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -81,7 +89,7 @@ router.get("/:id", async (req, res) => {
 // --- PATCH /api/events/:id (admin only) ---
 router.patch("/:id", authenticate, requireAdmin, async (req, res) => {
   const id = Number(req.params.id);
-  const parsed = eventSchema.partial().safeParse(req.body); // partial za update
+  const parsed = eventSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ errors: parsed.error.issues });
 
   try {
@@ -107,12 +115,90 @@ router.delete("/:id", authenticate, requireAdmin, async (req, res) => {
   try {
     const deleted = await prisma.events.update({
       where: { id },
-      data: { status: "Archived" },
+      data: { status: EventStatus.Archived },
     });
     res.json({ message: "Događaj arhiviran", event: deleted });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Database error or event not found" });
+  }
+});
+
+// --- POST /api/events/:id/rsvp ---
+router.post("/:id/rsvp", authenticate, async (req, res) => {
+  const userId = req.user!.id;
+  const eventId = Number(req.params.id);
+
+  try {
+    const registration = await rsvpEvent(userId, eventId);
+    res.json(registration);
+  } catch (err: any) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// --- DELETE /api/events/:id/rsvp ---
+router.delete("/:id/rsvp", authenticate, async (req, res) => {
+  const userId = req.user!.id;
+  const eventId = Number(req.params.id);
+
+  try {
+    await cancelRsvp(userId, eventId);
+    res.json({ message: "RSVP canceled" });
+  } catch (err: any) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// --- GET /api/events/:id/attendees (admin only) ---
+router.get("/:id/attendees", authenticate, requireAdmin, async (req, res) => {
+  const eventId = Number(req.params.id);
+  const status = req.query.status as RSVPStatus | undefined;
+
+  try {
+    const attendees = await listAttendees(eventId, status);
+    res.json(attendees);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- POST /api/events/:id/publish (admin only) ---
+router.post("/:id/publish", authenticate, requireAdmin, async (req, res) => {
+  const eventId = Number(req.params.id);
+  try {
+    const updated = await publishEvent(eventId);
+    res.json(updated);
+  } catch (err: any) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// --- POST /api/events/:id/archive (admin only) ---
+router.post("/:id/archive", authenticate, requireAdmin, async (req, res) => {
+  const eventId = Number(req.params.id);
+  try {
+    const updated = await archiveEvent(eventId);
+    res.json(updated);
+  } catch (err: any) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// --- GET /api/events/calendar ---
+router.get("/calendar", async (req, res) => {
+  try {
+    const icsData = await generateICalFeed();
+    res.setHeader("Content-Type", "text/calendar");
+    res.send(icsData);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 });
 
