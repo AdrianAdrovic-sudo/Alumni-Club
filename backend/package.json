@@ -12,7 +12,8 @@
     "generate": "prisma generate",
     "db:reset-users": "ts-node src/script/delete-all-users.ts",
     "db:reset-users-safe": "ts-node src/script/delete-all-users-safe.ts",
-    "db:clean-regular-users": "ts-node src/script/delete-all-users-except-admin.ts"
+    "db:clean-regular-users": "ts-node src/script/delete-all-users-except-admin.ts",
+    "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^4.16.2",

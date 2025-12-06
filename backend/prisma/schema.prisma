@@ -159,7 +159,7 @@ model users {
 
 model venues {
   id         Int       @id @default(autoincrement())
-  name       String
+  name       String    @unique
   address    String?
   capacity   Int?
   events     events[]
