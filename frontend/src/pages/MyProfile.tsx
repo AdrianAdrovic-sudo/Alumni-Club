@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -42,6 +42,44 @@ export default function MyProfile() {
   const [saved, setSaved] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
+  // --------------------------------------------------------
+  // LOAD USER FROM BACKEND
+  // --------------------------------------------------------
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const resp = await fetch("http://localhost:4000/api/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!resp.ok) return;
+
+        const data = await resp.json();
+
+        setProfileData({
+          ime: data.first_name || "",
+          prezime: data.last_name || "",
+          email: data.email || "",
+          godinaZavrsetka: String(data.enrollment_year || ""),
+          mjestoRada: data.work_location || "",
+          firma: data.occupation || "",
+          javniProfil: data.is_public ?? true,
+        });
+
+        if (data.profile_picture) {
+          setProfilnaSlika(`http://localhost:4000${data.profile_picture}`);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadProfile();
+  }, []);
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -72,109 +110,63 @@ export default function MyProfile() {
     }
   };
 
-  const removeCv = () => {
-    setCvFile(null);
-  };
+  const removeCv = () => setCvFile(null);
 
+  // --------------------------------------------------------
+  // SUBMIT UPDATE TO BACKEND
+  // --------------------------------------------------------
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Nema tokena - korisnik vjerovatno nije ulogovan.");
-        return;
-      }
+      if (!token) return;
 
-      const podaciProfila = {
-        ime: profileData.ime,
-        prezime: profileData.prezime,
-        godinaZavrsetka: profileData.godinaZavrsetka,
-        mjestoRada: profileData.mjestoRada,
-        firma: profileData.firma,
-        javniProfil: profileData.javniProfil,
-      };
-
-      console.log("Šaljem profil na backend:", podaciProfila);
-
-      const respProfil = await fetch("http://localhost:4000/api/profile", {
+      // Update main profile info
+      await fetch("http://localhost:4000/api/users/me", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(podaciProfila),
+        body: JSON.stringify({
+          ime: profileData.ime,
+          prezime: profileData.prezime,
+          godinaZavrsetka: profileData.godinaZavrsetka,
+          mjestoRada: profileData.mjestoRada,
+          firma: profileData.firma,
+          javniProfil: profileData.javniProfil,
+        }),
       });
 
-      if (!respProfil.ok) {
-        console.error(
-          "Greška pri čuvanju profila:",
-          respProfil.status,
-          await respProfil.text()
-        );
-        return;
-      }
-
-      const updated = await respProfil.json();
-      console.log("Ažuriran profil sa backend-a:", updated);
-
-      // CV upload
-      if (cvFile) {
-        const cvFormData = new FormData();
-        cvFormData.append("cv", cvFile);
-
-        const respCv = await fetch("http://localhost:4000/api/users/me/cv", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: cvFormData,
-        });
-
-        if (!respCv.ok) {
-          console.error(
-            "Greška pri upload-u CV-a:",
-            respCv.status,
-            await respCv.text()
-          );
-        } else {
-          const cvResult = await respCv.json();
-          console.log("CV uploadovan:", cvResult);
-        }
-      }
-
-      // Avatar upload
+      // Upload avatar
       if (avatarFile) {
-        const avatarData = new FormData();
-        avatarData.append("avatar", avatarFile);
+        const formData = new FormData();
+        formData.append("avatar", avatarFile);
 
-        const respAvatar = await fetch(
-          "http://localhost:4000/api/users/me/avatar",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: avatarData,
-          }
-        );
+        await fetch("http://localhost:4000/api/users/me/avatar", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+      }
 
-        if (!respAvatar.ok) {
-          console.error(
-            "Greška pri upload-u slike:",
-            respAvatar.status,
-            await respAvatar.text()
-          );
-        } else {
-          const avatarResult = await respAvatar.json();
-          console.log("Profilna slika uploadovana:", avatarResult);
-        }
+      // Upload CV
+      if (cvFile) {
+        const cvData = new FormData();
+        cvData.append("cv", cvFile);
+
+        await fetch("http://localhost:4000/api/users/me/cv", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: cvData,
+        });
       }
 
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
-      console.error("Network/JS greška u handleSubmit:", err);
+      console.error(err);
     }
   };
 
@@ -231,37 +223,36 @@ export default function MyProfile() {
             </h2>
           </div>
 
-          {/* Godina diplomiranja */}
+          {/* GODINA DIPLOMIRANJA */}
           <div>
             <label className="block text-base font-semibold text-black mb-2">
               Godina diplomiranja *
             </label>
             <select
               name="godinaZavrsetka"
-              value={profileData.godinaZavrsetka}
+              value={String(profileData.godinaZavrsetka)}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black text-base focus:outline-none focus:border-[#ffab1f] bg-white transition-colors"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black text-base"
             >
-              <option className="text-black" value="">
-                Izaberite godinu
-              </option>
+              <option value="">Izaberite godinu</option>
               {years.map((year) => (
-                <option className="text-black" key={year} value={year}>
+                <option key={year} value={String(year)}>
                   {year}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Email */}
+          {/* EMAIL */}
           <Item icon={<Mail />} label="Email" value={profileData.email} />
 
-          {/* CV upload */}
+          {/* CV UPLOAD */}
           <div>
             <label className="block text-base font-semibold text-[#294a70] mb-2">
               CV (PDF)
             </label>
+
             {cvFile ? (
               <div className="flex items-center justify-between px-5 py-4 bg-white rounded-lg border-2 border-gray-300">
                 <div className="flex items-center gap-3">
@@ -294,7 +285,7 @@ export default function MyProfile() {
             )}
           </div>
 
-          {/* Vidljivost profila */}
+          {/* VIDLJIVOST PROFILA */}
           <div className="bg-white p-6 rounded-lg border-2 border-gray-300">
             <div className="flex items-center justify-between mb-4">
               <span className="text-base font-semibold text-[#294a70]">
@@ -306,6 +297,7 @@ export default function MyProfile() {
                 <EyeOff className="w-6 h-6 text-[#ffab1f]" />
               )}
             </div>
+
             <div className="flex gap-3 mb-4">
               <button
                 type="button"
@@ -315,7 +307,7 @@ export default function MyProfile() {
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg text-sm font-semibold transition-all ${
                   !profileData.javniProfil
                     ? "border-[#ffab1f] bg-[#ffab1f] text-white"
-                    : "border-gray-300 bg-white text-gray-600 hover:border-[#ffab1f] hover:bg-[#fffbf5]"
+                    : "border-gray-300 bg-white text-gray-600"
                 }`}
               >
                 <EyeOff className="w-5 h-5" />
@@ -329,13 +321,14 @@ export default function MyProfile() {
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg text-sm font-semibold transition-all ${
                   profileData.javniProfil
                     ? "border-[#ffab1f] bg-[#ffab1f] text-white"
-                    : "border-gray-300 bg-white text-gray-600 hover:border-[#ffab1f] hover:bg-[#fffbf5]"
+                    : "border-gray-300 bg-white text-gray-600"
                 }`}
               >
                 <Eye className="w-5 h-5" />
                 Javan
               </button>
             </div>
+
             <p className="text-sm text-gray-600 leading-relaxed">
               {profileData.javniProfil
                 ? "Tvoj profil je vidljiv svim članovima Alumni kluba"
@@ -343,7 +336,7 @@ export default function MyProfile() {
             </p>
           </div>
 
-          {/* Firma + vidljivost summary + CV info */}
+          {/* Firma + Vidljivost Summary + CV */}
           <div className="space-y-4">
             <Item icon={<Briefcase />} label="Firma" value={profileData.firma} />
             <Item
@@ -356,7 +349,7 @@ export default function MyProfile() {
             )}
           </div>
 
-          {/* Save */}
+          {/* SAVE BUTTON */}
           <button
             type="submit"
             className="w-full flex items-center justify-center gap-2 py-3.5 px-8 bg-linear-to-r from-[#294a70] to-[#324D6B] text-white rounded-lg text-base font-semibold hover:from-[#ffab1f] hover:to-[#ff9500] transition-all hover:-translate-y-0.5 shadow-md hover:shadow-xl"
@@ -372,7 +365,7 @@ export default function MyProfile() {
           )}
         </form>
 
-        {/* Edit page button */}
+        {/* EDIT BUTTON */}
         <button
           type="button"
           onClick={() => navigate("/MyProfileEdit")}
