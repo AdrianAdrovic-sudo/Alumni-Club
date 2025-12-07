@@ -10,6 +10,7 @@ export default function ResetPassword() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
 
+  const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -44,7 +45,10 @@ export default function ResetPassword() {
         throw new Error(data.message || "Provjera podataka nije uspjela.");
       }
 
-      setMsg(data.message || "Korisnik je pronađen. Unesite novu šifru.");
+      setMsg(
+        data.message ||
+          "Ako postoji nalog sa ovim podacima, kod je poslat na email."
+      );
       setStep(2);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -62,6 +66,11 @@ export default function ResetPassword() {
     setMsg(null);
     setError(null);
 
+    if (!code) {
+      setError("Unesite kod koji ste dobili na email.");
+      return;
+    }
+
     if (!newPassword || !confirmPassword) {
       setError("Unesite novu šifru i potvrdu.");
       return;
@@ -78,7 +87,7 @@ export default function ResetPassword() {
       const res = await fetch(`${API_BASE}/reset-confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, newPassword }),
+        body: JSON.stringify({ username, email, code, newPassword }),
       });
 
       const data = await res.json();
@@ -87,7 +96,13 @@ export default function ResetPassword() {
         throw new Error(data.message || "Promjena šifre nije uspjela.");
       }
 
-      setMsg(data.message || "Šifra je uspješno promijenjena.");
+      setMsg(
+        data.message || "Šifra je uspješno promijenjena. Preusmjeravam na login."
+      );
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -106,7 +121,7 @@ export default function ResetPassword() {
         <h4>
           {step === 1
             ? "Unesite korisničko ime i email naloga."
-            : "Unesite novu šifru."}
+            : "Unesite kod sa emaila i novu šifru."}
         </h4>
 
         {step === 1 && (
@@ -139,6 +154,16 @@ export default function ResetPassword() {
 
         {step === 2 && (
           <form onSubmit={handleConfirm}>
+            <label htmlFor="code">Kod sa emaila:</label>
+            <input
+              id="code"
+              type="text"
+              placeholder="Na primjer 123456"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              required
+            />
+
             <label htmlFor="newPassword">Nova šifra:</label>
             <input
               id="newPassword"
