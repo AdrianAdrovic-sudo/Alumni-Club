@@ -15,35 +15,64 @@ export async function rsvpEvent(userId: number, eventId: number) {
   });
   if (!event) throw new Error("Event not found");
 
+  const user = await prisma.users.findUnique({ where: { id: userId } });
+  if (!user) throw new Error("User not found");
+
   // Provera kapaciteta
   const goingCount = event.event_registration.filter(
     (e) => e.rsvp === RSVPStatus.Going
   ).length;
 
+  let rsvpStatus: RSVPStatus;
   if (event.capacity && goingCount >= event.capacity) {
-    // Dodaj na waitlist
-    return await prisma.event_registration.upsert({
-      where: { user_id_event_id: { user_id: userId, event_id: eventId } },
-      update: { rsvp: RSVPStatus.Waitlist },
-      create: { user_id: userId, event_id: eventId, rsvp: RSVPStatus.Waitlist },
-    });
+    rsvpStatus = RSVPStatus.Waitlist;
+  } else {
+    rsvpStatus = RSVPStatus.Going;
   }
 
-  // Normalno RSVP
-  return await prisma.event_registration.upsert({
+  const registration = await prisma.event_registration.upsert({
     where: { user_id_event_id: { user_id: userId, event_id: eventId } },
-    update: { rsvp: RSVPStatus.Going },
-    create: { user_id: userId, event_id: eventId, rsvp: RSVPStatus.Going },
+    update: { rsvp: rsvpStatus },
+    create: { user_id: userId, event_id: eventId, rsvp: rsvpStatus },
   });
+
+  // --- Minimalno dodat: logovanje draft email ---
+  await prisma.outbox_emails.create({
+    data: {
+      to: user.email,
+      user_id: userId,
+      event_id: eventId,
+      subject: `RSVP Confirmation: ${event.title}`,
+      body: `You have successfully RSVP'd as ${rsvpStatus} for "${event.title}"`,
+    },
+  });
+
+  return registration;
 }
 
 /**
  * Cancel RSVP
  */
 export async function cancelRsvp(userId: number, eventId: number) {
-  return prisma.event_registration.deleteMany({
+  const deleted = await prisma.event_registration.deleteMany({
     where: { user_id: userId, event_id: eventId },
   });
+
+  const user = await prisma.users.findUnique({ where: { id: userId } });
+  if (!user) throw new Error("User not found");
+
+  // --- Minimalno dodat: logovanje draft email ---
+  await prisma.outbox_emails.create({
+    data: {
+      to: user.email,
+      user_id: userId,
+      event_id: eventId,
+      subject: `RSVP Cancelled`,
+      body: `Your RSVP for event ID ${eventId} has been cancelled.`,
+    },
+  });
+
+  return deleted;
 }
 
 /**
