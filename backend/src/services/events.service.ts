@@ -18,7 +18,6 @@ export async function rsvpEvent(userId: number, eventId: number) {
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) throw new Error("User not found");
 
-  // Provera kapaciteta
   const goingCount = event.event_registration.filter(
     (e) => e.rsvp === RSVPStatus.Going
   ).length;
@@ -36,7 +35,8 @@ export async function rsvpEvent(userId: number, eventId: number) {
     create: { user_id: userId, event_id: eventId, rsvp: rsvpStatus },
   });
 
-  // --- Minimalno dodat: logovanje draft email ---
+  console.log(`[RSVP] User ${userId} RSVP'd as ${rsvpStatus} for event ${eventId}`);
+
   await prisma.outbox_emails.create({
     data: {
       to: user.email,
@@ -50,38 +50,88 @@ export async function rsvpEvent(userId: number, eventId: number) {
   return registration;
 }
 
-/**
- * Cancel RSVP
- */
 export async function cancelRsvp(userId: number, eventId: number) {
+  console.log("Cancel RSVP called", { userId, eventId });
+
+  // Prvo pronađi event sa registracijama
+  const event = await prisma.events.findUnique({
+    where: { id: eventId },
+    include: { event_registration: { orderBy: { registered_at: "asc" } } },
+  });
+  if (!event) throw new Error("Event not found");
+
+  // Obriši korisnikov RSVP
   const deleted = await prisma.event_registration.deleteMany({
     where: { user_id: userId, event_id: eventId },
   });
+  console.log("Deleted RSVP rows:", deleted.count);
 
+  // Broj trenutno Going
+  const goingCount = event.event_registration.filter(
+    (e) => e.rsvp === RSVPStatus.Going && e.user_id !== userId
+  ).length;
+
+  console.log("Going count after cancellation:", goingCount);
+
+  // Ako ima preostalo mjesta, promijeni prvog sa Waitlist u Going
+  if (event.capacity && goingCount < event.capacity) {
+    const nextOnWaitlist = await prisma.event_registration.findFirst({
+      where: { event_id: eventId, rsvp: RSVPStatus.Waitlist },
+      orderBy: { registered_at: "asc" },
+    });
+
+    if (nextOnWaitlist) {
+      console.log("Promoting from waitlist:", nextOnWaitlist.user_id);
+
+      await prisma.event_registration.update({
+        where: { id: nextOnWaitlist.id },
+        data: { rsvp: RSVPStatus.Going },
+      });
+
+      // Pošalji email toj osobi
+      const userOnWaitlist = await prisma.users.findUnique({
+        where: { id: nextOnWaitlist.user_id },
+      });
+
+      if (userOnWaitlist) {
+        await prisma.outbox_emails.create({
+          data: {
+            to: userOnWaitlist.email,
+            user_id: userOnWaitlist.id,
+            event_id: eventId,
+            subject: `RSVP Update: place available for ${event.title}`,
+            body: `A spot opened up for "${event.title}". Your status has been updated to Going.`,
+          },
+        });
+      }
+    }
+  }
+
+  // Email za korisnika koji je otkazao
   const user = await prisma.users.findUnique({ where: { id: userId } });
-  if (!user) throw new Error("User not found");
+  if (user) {
+    await prisma.outbox_emails.create({
+      data: {
+        to: user.email,
+        user_id: userId,
+        event_id: eventId,
+        subject: `RSVP Cancelled`,
+        body: `Your RSVP for event "${event.title}" has been cancelled.`,
+      },
+    });
+  }
 
-  // --- Minimalno dodat: logovanje draft email ---
-  await prisma.outbox_emails.create({
-    data: {
-      to: user.email,
-      user_id: userId,
-      event_id: eventId,
-      subject: `RSVP Cancelled`,
-      body: `Your RSVP for event ID ${eventId} has been cancelled.`,
-    },
-  });
+  console.log("Cancellation complete");
 
   return deleted;
 }
 
+
+
 /**
  * Lista učesnika - admin only
  */
-export async function listAttendees(
-  eventId: number,
-  status?: RSVPStatus
-) {
+export async function listAttendees(eventId: number, status?: RSVPStatus) {
   return prisma.event_registration.findMany({
     where: { event_id: eventId, ...(status ? { rsvp: status } : {}) },
     include: { users: true },
@@ -140,9 +190,39 @@ export async function generateICalFeed() {
   const { error, value } = ics.createEvents(icsEvents);
   if (error) throw error;
 
-  // Čuvanje u fajl (opciono)
   const filePath = join(__dirname, "../../public/events.ics");
   writeFileSync(filePath, value || "");
 
   return value;
+}
+
+/**
+ * Dobija event sa statistikama: broj Going, Waitlist, preostala mjesta
+ */
+export async function getEventWithStats(eventId: number) {
+  const event = await prisma.events.findUnique({
+    where: { id: eventId },
+    include: { event_registration: true },
+  });
+
+  if (!event) throw new Error("Event not found");
+
+  const goingCount = event.event_registration.filter(
+    (e) => e.rsvp === RSVPStatus.Going
+  ).length;
+
+  const waitlistCount = event.event_registration.filter(
+    (e) => e.rsvp === RSVPStatus.Waitlist
+  ).length;
+
+  const remainingSeats = event.capacity
+    ? Math.max(0, event.capacity - goingCount)
+    : 0;
+
+  return {
+    ...event,
+    goingCount,
+    waitlistCount,
+    remainingSeats,
+  };
 }

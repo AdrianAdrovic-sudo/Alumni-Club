@@ -48,8 +48,12 @@ const EventForm: React.FC<EventFormProps> = ({ eventId }) => {
           if (res.ok) {
             setForm({
               ...data,
-              start_time: data.start_time ? new Date(data.start_time).toISOString().slice(0, 16) : "",
-              end_time: data.end_time ? new Date(data.end_time).toISOString().slice(0, 16) : "",
+              start_time: data.start_time
+                ? new Date(data.start_time).toISOString().slice(0, 16)
+                : "",
+              end_time: data.end_time
+                ? new Date(data.end_time).toISOString().slice(0, 16)
+                : "",
             });
           } else {
             alert(data.error || "Greška pri učitavanju događaja");
@@ -66,7 +70,12 @@ const EventForm: React.FC<EventFormProps> = ({ eventId }) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "capacity") {
+      setForm({ ...form, [name]: value === "" ? null : parseInt(value, 10) });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,17 +85,21 @@ const EventForm: React.FC<EventFormProps> = ({ eventId }) => {
       ...form,
       start_time: new Date(form.start_time).toISOString(),
       end_time: new Date(form.end_time).toISOString(),
+      capacity: form.capacity !== null ? form.capacity : null,
     };
 
     try {
-      const res = await fetch(eventId || id ? `/api/events/${id || eventId}` : "/api/events", {
-        method: eventId || id ? "PATCH" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        eventId || id ? `/api/events/${id || eventId}` : "/api/events",
+        {
+          method: eventId || id ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) {
@@ -163,7 +176,7 @@ const EventForm: React.FC<EventFormProps> = ({ eventId }) => {
               <input
                 type="number"
                 name="capacity"
-                value={form.capacity || ""}
+                value={form.capacity ?? ""}
                 onChange={handleChange}
                 placeholder="Kapacitet"
                 className="w-full border border-gray-300 rounded px-4 py-2"

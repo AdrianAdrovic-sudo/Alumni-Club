@@ -70,7 +70,7 @@ model events {
   timezone           String               @default("UTC")
   visibility         EventVisibility      @default(Public)
   status             EventStatus          @default(Draft)
-  capacity           Int?
+  capacity           Int                  @default(10)
   venue_id           Int?
   deleted            Boolean              @default(false)
   event_registration event_registration[]

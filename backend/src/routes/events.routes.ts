@@ -10,6 +10,7 @@ import {
   publishEvent,
   archiveEvent,
   generateICalFeed,
+  getEventWithStats,
 } from "../services/events.service";
 
 const prisma = new PrismaClient();
@@ -73,16 +74,19 @@ router.get("/", async (req, res) => {
   }
 });
 
-// --- GET /api/events/:id ---
+// --- GET /api/events/:id sa statistikama ---
 router.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
   try {
-    const event = await prisma.events.findUnique({ where: { id } });
-    if (!event) return res.status(404).json({ error: "Event not found" });
+    const event = await getEventWithStats(id);
     res.json(event);
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
-    res.status(500).json({ error: "Database error" });
+    if (err.message === "Event not found") {
+      res.status(404).json({ error: "Event not found" });
+    } else {
+      res.status(500).json({ error: "Database error" });
+    }
   }
 });
 
@@ -149,6 +153,25 @@ router.delete("/:id/rsvp", authenticate, async (req, res) => {
   } catch (err: any) {
     console.error(err);
     res.status(400).json({ error: err.message });
+  }
+});
+
+// --- GET /api/events/:id/rsvp/me ---
+// vraća event_registration za ulogovanog usera ili null
+router.get("/:id/rsvp/me", authenticate, async (req, res) => {
+  const userId = req.user!.id;
+  const eventId = Number(req.params.id);
+
+  try {
+    const registration = await prisma.event_registration.findUnique({
+      where: { user_id_event_id: { user_id: userId, event_id: eventId } },
+      include: { users: true }, 
+    });
+
+    res.json(registration || null);
+  } catch (err: any) {
+    console.error("Error fetching user registration:", err);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
