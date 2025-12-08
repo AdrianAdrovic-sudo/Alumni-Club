@@ -147,6 +147,12 @@ const EventList: React.FC = () => {
                     <td className="p-4 text-right">
                       <div className="flex justify-end space-x-2">
                         <button
+                          onClick={() => navigate(`/admin/events/${ev.id}`)}
+                          className="px-3 py-1.5 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 transition"
+                        >
+                          Detalji
+                        </button>
+                        <button
                           onClick={() => navigate(`/admin/events/${ev.id}/edit`)}
                           className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition"
                         >

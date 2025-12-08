@@ -23,6 +23,7 @@ import EventList from "./pages/EventList";
 import EventForm from "./pages/EventForm";
 import PublicEventList from "./pages/PublicEventList";
 import PublicEventDetails from "./pages/PublicEventDetails";
+import AdminEventDetails from "./pages/AdminEventDetails";
 
 export default function App() {
   return (
@@ -86,6 +87,14 @@ export default function App() {
                   <EventList />
                 </AdminRoute>
               }
+            />
+            <Route 
+              path="/admin/events/:id" 
+              element={
+              <AdminRoute>
+                  <AdminEventDetails />
+              </AdminRoute>
+                } 
             />
             <Route
               path="/admin/events/new"

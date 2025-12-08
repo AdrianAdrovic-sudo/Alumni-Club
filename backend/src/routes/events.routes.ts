@@ -214,6 +214,23 @@ router.post("/:id/archive", authenticate, requireAdmin, async (req, res) => {
 });
 
 // --- GET /api/events/calendar ---
+router.get("/:id/calendar", async (req, res) => {
+  const eventId = Number(req.params.id);
+  try {
+    const icsData = await generateICalFeed(eventId); // ovo vraća string ICS
+
+    res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=event_${eventId}.ics`
+    );
+    res.send(icsData); // send kao string
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send("Error generating calendar");
+  }
+});
+
 router.get("/calendar", async (req, res) => {
   try {
     const icsData = await generateICalFeed();
