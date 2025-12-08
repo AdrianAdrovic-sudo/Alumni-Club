@@ -4,6 +4,7 @@
     "module": "commonjs",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./src",
@@ -13,6 +14,6 @@
       "@/*": ["*"]
     }
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts","prisma/**/*"],
   "exclude": ["node_modules", "dist"]
 }

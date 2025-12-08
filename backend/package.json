@@ -12,7 +12,8 @@
     "generate": "prisma generate",
     "db:reset-users": "ts-node src/script/delete-all-users.ts",
     "db:reset-users-safe": "ts-node src/script/delete-all-users-safe.ts",
-    "db:clean-regular-users": "ts-node src/script/delete-all-users-except-admin.ts"
+    "db:clean-regular-users": "ts-node src/script/delete-all-users-except-admin.ts",
+    "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^4.16.2",
@@ -24,7 +25,8 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.11",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

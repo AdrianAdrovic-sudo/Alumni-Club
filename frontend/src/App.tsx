@@ -19,6 +19,11 @@ import MyProfile from "./pages/MyProfile";
 import MyProfileEdit from "./pages/MyProfileEdit";
 import AddBlog from "./pages/AddBlog";
 import ResetPassword from "./pages/ResetPassword";
+import EventList from "./pages/EventList";
+import EventForm from "./pages/EventForm";
+import PublicEventList from "./pages/PublicEventList";
+import PublicEventDetails from "./pages/PublicEventDetails";
+import AdminEventDetails from "./pages/AdminEventDetails";
 
 export default function App() {
   return (
@@ -74,6 +79,44 @@ export default function App() {
                 </AdminRoute>
               }
             />
+            {/* Admin event routes */}
+            <Route
+              path="/admin/events"
+              element={
+                <AdminRoute>
+                  <EventList />
+                </AdminRoute>
+              }
+            />
+            <Route 
+              path="/admin/events/:id" 
+              element={
+              <AdminRoute>
+                  <AdminEventDetails />
+              </AdminRoute>
+                } 
+            />
+            <Route
+              path="/admin/events/new"
+              element={
+                <AdminRoute>
+                  <EventForm />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/events/:id/edit"
+              element={
+                <AdminRoute>
+                  <EventForm />
+                </AdminRoute>
+              }
+            />
+
+            {/* Public event routes */}
+            <Route path="/events" element={<PublicEventList />} />
+            <Route path="/events/:id" element={<PublicEventDetails />} />
+
           </Routes>
         </main>
         <Footer />
