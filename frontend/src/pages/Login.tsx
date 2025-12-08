@@ -95,7 +95,13 @@ export default function Login() {
             {loading ? "Prijavljujem..." : "Prijavi se"}
           </button>
 
-          <p className="forgot-password">Zaboravili ste šifru?</p>
+          <p
+          className="forgot-password"
+           onClick={() => navigate("/reset-password")}
+            > 
+              Zaboravili ste šifru?
+            </p>
+
         </form>
 
         {msg && (

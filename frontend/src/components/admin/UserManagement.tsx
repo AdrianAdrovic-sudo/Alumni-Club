@@ -84,8 +84,8 @@ export default function UserManagement() {
         pages: 0
       });
     } catch (error) {
-      console.error('Error loading users:', error);
-      alert('Error loading users. Please check the console for details.');
+      console.error('Greška prilikom učitavanja korisnika:', error);
+      alert('Neuspješno učitavanje korisnika. Provjerite konzolu..');
       setUsers([]);
     } finally {
       setLoading(false);
@@ -93,14 +93,14 @@ export default function UserManagement() {
   };
 
   const handleDeactivate = async (userId: number) => {
-    if (window.confirm('Are you sure you want to deactivate this user?')) {
+    if (window.confirm('Sigurno želite deaktivirati profil korisnika?')) {
       try {
         await AdminService.deactivateUser(userId);
         loadUsers();
-        alert('User deactivated successfully');
+        alert('Uspješno deaktiviran korisnik');
       } catch (error: any) {
-        console.error('Error deactivating user:', error);
-        alert(`Error deactivating user: ${error.response?.data?.message || error.message}`);
+        console.error('Neuspješno deaktiviranje:', error);
+        alert(`Neuspješno deaktiviranje korisnika: ${error.response?.data?.message || error.message}`);
       }
     }
   };
@@ -109,22 +109,22 @@ export default function UserManagement() {
     try {
       await AdminService.activateUser(userId);
       loadUsers();
-      alert('User activated successfully');
+      alert('Korisnik uspješno aktiviran');
     } catch (error: any) {
-      console.error('Error activating user:', error);
-      alert(`Error activating user: ${error.response?.data?.message || error.message}`);
+      console.error('Greška prilikom aktiviranja korisnika:', error);
+      alert(`Neuspješno aktiviranje korisnika: ${error.response?.data?.message || error.message}`);
     }
   };
 
   const handleDelete = async (userId: number) => {
-    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    if (window.confirm('Da li ste sigurni da želite obrisati korisika? Ovaj postupak se ne može povratiti.')) {
       try {
         await AdminService.deleteUser(userId);
         loadUsers();
-        alert('User deleted successfully');
+        alert('Korisnik uspješno obrisan');
       } catch (error: any) {
-        console.error('Error deleting user:', error);
-        alert(`Error deleting user: ${error.response?.data?.message || error.message}`);
+        console.error('Greška prilikom brisanja korisnika:', error);
+        alert(`Neuspješno brisanje korisnika: ${error.response?.data?.message || error.message}`);
       }
     }
   };
@@ -146,10 +146,10 @@ export default function UserManagement() {
         occupation: ''
       });
       loadUsers();
-      alert('User created successfully');
+      alert('Korisinik uspješno kreiran');
     } catch (error: any) {
-      console.error('Error creating user:', error);
-      alert(`Error creating user: ${error.response?.data?.message || error.message}`);
+      console.error('Greška prilikom kreiranja korinsika:', error);
+      alert(`Neuspješno kreiranje korisnika: ${error.response?.data?.message || error.message}`);
     } finally {
       setCreateLoading(false);
     }
@@ -160,14 +160,14 @@ export default function UserManagement() {
   try {
     setBulkImportLoading(true);
     
-    console.log('Raw CSV data:', csvData);
+    console.log('Neobrađeni CSV podaci:', csvData);
     
     // Parse CSV data
     const rows = csvData.split('\n').filter(row => row.trim());
-    console.log('Rows found:', rows.length);
+    console.log('Rezultati pretrage:', rows.length);
     
     if (rows.length < 2) {
-      alert('No data found in CSV. Please check the format.');
+      alert('CSV fajl ne sadrži podatke. Proverite ispravnost formata.');
       return;
     }
 
@@ -175,7 +175,7 @@ export default function UserManagement() {
     const headers = rows[0].split(',').map(header => 
       header.trim().replace(/"/g, '').toLowerCase()
     );
-    console.log('CSV Headers:', headers);
+    console.log('CSV zaglavlja:', headers);
 
     // Get existing usernames for collision checking
     const existingUsernames = users.map(user => user.username);
@@ -183,10 +183,10 @@ export default function UserManagement() {
     
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i].split(',').map(field => field.trim().replace(/"/g, ''));
-      console.log(`Processing row ${i}:`, row);
+      console.log(`Obrada reda ${i}:`, row);
       
       if (row.length < 3) {
-        console.warn(`Skipping row ${i} - not enough columns`);
+        console.warn(`Preskakanje reda ${i} - not enough columns`);
         continue;
       }
 
@@ -196,7 +196,7 @@ export default function UserManagement() {
         userData[header] = row[index];
       });
 
-      console.log('Parsed user data:', userData);
+      console.log('Obrađeni podaci o korisnicima:', userData);
 
       // Map CSV columns to our field names
       const firstName = userData['ime'] || '';
@@ -221,16 +221,16 @@ export default function UserManagement() {
           occupation: '' // Default empty occupation
         });
         
-        console.log(`Added user: ${firstName} ${lastName}`);
+        console.log(`Dodat korisnik: ${firstName} ${lastName}`);
       } else {
-        console.warn(`Skipping row ${i} - missing required fields:`, { firstName, lastName, email });
+        console.warn(`Preskakanje reda ${i} - nedostaju obavezna polja:`, { firstName, lastName, email });
       }
     }
 
-    console.log('Users to create:', usersToCreate);
+    console.log('Novi korisnici:', usersToCreate);
 
     if (usersToCreate.length === 0) {
-      alert('No valid users found. Please check your CSV format.\n\nRequired columns: Ime, Prezime, Email');
+      alert('Nisu pronađeni važeći korisnici. Proverite format CSV fajla.\n\nObavezne kolone: Ime, Prezime, Email');
       return;
     }
 
@@ -243,7 +243,7 @@ export default function UserManagement() {
         await AdminService.createUser(userData);
         successCount++;
       } catch (error) {
-        console.error(`Error creating user ${userData.email}:`, error);
+        console.error(`Greška prilikom kreiranja korisnika ${userData.email}:`, error);
         errorCount++;
       }
     }
@@ -253,14 +253,14 @@ export default function UserManagement() {
     loadUsers();
     
     if (errorCount > 0) {
-      alert(`Import completed with ${successCount} successes and ${errorCount} errors. Check console for details.`);
+      alert(`Import završen sa ${successCount} uspješnih i ${errorCount} grešaka. Provjerite konzolu za detalje.`);
     } else {
-      alert(`Successfully imported ${successCount} users!`);
+      alert(`Uspješno importovano ${successCount} korisnika!`);
     }
     
   } catch (error: any) {
-    console.error('Error in bulk import:', error);
-    alert(`Error during bulk import: ${error.message}`);
+    console.error('Greška pri masovnom importu:', error);
+    alert(`Greška tokom masovnog importa: ${error.message}`);
   } finally {
     setBulkImportLoading(false);
   }
@@ -292,19 +292,19 @@ export default function UserManagement() {
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
       {/* Header with Create Buttons */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">User Management</h2>
+        <h2 className="text-2xl font-semibold text-gray-800">Upravljanje korisnicima</h2>
         <div className="flex space-x-3">
           <button
             onClick={() => setShowBulkImportModal(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition duration-200"
           >
-            Bulk Import
+            Masovni import
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
             className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition duration-200"
           >
-            Create User
+            Kreiraj korisnika
           </button>
         </div>
       </div>
@@ -312,25 +312,25 @@ export default function UserManagement() {
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Pretraga</label>
           <input
             type="text"
-            placeholder="Search users..."
+            placeholder="Pretražite korisnike..."
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Uloga</label>
           <select
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
             value={filters.role}
             onChange={(e) => setFilters({ ...filters, role: e.target.value })}
           >
-            <option value="">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
+            <option value="">Sve uloge</option>
+            <option value="admin">Administrator</option>
+            <option value="user">Korisnik</option>
           </select>
         </div>
         <div>
@@ -340,9 +340,9 @@ export default function UserManagement() {
             value={filters.is_active}
             onChange={(e) => setFilters({ ...filters, is_active: e.target.value })}
           >
-            <option value="">All Status</option>
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
+            <option value="">Svi statusi</option>
+            <option value="true">Aktivan</option>
+            <option value="false">Neaktivan</option>
           </select>
         </div>
         <div className="flex items-end">
@@ -353,7 +353,7 @@ export default function UserManagement() {
             }}
             className="w-full px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition duration-200"
           >
-            Clear Filters
+            Obriši filtere
           </button>
         </div>
       </div>
@@ -362,7 +362,7 @@ export default function UserManagement() {
       {loading ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading users...</p>
+          <p className="mt-4 text-gray-600">Učitavanje korisnika...</p>
         </div>
       ) : (
         <>
@@ -370,19 +370,19 @@ export default function UserManagement() {
             <table className="w-full table-auto">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">User</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Role</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Enrollment</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Korisnik</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Uloga</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Upis</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Activity</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Aktivnost</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Akcije</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {users.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                      No users found matching your criteria
+                      Nema korisnika koji odgovaraju kriterijumima
                     </td>
                   </tr>
                 ) : (
@@ -403,7 +403,7 @@ export default function UserManagement() {
                             ? 'bg-purple-100 text-purple-800' 
                             : 'bg-blue-100 text-blue-800'
                         }`}>
-                          {user.role}
+                          {user.role === 'admin' ? 'Administrator' : 'Korisnik'}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-gray-600">{user.enrollment_year}</td>
@@ -413,12 +413,12 @@ export default function UserManagement() {
                             ? 'bg-green-100 text-green-800' 
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {user.is_active ? 'Active' : 'Inactive'}
+                          {user.is_active ? 'Aktivan' : 'Neaktivan'}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
-                        <div>Posts: {user._count.posts}</div>
-                        <div>Events: {user._count.event_registration}</div>
+                        <div>Objave: {user._count.posts}</div>
+                        <div>Eventi: {user._count.event_registration}</div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex space-x-2">
@@ -427,21 +427,21 @@ export default function UserManagement() {
                               onClick={() => handleDeactivate(user.id)}
                               className="px-3 py-1 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-600 transition"
                             >
-                              Deactivate
+                              Deaktiviraj
                             </button>
                           ) : (
                             <button
                               onClick={() => handleActivate(user.id)}
                               className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition"
                             >
-                              Activate
+                              Aktiviraj
                             </button>
                           )}
                           <button
                             onClick={() => handleDelete(user.id)}
                             className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition"
                           >
-                            Delete
+                            Obriši
                           </button>
                         </div>
                       </td>
@@ -460,32 +460,32 @@ export default function UserManagement() {
                 disabled={pagination.page === 1}
                 className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-300 transition text-gray-700"
               >
-                Previous
+                Prethodna
               </button>
               <span className="text-gray-600">
-                Page {pagination.page} of {pagination.pages} (Total: {pagination.total})
+                Stranica {pagination.page} od {pagination.pages} (Ukupno: {pagination.total})
               </span>
               <button
                 onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                 disabled={pagination.page === pagination.pages}
                 className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-300 transition text-gray-700"
               >
-                Next
+                Sljedeća
               </button>
             </div>
           )}
         </>
       )}
 
-      {/* Create User Modal - FIXED */}
+      {/* Create User Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Create New User</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Kreiraj novog korisnika</h3>
             <form onSubmit={handleCreateUser}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ime *</label>
                   <input
                     type="text"
                     required
@@ -495,7 +495,7 @@ export default function UserManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Prezime *</label>
                   <input
                     type="text"
                     required
@@ -515,30 +515,30 @@ export default function UserManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Username *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Korisničko ime *</label>
                   <input
                     type="text"
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-gray-50"
                     value={createUserData.username}
                     onChange={(e) => setCreateUserData({ ...createUserData, username: e.target.value })}
-                    placeholder="Auto-generated from name"
+                    placeholder="Automatski generisano iz imena"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Auto-generated, but you can modify if needed</p>
+                  <p className="text-xs text-gray-500 mt-1">Automatski generisano, ali možete izmijeniti ako je potrebno</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Lozinka *</label>
                   <input
                     type="password"
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.password}
                     onChange={(e) => setCreateUserData({ ...createUserData, password: e.target.value })}
-                    placeholder="Set initial password"
+                    placeholder="Postavite početnu lozinku"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Enrollment Year</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Godina upisa</label>
                   <input
                     type="number"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
@@ -547,24 +547,24 @@ export default function UserManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Uloga</label>
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.role}
                     onChange={(e) => setCreateUserData({ ...createUserData, role: e.target.value })}
                   >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+                    <option value="user">Korisnik</option>
+                    <option value="admin">Administrator</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Zanimanje</label>
                   <input
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                     value={createUserData.occupation}
                     onChange={(e) => setCreateUserData({ ...createUserData, occupation: e.target.value })}
-                    placeholder="Optional - user can set later"
+                    placeholder="Opciono - korisnik može postaviti kasnije"
                   />
                 </div>
               </div>
@@ -574,14 +574,14 @@ export default function UserManagement() {
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
                 >
-                  Cancel
+                  Otkaži
                 </button>
                 <button
                   type="submit"
                   disabled={createLoading}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
                 >
-                  {createLoading ? 'Creating...' : 'Create User'}
+                  {createLoading ? 'Kreiranje...' : 'Kreiraj korisnika'}
                 </button>
               </div>
             </form>
@@ -589,26 +589,26 @@ export default function UserManagement() {
         </div>
       )}
 
-      {/* Bulk Import Modal - FIXED */}
+      {/* Bulk Import Modal */}
       {showBulkImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Bulk Import Users</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Masovni import korisnika</h3>
             
             <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-semibold text-gray-800 mb-2">Instructions:</h4>
+              <h4 className="font-semibold text-gray-800 mb-2">Uputstva:</h4>
               <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
-                <li>Export Google Forms responses as CSV</li>
-                <li>Ensure CSV has columns for: <strong>First Name, Last Name, Email</strong></li>
-                <li>Usernames will be auto-generated as firstName.lastName</li>
-                <li>All users will be created with default password "alumni123"</li>
+                <li>Eksportujte Google Forms odgovore kao CSV</li>
+                <li>Osigurajte da CSV ima kolone za: <strong>Ime, Prezime, Email</strong></li>
+                <li>Korisnička imena će biti automatski generisana kao ime.prezime</li>
+                <li>Svi korisnici će biti kreirani sa podrazumjevanom lozinkom "alumni123"</li>
               </ol>
               <div className="mt-3 text-sm">
-                <strong className="text-gray-800">Example CSV format:</strong>
+                <strong className="text-gray-800">Primjer CSV formata:</strong>
                 <pre className="bg-gray-100 p-2 rounded mt-1 text-xs text-gray-800 border">
-                  Timestamp,Ime,"Prezime,Email{'\n'}
-                  2025/11/26 5:46:06 PM GMT+1,John,Doe,john.doe@example.com{'\n'}
-                  2025/11/26 5:46:06 PM GMT+1,Jane,Smith,jane.smith@example.com
+                  Timestamp,Ime,Prezime,Email{'\n'}
+                  2025/11/26 5:46:06 PM GMT+1,Marko,Marković,marko.markovic@primjer.com{'\n'}
+                  2025/11/26 5:46:06 PM GMT+1,Ana,Anić,ana.anic@primjer.com
                 </pre>
               </div>
             </div>
@@ -616,14 +616,14 @@ export default function UserManagement() {
             <form onSubmit={handleBulkImport}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Paste CSV Data:
+                  Zalijepite CSV podatke:
                 </label>
                 <textarea
                   value={csvData}
                   onChange={(e) => setCsvData(e.target.value)}
                   rows={10}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm text-gray-700 bg-white"
-                  placeholder="Paste your CSV data here..."
+                  placeholder="Zalijepite vaše CSV podatke ovdje..."
                   required
                 />
               </div>
@@ -637,14 +637,14 @@ export default function UserManagement() {
                   }}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
                 >
-                  Cancel
+                  Otkaži
                 </button>
                 <button
                   type="submit"
                   disabled={bulkImportLoading || !csvData.trim()}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
                 >
-                  {bulkImportLoading ? 'Importing...' : 'Import Users'}
+                  {bulkImportLoading ? 'Importovanje...' : 'Importuj korisnike'}
                 </button>
               </div>
             </form>

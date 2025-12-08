@@ -43,29 +43,29 @@ export default function ContentManagement() {
       setPosts(data.posts);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error loading posts:', error);
-      alert('Error loading posts');
+      console.error('Greška prilikom učitavanja objave', error);
+      alert('Neuspešno učitavanje objave');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeletePost = async (postId: number) => {
-    if (window.confirm('Are you sure you want to delete this post?')) {
+    if (window.confirm('Da li ste sigurni da želite obrisati ovu objavu?')) {
       try {
         await AdminService.deletePost(postId);
         loadPosts();
-        alert('Post deleted successfully');
+        alert('Objava uspješno obrisana');
       } catch (error) {
-        console.error('Error deleting post:', error);
-        alert('Error deleting post');
+        console.error('Greška prilikom brisanja objave:', error);
+        alert('Neuspješno brisanje objave');
       }
     }
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Content Management</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Upravljanje sadržajem</h2>
 
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-6">
@@ -78,7 +78,7 @@ export default function ContentManagement() {
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            Posts
+            Objave
           </button>
           <button
             onClick={() => setActiveTab('events')}
@@ -88,7 +88,7 @@ export default function ContentManagement() {
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            Events
+            Događaji
           </button>
         </nav>
       </div>
@@ -98,7 +98,7 @@ export default function ContentManagement() {
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading posts...</p>
+              <p className="mt-4 text-gray-600">Učitavanje objava...</p>
             </div>
           ) : (
             <>
@@ -166,7 +166,7 @@ export default function ContentManagement() {
 
       {activeTab === 'events' && (
         <div className="text-center py-8 text-gray-500">
-          Events management coming soon...
+          Upravljanje događajima uskoro...
         </div>
       )}
     </div>

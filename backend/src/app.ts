@@ -11,12 +11,14 @@ import userRoutes from "./routes/users.routes";
 import postsRoutes from "./routes/posts.routes";
 import { getMyProfile, updateMyProfile } from "./controllers/users.controller";
 import { authenticate } from "./middlewares/auth.middleware";
+import enrollRoutes from "./routes/enroll.routes";
+import eventsRoutes from "./routes/events.routes";
 
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -35,6 +37,8 @@ app.use("/api/health", healthRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api", postsRoutes);
+app.use("/api", enrollRoutes);
+app.use("/api/events", eventsRoutes);
 app.get("/api/profile", authenticate, getMyProfile);
 app.put("/api/profile", authenticate, updateMyProfile);
 

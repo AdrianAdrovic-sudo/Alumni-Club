@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../css/Blog.css';
 
 type ImageProps = {
@@ -39,6 +40,7 @@ export const Blog = (props: BlogProps) => {
     ...props,
   };
 
+  const navigate = useNavigate();
   const [showAll, setShowAll] = useState(false);
 
   const visiblePosts = blogPosts.slice(0, ITEMS_PER_PAGE);
@@ -51,7 +53,7 @@ export const Blog = (props: BlogProps) => {
   const renderCard = (post: BlogPost, index: number, isHidden: boolean = false) => {
     const totalIndex = isHidden ? ITEMS_PER_PAGE + index : index;
     const isLastRow = showAll && totalIndex >= blogPosts.length - remainingItems;
-    
+
     // Calculate column span for last row items
     let columnSpan = '';
     if (isLastRow && remainingItems === 1) {
@@ -66,8 +68,8 @@ export const Blog = (props: BlogProps) => {
     }
 
     return (
-      <div 
-        key={totalIndex} 
+      <div
+        key={totalIndex}
         className={`${columnSpan} ${isHidden ? 'animate-slide-in' : ''}`}
         style={isHidden ? {
           animationDelay: `${index * 100}ms`,
@@ -127,19 +129,29 @@ export const Blog = (props: BlogProps) => {
             <p className="md:text-md">{description}</p>
           </div>
         </div>
-        
+
+        {/* Add Blog Button Section */}
+        <div className="mb-8 flex justify-end">
+          <button
+            onClick={() => navigate('/AddBlog')}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border-[3px] border-white"
+          >
+            Add Blog
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
           {/* Always visible posts */}
           {visiblePosts.map((post, index) => renderCard(post, index, false))}
-          
+
           {/* Hidden posts with animation */}
           {showAll && hiddenPosts.map((post, index) => renderCard(post, index, true))}
         </div>
 
         {hasMorePosts && (
           <div className="flex items-center justify-center">
-            <button 
-              className={`default-blog-btn mt-10 md:mt-14 lg:mt-16 ${button.variant === "secondary" ? "default-blog-btn-secondary" : ""}`}
+            <button
+              className={`default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white ${button.variant === "secondary" ? "default-blog-btn-secondary" : ""}`}
               onClick={() => setShowAll(!showAll)}
             >
               {showAll ? "Show less" : button.title}

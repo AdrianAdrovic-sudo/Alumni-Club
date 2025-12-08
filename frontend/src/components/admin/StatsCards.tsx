@@ -15,37 +15,37 @@ interface StatsCardsProps {
 export default function StatsCards({ stats }: StatsCardsProps) {
   const statCards = [
     {
-      title: 'Total Users',
+      title: 'Ukupno korisnika',
       value: stats.totalUsers,
       color: 'bg-blue-500',
       icon: '👥'
     },
     {
-      title: 'Active Users',
+      title: 'Aktivni korisnici',
       value: stats.activeUsers,
       color: 'bg-green-500',
       icon: '✅'
     },
     {
-      title: 'Inactive Users',
+      title: 'Neaktivni korisnici',
       value: stats.inactiveUsers,
       color: 'bg-red-500',
       icon: '❌'
     },
     {
-      title: 'Total Posts',
+      title: 'Ukupno objava',
       value: stats.totalPosts,
       color: 'bg-purple-500',
       icon: '📝'
     },
     {
-      title: 'Total Events',
+      title: 'Ukupno događaja',
       value: stats.totalEvents,
       color: 'bg-orange-500',
       icon: '📅'
     },
     {
-      title: 'Recent Registrations',
+      title: 'Nedavne registracije',
       value: stats.recentRegistrations,
       color: 'bg-teal-500',
       icon: '🆕'

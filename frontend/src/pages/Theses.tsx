@@ -6,17 +6,27 @@ export default function DiplomskiRadovi() {
   const [sortBy, setSortBy] = useState("datum-desc");
   const [showFilter, setShowFilter] = useState(false);
 
+  const handleDownload = (fileUrl: string, fileName: string) => {
+    // Create a temporary anchor element to trigger download
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const podaci = [
-    { ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009." },
-    { ime: "Tripo", prezime: "Matijević", naziv: "Prikupljanje činjenica za informacioni sistem studentske službe", datum: "10.07.2009." },
-    { ime: "Zoran", prezime: "Ćorović", naziv: "Model, objekti i veze informacionog sistema studentske službe", datum: "10.07.2009." },
-    { ime: "Dženan", prezime: "Strujić", naziv: "Relacioni model informacionog sistema studentske službe", datum: "10.07.2009." },
-    { ime: "Novak", prezime: "Radulović", naziv: "Forme i izvještaj informacionog sistema studentske službe", datum: "10.07.2009." },
-    { ime: "Igor", prezime: "Pekić", naziv: "Sigurnost informacionog sistema studentske službe", datum: "10.07.2009." },
-    { ime: "Ana", prezime: "Jovanović", naziv: "Web aplikacija za studentsku službu", datum: "10.07.2009." },
-    { ime: "Jelena", prezime: "Marković", naziv: "Implementacija informacionog sistema studentske službe", datum: "10.07.2009." },
-    { ime: "Marko", prezime: "Nikolić", naziv: "Testiranje informacionog sistema studentske službe", datum: "10.07.2009." },
-    { ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2009." },
+    { ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009.", fileUrl: "/theses/zizic-milos.pdf" },
+    { ime: "Tripo", prezime: "Matijević", naziv: "Prikupljanje činjenica za informacioni sistem studentske službe", datum: "10.07.2009.", fileUrl: "/theses/matijevic-tripo.pdf" },
+    { ime: "Zoran", prezime: "Ćorović", naziv: "Model, objekti i veze informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/corovic-zoran.pdf" },
+    { ime: "Dženan", prezime: "Strujić", naziv: "Relacioni model informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/strujic-dzenan.pdf" },
+    { ime: "Novak", prezime: "Radulović", naziv: "Forme i izvještaj informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/radulovic-novak.pdf" },
+    { ime: "Igor", prezime: "Pekić", naziv: "Sigurnost informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/pekic-igor.pdf" },
+    { ime: "Ana", prezime: "Jovanović", naziv: "Web aplikacija za studentsku službu", datum: "10.07.2009.", fileUrl: "/theses/jovanovic-ana.pdf" },
+    { ime: "Jelena", prezime: "Marković", naziv: "Implementacija informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/markovic-jelena.pdf" },
+    { ime: "Marko", prezime: "Nikolić", naziv: "Testiranje informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/nikolic-marko.pdf" },
+    { ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/stojanovic-ivana.pdf" },
   ];
 
   // Filtriranje
@@ -77,25 +87,25 @@ export default function DiplomskiRadovi() {
                 onClick={() => { setSortBy("datum-desc"); setShowFilter(false); }}
                 className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "datum-desc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
               >
-               Datum (najnoviji prvo)
+                Datum (najnoviji prvo)
               </button>
               <button
                 onClick={() => { setSortBy("datum-asc"); setShowFilter(false); }}
                 className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "datum-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
               >
-              Datum (najstariji prvo)
+                Datum (najstariji prvo)
               </button>
               <button
                 onClick={() => { setSortBy("ime-asc"); setShowFilter(false); }}
                 className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "ime-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
               >
-              Ime (A-Z)
+                Ime (A-Z)
               </button>
               <button
                 onClick={() => { setSortBy("prezime-asc"); setShowFilter(false); }}
                 className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "prezime-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
               >
-              Prezime (A-Z)
+                Prezime (A-Z)
               </button>
               <button
                 onClick={() => { setSortBy("naziv-asc"); setShowFilter(false); }}
@@ -108,7 +118,7 @@ export default function DiplomskiRadovi() {
         </div>
 
         <div className="flex items-center w-full sm:w-96">
-         
+
           <input
             type="text"
             placeholder="Pretraga..."
@@ -151,8 +161,13 @@ export default function DiplomskiRadovi() {
                     <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
                       {p.prezime}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
-                      {p.naziv}
+                    <td className="px-4 py-3 pb-[28px] text-sm text-gray-800 border-b border-gray-200">
+                      <button
+                        onClick={() => handleDownload(p.fileUrl, `${p.prezime}-${p.ime}.pdf`)}
+                        className="text-gray-800 hover:text-[#294a70] cursor-pointer text-left bg-transparent border-none p-0 m-0 font-normal transition-colors"
+                      >
+                        {p.naziv}
+                      </button>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
                       {p.datum}

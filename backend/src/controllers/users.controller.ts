@@ -52,6 +52,12 @@ export async function getMyProfile(req: Request, res: Response) {
         work_location: true,
         is_public: true,
         cv_url: true,
+<<<<<<< HEAD
+=======
+        position: true,
+        study_level: true,
+        study_direction: true,
+>>>>>>> main
         role: true,
         is_active: true,
         created_at: true,
@@ -101,6 +107,24 @@ export async function updateMyProfile(req: Request, res: Response) {
       }
     }
 
+<<<<<<< HEAD
+=======
+    // Pozicija
+    if (typeof body.pozicija === "string" && body.pozicija.trim()) {
+      data.position = body.pozicija.trim();
+    }
+
+    // Nivo studija
+    if (typeof body.nivoStudija === "string" && body.nivoStudija.trim()) {
+      data.study_level = body.nivoStudija.trim();
+    }
+
+    // Smjer
+    if (typeof body.smjer === "string" && body.smjer.trim()) {
+      data.study_direction = body.smjer.trim();
+    }
+
+>>>>>>> main
     // Firma / zanimanje: "firma" ili "occupation"
     const occupationRaw = body.firma ?? body.occupation;
     if (typeof occupationRaw === "string" && occupationRaw.trim()) {
@@ -149,6 +173,12 @@ export async function updateMyProfile(req: Request, res: Response) {
         work_location: true,
         is_public: true,
         cv_url: true,
+<<<<<<< HEAD
+=======
+        position: true,
+        study_level: true,
+        study_direction: true,
+>>>>>>> main
         role: true,
         is_active: true,
         created_at: true,

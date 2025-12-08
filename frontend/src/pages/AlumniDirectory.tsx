@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BiLogoDribbble, BiLogoLinkedinSquare } from "react-icons/bi";
 import { FaXTwitter } from "react-icons/fa6";
+import api from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 type ImageProps = {
   src: string;
@@ -25,6 +27,7 @@ type SocialLink = {
 };
 
 type AlumniMember = {
+  id: number;
   image: ImageProps;
   name: string;
   jobTitle: string;
@@ -40,22 +43,32 @@ type Props = {
   footer: Footer;
 };
 
-export type AlumniDirectoryProps = React.ComponentPropsWithoutRef<"section"> & Partial<Props>;
+export type AlumniDirectoryProps = React.ComponentPropsWithoutRef<"section"> &
+  Partial<Props>;
 
-const Button: React.FC<ButtonProps & { children: React.ReactNode; onClick?: () => void; className?: string; type?: 'button' | 'submit'; }> = ({
+const Button: React.FC<
+  ButtonProps & {
+    children: React.ReactNode;
+    onClick?: () => void;
+    className?: string;
+    type?: "button" | "submit";
+  }
+> = ({
   title,
   variant = "primary",
   size = "md",
   children,
   onClick,
-  className = '',
-  type = 'button',
+  className = "",
+  type = "button",
 }) => {
-  const baseClasses = "inline-flex items-center justify-center font-medium transition-all rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const baseClasses =
+    "inline-flex items-center justify-center font-medium transition-all rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2";
 
   const variantClasses = {
     primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
-    secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500",
+    secondary:
+      "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500",
     link: "text-blue-600 hover:text-blue-700 underline",
   };
 
@@ -76,9 +89,14 @@ const Button: React.FC<ButtonProps & { children: React.ReactNode; onClick?: () =
   );
 };
 
-const AlumniMember = ({ member }: { member: AlumniMember }) => {
+const AlumniMemberCard = ({ member }: { member: AlumniMember }) => {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex flex-col text-center">
+    <div
+      className="flex flex-col text-center cursor-pointer hover:scale-[1.02] transition"
+      onClick={() => navigate(`/alumni/${member.id}`)}
+    >
       <div className="rb-5 mb-5 flex w-full items-center justify-center md:mb-6">
         <img
           src={member.image.src}
@@ -91,8 +109,8 @@ const AlumniMember = ({ member }: { member: AlumniMember }) => {
         <h6 className="md:text-md">{member.jobTitle}</h6>
       </div>
       <p>{member.description}</p>
-      <div className="mt-6 grid grid-flow-col grid-cols-[max-content] gap-[0.875rem] self-center">
-        {member.socialLinks.map((link, index) => (
+      <div className="mt-6 grid grid-flow-col grid-cols-[max-content] gap-3.5 self-center">
+        {member.socialLinks.map((link: SocialLink, index: number) => (
           <a key={index} href={link.href}>
             {link.icon}
           </a>
@@ -103,43 +121,122 @@ const AlumniMember = ({ member }: { member: AlumniMember }) => {
 };
 
 export const AlumniDirectory = (props: AlumniDirectoryProps) => {
-  const { tagline, heading, description, alumniMembers, footer } = {
+  const { tagline, heading, description, footer } = {
     ...AlumniDirectoryDefaults,
     ...props,
   };
 
+  // REAL alumni loaded from backend
+  const [alumniMembers, setAlumniMembers] = useState<AlumniMember[]>([]);
+  const [directoryLoading, setDirectoryLoading] = useState(true);
+
+  // ENROLL modal state (original behaviour)
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState(false); // submit loading for enroll
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
+
+  // Load real alumni from backend
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const res = await api.get("/alumni/directory");
+        const backendUsers = res.data.users;
+
+        const mapped: AlumniMember[] = backendUsers.map((u: any) => ({
+          id: u.id,
+          image: {
+            src:
+              u.profile_picture ||
+              "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+            alt: "Slika člana alumni kluba",
+          },
+          name: `${u.first_name} ${u.last_name}`,
+          jobTitle: u.occupation || "Nije navedeno",
+          description:
+            "Alumni član. Pogledajte profil za više informacija.",
+          socialLinks: [
+            { href: "#", icon: <BiLogoLinkedinSquare className="size-6" /> },
+            { href: "#", icon: <FaXTwitter className="size-6 p-0.5" /> },
+            { href: "#", icon: <BiLogoDribbble className="size-6" /> },
+          ],
+        }));
+
+        setAlumniMembers(mapped);
+      } catch (err) {
+        console.error("Greška pri učitavanju direktorijuma:", err);
+      } finally {
+        setDirectoryLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email';
-    if (!formData.message.trim()) newErrors.message = 'Message is required';
+    if (!formData.name.trim()) newErrors.name = "Ime i prezime je obavezno";
+    if (!formData.email.trim()) newErrors.email = "Email je obavezan";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      newErrors.email = "Nevažeći email";
+    if (!formData.message.trim()) newErrors.message = "Poruka je obavezna";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log('Form submitted:', formData);
-      
-      // Replace this with your API call or submission handler
-      setFormData({ name: '', email: '', message: '' });
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    if (!validateForm()) return;
+
+    try {
+      setLoading(true);
+      await api.post("/enroll", {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+      });
+
+      setSubmitSuccess(true);
+      setFormData({ name: "", email: "", message: "" });
       setIsModalOpen(false);
-      alert('Application sent successfully!');
+      alert("Prijava je uspješno poslata.");
+    } catch (error) {
+      console.error("Greška pri slanju prijave:", error);
+      setSubmitError(
+        "Došlo je do greške pri slanju prijave. Pokušajte ponovo."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
+      setErrors({ ...errors, [e.target.name]: "" });
     }
   };
+
+  if (directoryLoading) {
+    return (
+      <section className="px-[5%] py-16 md:py-24 lg:py-28">
+        <div className="text-center text-gray-200">Učitavanje...</div>
+      </section>
+    );
+  }
 
   return (
     <>
@@ -153,45 +250,47 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
             <p className="md:text-md">{description}</p>
           </div>
           <div className="grid grid-cols-1 items-start justify-center gap-x-8 gap-y-12 md:grid-cols-3 md:gap-x-8 md:gap-y-16 lg:gap-x-12">
-            {alumniMembers.map((member, index) => (
-              <AlumniMember key={index} member={member} />
+            {alumniMembers.map((member: AlumniMember, index: number) => (
+              <AlumniMemberCard key={index} member={member} />
             ))}
           </div>
-          <div className="mx-auto mt-14 w-full max-w-md text-center md:mt-20 lg:mt-24">
-            <h4 className="mb-3 text-2xl font-bold md:mb-4 md:text-3xl md:leading-[1.3] lg:text-4xl">
-              {footer.heading}
-            </h4>
-            <p className="md:text-md">{footer.description}</p>
-            <div className="mt-6 flex items-center justify-center gap-x-4 text-center md:mt-8">
-              <Button 
-                {...footer.button} 
-                onClick={() => setIsModalOpen(true)}
-              >
-                {footer.button.title}
-              </Button>
+
+          {!isLoggedIn && (
+            <div className="mx-auto mt-14 w-full max-w-md text-center md:mt-20 lg:mt-24">
+              <h4 className="mb-3 text-2xl font-bold md:mb-4 md:text-3xl md:leading-[1.3] lg:text-4xl">
+                {footer.heading}
+              </h4>
+              <p className="md:text-md">{footer.description}</p>
+              <div className="mt-6 flex items-center justify-center gap-x-4 textcenter md:mt-8">
+                <Button {...footer.button} onClick={() => setIsModalOpen(true)}>
+                  {footer.button.title}
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* Modal */}
       {isModalOpen && (
         <>
-          {/* Backdrop */}
-          <div 
+          <div
             className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setIsModalOpen(false)}
             aria-hidden="true"
           />
-          {/* Modal Content */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200">
               <div className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Join Alumni Club</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                  Pridružite se Alumni Klubu
+                </h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Ime i prezime *
                     </label>
                     <input
                       id="name"
@@ -200,15 +299,22 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       value={formData.name}
                       onChange={handleChange}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
-                        errors.name ? 'border-red-500' : 'border-gray-300'
+                        errors.name ? "border-red-500" : "border-gray-300"
                       }`}
                       required
                     />
-                    {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+                    {errors.name && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.name}
+                      </p>
+                    )}
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Email *
                     </label>
                     <input
@@ -218,16 +324,23 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       value={formData.email}
                       onChange={handleChange}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
-                        errors.email ? 'border-red-500' : 'border-gray-300'
+                        errors.email ? "border-red-500" : "border-gray-300"
                       }`}
                       required
                     />
-                    {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                      Message *
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Poruka *
                     </label>
                     <textarea
                       id="message"
@@ -236,25 +349,43 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       value={formData.message}
                       onChange={handleChange}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-vertical ${
-                        errors.message ? 'border-red-500' : 'border-gray-300'
+                        errors.message ? "border-red-500" : "border-gray-300"
                       }`}
                       required
                     />
-                    {errors.message && <p className="mt-1 text-sm text-red-600">{errors.message}</p>}
+                    {errors.message && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.message}
+                      </p>
+                    )}
                   </div>
-                  
+
+                  {submitError && (
+                    <p className="text-sm text-red-600">{submitError}</p>
+                  )}
+                  {submitSuccess && (
+                    <p className="text-sm text-green-600">
+                      Prijava je uspješno poslata.
+                    </p>
+                  )}
+
                   <div className="flex gap-3 pt-2">
-                    <Button 
-                      type="button" 
-                      variant="secondary" 
-                      size="lg" 
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="lg"
                       onClick={() => setIsModalOpen(false)}
                       className="flex-1"
                     >
-                      Cancel
+                      Otkaži
                     </Button>
-                    <Button type="submit" variant="primary" size="lg" className="flex-1">
-                      Submit Application
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="lg"
+                      className="flex-1"
+                    >
+                      {loading ? "Slanje..." : "Pošaljite prijavu"}
                     </Button>
                   </div>
                 </form>
@@ -269,91 +400,18 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
 
 export const AlumniDirectoryDefaults: Props = {
   tagline: "Mediteran FIT",
-  heading: "Alumni Club",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  heading: "Alumni Klub",
+  description:
+    "Dobrodošli u naš alumni klub. Povezujemo bivše studente i pratimo njihove uspjehe.",
   alumniMembers: [
     {
+      id: 0,
       image: {
         src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder image 1",
+        alt: "Slika člana alumni kluba",
       },
-      name: "Full name",
-      jobTitle: "Job title",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
-      socialLinks: [
-        { href: "#", icon: <BiLogoLinkedinSquare className="size-6" /> },
-        { href: "#", icon: <FaXTwitter className="size-6 p-0.5" /> },
-        { href: "#", icon: <BiLogoDribbble className="size-6" /> },
-      ],
-    },
-    {
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder image 2",
-      },
-      name: "Full name",
-      jobTitle: "Job title",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
-      socialLinks: [
-        { href: "#", icon: <BiLogoLinkedinSquare className="size-6" /> },
-        { href: "#", icon: <FaXTwitter className="size-6 p-0.5" /> },
-        { href: "#", icon: <BiLogoDribbble className="size-6" /> },
-      ],
-    },
-    {
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder image 3",
-      },
-      name: "Full name",
-      jobTitle: "Job title",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
-      socialLinks: [
-        { href: "#", icon: <BiLogoLinkedinSquare className="size-6" /> },
-        { href: "#", icon: <FaXTwitter className="size-6 p-0.5" /> },
-        { href: "#", icon: <BiLogoDribbble className="size-6" /> },
-      ],
-    },
-    {
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder image 4",
-      },
-      name: "Full name",
-      jobTitle: "Job title",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
-      socialLinks: [
-        { href: "#", icon: <BiLogoLinkedinSquare className="size-6" /> },
-        { href: "#", icon: <FaXTwitter className="size-6 p-0.5" /> },
-        { href: "#", icon: <BiLogoDribbble className="size-6" /> },
-      ],
-    },
-    {
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder image 7",
-      },
-      name: "Full name",
-      jobTitle: "Job title",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
-      socialLinks: [
-        { href: "#", icon: <BiLogoLinkedinSquare className="size-6" /> },
-        { href: "#", icon: <FaXTwitter className="size-6 p-0.5" /> },
-        { href: "#", icon: <BiLogoDribbble className="size-6" /> },
-      ],
-    },
-    {
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder image 8",
-      },
-      name: "Full name",
-      jobTitle: "Job title",
+      name: "Puno ime",
+      jobTitle: "Pozicija",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
       socialLinks: [
@@ -364,9 +422,9 @@ export const AlumniDirectoryDefaults: Props = {
     },
   ],
   footer: {
-    heading: "Join our Alumni Club!",
-    description: "Posaljite prijavu.",
-    button: { title: "Enroll", variant: "secondary" },
+    heading: "Pridružite se Alumni Klubu!",
+    description: "Pošaljite prijavu i budite dio naše mreže bivših studenata.",
+    button: { title: "Prijavite se", variant: "secondary", size: "md" },
   },
 };
 

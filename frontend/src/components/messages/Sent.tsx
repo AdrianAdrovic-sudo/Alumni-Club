@@ -11,13 +11,13 @@ export default function Sent({ messages, onDeleteLocal }: SentProps) {
   if (messages.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No sent messages</p>
+        <p className="text-gray-500">Nema poslatih poruka</p>
       </div>
     );
   }
 
   const handleDelete = (id: number) => {
-    if (!window.confirm('Delete this message from your Sent folder on your side')) return;
+    if (!window.confirm('Obriši poruku iz foldera poslato')) return;
     onDeleteLocal(id);
   };
 

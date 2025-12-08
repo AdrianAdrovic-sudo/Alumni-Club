@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { Camera, Save, Eye, EyeOff, Upload, X } from "lucide-react";
@@ -6,6 +7,41 @@ export default function MyProfile() {
   const [profileData, setProfileData] = useState({
     ime: "",
     prezime: "",
+=======
+import React, { useState, useEffect } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Camera,
+  Save,
+  Eye,
+  EyeOff,
+  Upload,
+  X,
+  Mail,
+  Briefcase,
+  User,
+  FileText,
+} from "lucide-react";
+
+type ProfileData = {
+  ime: string;
+  prezime: string;
+  email: string;
+  godinaZavrsetka: string;
+  mjestoRada: string;
+  firma: string;
+  javniProfil: boolean;
+};
+
+export default function MyProfile() {
+  const navigate = useNavigate();
+
+  const [profileData, setProfileData] = useState<ProfileData>({
+    ime: "",
+    prezime: "",
+    email: "",
+>>>>>>> main
     godinaZavrsetka: "",
     mjestoRada: "",
     firma: "",
@@ -17,6 +53,47 @@ export default function MyProfile() {
   const [saved, setSaved] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
+<<<<<<< HEAD
+=======
+  // --------------------------------------------------------
+  // LOAD USER FROM BACKEND
+  // --------------------------------------------------------
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const resp = await fetch("http://localhost:4000/api/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!resp.ok) return;
+
+        const data = await resp.json();
+
+        setProfileData({
+          ime: data.first_name || "",
+          prezime: data.last_name || "",
+          email: data.email || "",
+          godinaZavrsetka: String(data.enrollment_year || ""),
+          mjestoRada: data.work_location || "",
+          firma: data.occupation || "",
+          javniProfil: data.is_public ?? true,
+        });
+
+        if (data.profile_picture) {
+          setProfilnaSlika(`http://localhost:4000${data.profile_picture}`);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadProfile();
+  }, []);
+
+>>>>>>> main
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -47,14 +124,23 @@ export default function MyProfile() {
     }
   };
 
+<<<<<<< HEAD
   const removeCv = () => {
     setCvFile(null);
   };
+=======
+  const removeCv = () => setCvFile(null);
+
+  // --------------------------------------------------------
+  // SUBMIT UPDATE TO BACKEND
+  // --------------------------------------------------------
+>>>>>>> main
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       const token = localStorage.getItem("token");
+<<<<<<< HEAD
       if (!token) {
         console.error("Nema tokena – korisnik vjerovatno nije ulogovan.");
         return;
@@ -144,12 +230,59 @@ export default function MyProfile() {
           const avatarResult = await respAvatar.json();
           console.log("Profilna slika uploadovana:", avatarResult);
         }
+=======
+      if (!token) return;
+
+      // Update main profile info
+      await fetch("http://localhost:4000/api/users/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ime: profileData.ime,
+          prezime: profileData.prezime,
+          godinaZavrsetka: profileData.godinaZavrsetka,
+          mjestoRada: profileData.mjestoRada,
+          firma: profileData.firma,
+          javniProfil: profileData.javniProfil,
+        }),
+      });
+
+      // Upload avatar
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append("avatar", avatarFile);
+
+        await fetch("http://localhost:4000/api/users/me/avatar", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+      }
+
+      // Upload CV
+      if (cvFile) {
+        const cvData = new FormData();
+        cvData.append("cv", cvFile);
+
+        await fetch("http://localhost:4000/api/users/me/cv", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: cvData,
+        });
+>>>>>>> main
       }
 
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
+<<<<<<< HEAD
       console.error("Network/JS greška u handleSubmit:", err);
+=======
+      console.error(err);
+>>>>>>> main
     }
   };
 
@@ -158,17 +291,24 @@ export default function MyProfile() {
 
   return (
     <div className="w-full min-h-screen bg-white">
-      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white py-20 px-5 text-center">
+      <div className="bg-linear-to-r from-[#294a70] to-[#324D6B] text-white py-20 px-5 text-center">
         <h1 className="text-5xl mb-4 font-bold">Moj Profil</h1>
-        <p className="text-xl opacity-90">Upravljaj svojim Alumni profilom</p>
+        <p className="text-xl opacity-90">Pregled svog alumni profila</p>
       </div>
 
       <div className="max-w-4xl mx-auto py-16 px-5">
         <form
           onSubmit={handleSubmit}
+<<<<<<< HEAD
           className="bg-[#f9f9f9] p-10 rounded-2xl shadow-lg"
         >
           <div className="flex flex-col items-center mb-10">
+=======
+          className="bg-[#f9f9f9] p-10 rounded-2xl shadow-lg space-y-8"
+        >
+          {/* Avatar */}
+          <div className="flex flex-col items-center">
+>>>>>>> main
             <div className="relative">
               <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-300 border-4 border-white shadow-xl">
                 {profilnaSlika ? (
@@ -178,7 +318,7 @@ export default function MyProfile() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#294a70] to-[#324D6B]">
+                  <div className="w-full h-full flex items-center justify-center bg-linear-to-r from-[#294a70] to-[#324D6B]">
                     <Camera className="w-16 h-16 text-white" />
                   </div>
                 )}
@@ -198,92 +338,51 @@ export default function MyProfile() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-base font-semibold text-[#294a70] mb-2">
-                Ime *
-              </label>
-              <input
-                type="text"
-                name="ime"
-                value={profileData.ime}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-[#ffab1f] bg-white transition-colors"
-                placeholder="Unesite ime"
-              />
-            </div>
-            <div>
-              <label className="block text-base font-semibold text-[#294a70] mb-2">
-                Prezime *
-              </label>
-              <input
-                type="text"
-                name="prezime"
-                value={profileData.prezime}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-[#ffab1f] bg-white transition-colors"
-                placeholder="Unesite prezime"
-              />
-            </div>
+          {/* Ime + prezime */}
+          <div className="flex flex-col items-center">
+            <h2 className="text-3xl font-bold mt-4 text-[#294a70]">
+              {profileData.ime} {profileData.prezime}
+            </h2>
           </div>
 
-          <div className="mb-6">
+          {/* GODINA DIPLOMIRANJA */}
+          <div>
             <label className="block text-base font-semibold text-black mb-2">
               Godina diplomiranja *
             </label>
             <select
               name="godinaZavrsetka"
-              value={profileData.godinaZavrsetka}
+              value={String(profileData.godinaZavrsetka)}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black text-base focus:outline-none focus:border-[#ffab1f] bg-white transition-colors"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black text-base"
             >
+<<<<<<< HEAD
               <option className="text-black" value="">
                 Izaberite godinu
               </option>
               {years.map((year) => (
                 <option className="text-black" key={year} value={year}>
+=======
+              <option value="">Izaberite godinu</option>
+              {years.map((year) => (
+                <option key={year} value={String(year)}>
+>>>>>>> main
                   {year}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-base font-semibold text-[#294a70] mb-2">
-                Mjesto rada
-              </label>
-              <input
-                type="text"
-                name="mjestoRada"
-                value={profileData.mjestoRada}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-[#ffab1f] bg-white transition-colors"
-                placeholder="Grad/Država"
-              />
-            </div>
-            <div>
-              <label className="block text-base font-semibold text-[#294a70] mb-2">
-                Firma
-              </label>
-              <input
-                type="text"
-                name="firma"
-                value={profileData.firma}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-[#ffab1f] bg-white transition-colors"
-                placeholder="Naziv firme"
-              />
-            </div>
-          </div>
+          {/* EMAIL */}
+          <Item icon={<Mail />} label="Email" value={profileData.email} />
 
-          <div className="mb-6">
+          {/* CV UPLOAD */}
+          <div>
             <label className="block text-base font-semibold text-[#294a70] mb-2">
               CV (PDF)
             </label>
+
             {cvFile ? (
               <div className="flex items-center justify-between px-5 py-4 bg-white rounded-lg border-2 border-gray-300">
                 <div className="flex items-center gap-3">
@@ -316,7 +415,8 @@ export default function MyProfile() {
             )}
           </div>
 
-          <div className="bg-white p-6 rounded-lg mb-6 border-2 border-gray-300">
+          {/* VIDLJIVOST PROFILA */}
+          <div className="bg-white p-6 rounded-lg border-2 border-gray-300">
             <div className="flex items-center justify-between mb-4">
               <span className="text-base font-semibold text-[#294a70]">
                 Vidljivost profila
@@ -327,6 +427,7 @@ export default function MyProfile() {
                 <EyeOff className="w-6 h-6 text-[#ffab1f]" />
               )}
             </div>
+
             <div className="flex gap-3 mb-4">
               <button
                 type="button"
@@ -336,7 +437,11 @@ export default function MyProfile() {
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg text-sm font-semibold transition-all ${
                   !profileData.javniProfil
                     ? "border-[#ffab1f] bg-[#ffab1f] text-white"
+<<<<<<< HEAD
                     : "border-gray-300 bg-white text-gray-600 hover:border-[#ffab1f] hover:bg-[#fffbf5]"
+=======
+                    : "border-gray-300 bg-white text-gray-600"
+>>>>>>> main
                 }`}
               >
                 <EyeOff className="w-5 h-5" />
@@ -350,13 +455,18 @@ export default function MyProfile() {
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg text-sm font-semibold transition-all ${
                   profileData.javniProfil
                     ? "border-[#ffab1f] bg-[#ffab1f] text-white"
+<<<<<<< HEAD
                     : "border-gray-300 bg-white text-gray-600 hover:border-[#ffab1f] hover:bg-[#fffbf5]"
+=======
+                    : "border-gray-300 bg-white text-gray-600"
+>>>>>>> main
                 }`}
               >
                 <Eye className="w-5 h-5" />
                 Javan
               </button>
             </div>
+
             <p className="text-sm text-gray-600 leading-relaxed">
               {profileData.javniProfil
                 ? "Tvoj profil je vidljiv svim članovima Alumni kluba"
@@ -364,20 +474,71 @@ export default function MyProfile() {
             </p>
           </div>
 
+<<<<<<< HEAD
           <button
             type="submit"
             className="w-full flex items-center justify-center gap-2 py-3.5 px-8 bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white rounded-lg text-base font-semibold hover:from-[#ffab1f] hover:to-[#ff9500] transition-all hover:-translate-y-0.5 shadow-md hover:shadow-xl"
+=======
+          {/* Firma + Vidljivost Summary + CV */}
+          <div className="space-y-4">
+            <Item icon={<Briefcase />} label="Firma" value={profileData.firma} />
+            <Item
+              icon={<User />}
+              label="Vidljivost profila"
+              value={profileData.javniProfil ? "Javan" : "Privatan"}
+            />
+            {cvFile && (
+              <Item icon={<FileText />} label="CV" value={cvFile.name} />
+            )}
+          </div>
+
+          {/* SAVE BUTTON */}
+          <button
+            type="submit"
+            className="w-full flex items-center justify-center gap-2 py-3.5 px-8 bg-linear-to-r from-[#294a70] to-[#324D6B] text-white rounded-lg text-base font-semibold hover:from-[#ffab1f] hover:to-[#ff9500] transition-all hover:-translate-y-0.5 shadow-md hover:shadow-xl"
+>>>>>>> main
           >
             <Save className="w-5 h-5" />
             Sačuvaj promjene
           </button>
 
           {saved && (
-            <div className="mt-6 py-4 px-6 bg-green-100 text-green-800 rounded-lg text-center font-semibold text-sm border-2 border-green-200 animate-[slideDown_0.3s_ease-out]">
-              Profil uspješno sačuvan!
-            </div>
+            <p className="text-center text-sm text-green-600 mt-2">
+              Promjene sačuvane.
+            </p>
           )}
         </form>
+
+        {/* EDIT BUTTON */}
+        <button
+          type="button"
+          onClick={() => navigate("/MyProfileEdit")}
+          className="mt-8 w-full py-4 bg-linear-to-r from-[#294a70] to-[#324D6B] text-white font-semibold rounded-xl shadow-md hover:from-[#ffab1f] hover:to-[#ff9500] transition-all"
+        >
+          Izmijenite profil
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Item({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="text-[#ffab1f]">{icon}</div>
+      <div>
+        <p className="text-sm text-gray-500">{label}</p>
+        <p className="text-lg font-semibold text-[#294a70]">
+          {value || "—"}
+        </p>
       </div>
     </div>
   );

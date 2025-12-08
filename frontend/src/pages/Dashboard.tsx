@@ -74,8 +74,8 @@ export default function Dashboard() {
             {isAdmin ? 'Admin Dashboard' : 'User Dashboard'}
           </h1>
           <p className="text-lg text-gray-600">
-            {isAdmin 
-              ? 'Welcome to your administration panel' 
+            {isAdmin
+              ? 'Welcome to your administration panel'
               : 'Welcome to your personal dashboard'
             }
           </p>
@@ -87,33 +87,36 @@ export default function Dashboard() {
             <nav className="flex space-x-4">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  activeTab === 'overview'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'overview'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                  }`}
               >
                 Overview
               </button>
               <button
                 onClick={() => setActiveTab('users')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  activeTab === 'users'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'users'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                  }`}
               >
                 User Management
               </button>
               <button
                 onClick={() => setActiveTab('content')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  activeTab === 'content'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'content'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                  }`}
               >
                 Content Management
+              </button>
+              <button
+                onClick={() => navigate("/admin/events")}
+                className="px-4 py-2 rounded-lg font-medium transition bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+              >
+                Upravljanje događajima
               </button>
             </nav>
           </div>
@@ -168,18 +171,17 @@ export default function Dashboard() {
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Role:</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                user.role === 'admin' 
-                  ? 'bg-purple-100 text-purple-800' 
-                  : 'bg-blue-100 text-blue-800'
-              }`}>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${user.role === 'admin'
+                ? 'bg-purple-100 text-purple-800'
+                : 'bg-blue-100 text-blue-800'
+                }`}>
                 {user.role}
               </span>
             </div>
           </div>
         </div>
 
-        <button 
+        <button
           onClick={logout}
           className="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-lg transition duration-200"
         >
