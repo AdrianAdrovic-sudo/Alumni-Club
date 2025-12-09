@@ -101,7 +101,7 @@ export default function MyProfileEdit() {
 
   return (
       <div className="w-full min-h-screen bg-white">
-      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white py-20 px-5 text-center">
+      <div className="bg-linear-to-br from-[#294a70] to-[#324D6B] text-white py-20 px-5 text-center">
         <h1 className="text-5xl mb-4 font-bold">Izmijenite Profil</h1>
         <p className="text-xl opacity-90">Ažurirajte svoje podatke</p>
       </div>
@@ -118,13 +118,13 @@ export default function MyProfileEdit() {
                   alt="Profil"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400">
+                <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-gray-100 to-gray-200 text-gray-400">
                   <User size={90} />
                 </div>
               )}
             </div>
           </div>
-          <label className="mt-6 px-8 py-3 bg-gradient-to-r from-[#ffab1f] to-[#ff9500] text-white font-bold rounded-full cursor-pointer hover:from-[#ff9500] hover:to-[#ffab1f] transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+          <label className="mt-6 px-8 py-3 bg-linear-to-br from-[#ffab1f] to-[#ff9500] text-white font-bold rounded-full cursor-pointer hover:from-[#ff9500] hover:to-[#ffab1f] transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
             Promijenite sliku
             <input
               type="file"
@@ -237,7 +237,7 @@ export default function MyProfileEdit() {
 
 
           
-          <div className="flex items-center gap-4 bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-md hover:border-[#ffab1f]/30 transition-all group">
+          <div className="flex items-center gap-4 bg-linear-to-br from-gray-50 to-white p-5 rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-md hover:border-[#ffab1f]/30 transition-all group">
           <div className="text-[#ffab1f] group-hover:scale-110 transition-transform">
             <FileText />
           </div>
@@ -246,8 +246,8 @@ export default function MyProfileEdit() {
             <p className="text-lg font-bold text-[#294a70]">
             </p>
           </div>
-          <label className="px-5 py-2.5 !text-white font-bold text-sm
-                            bg-gradient-to-br from-[#294a70] to-[#3a5a80]
+          <label className="px-5 py-2.5 text-white font-bold text-sm
+                            bg-linear-to-br from-[#294a70] to-[#3a5a80]
                             hover:from-[#ffab1f] hover:to-[#ff9500]
                             rounded-xl
                             transform transition hover:scale-105
@@ -262,7 +262,7 @@ export default function MyProfileEdit() {
             </label>
             </div>
 
-   <div className="flex items-center gap-4 bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-md hover:border-[#ffab1f]/30 transition-all group">
+   <div className="flex items-center gap-4 bg-linear-to-br from-gray-50 to-white p-5 rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-md hover:border-[#ffab1f]/30 transition-all group">
   <div className="text-[#ffab1f] group-hover:scale-110 transition-transform">
     <User />
   </div>
@@ -303,7 +303,7 @@ export default function MyProfileEdit() {
         <div className="flex gap-5 mt-10">
           <button
             onClick={handleSubmit}
-            className="flex-1 py-4 bg-gradient-to-r from-[#294a70] via-[#3a5a80] to-[#294a70] text-white 
+            className="flex-1 py-4 bg-linear-to-br from-[#294a70] via-[#3a5a80] to-[#294a70] text-white 
             font-bold text-lg rounded-2xl shadow-lg hover:shadow-2xl hover:from-[#ffab1f] hover:via-[#ff9500] hover:to-[#ffab1f] 
             transition-all transform hover:scale-[1.02] flex items-center justify-center gap-3"
           >
@@ -312,7 +312,7 @@ export default function MyProfileEdit() {
           </button>
           <button
             onClick={handleCancel}
-            className="flex-1 py-4 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 font-bold text-lg rounded-2xl 
+            className="flex-1 py-4 bg-linear-to-br from-gray-200 to-gray-300 text-gray-700 font-bold text-lg rounded-2xl 
             shadow-lg hover:shadow-xl hover:from-gray-300 hover:to-gray-400 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-3"
           >
             <X size={22} />
@@ -348,7 +348,7 @@ function FormField({
   placeholder?: string;
 }) {
     return (
-    <div className="flex items-center gap-4 bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-md hover:border-[#ffab1f]/30 transition-all group">
+    <div className="flex items-center gap-4 bg-linear-to-br from-gray-50 to-white p-5 rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-md hover:border-[#ffab1f]/30 transition-all group">
       <div className="text-[#ffab1f] group-hover:scale-110 transition-transform">{icon}</div>
       <div className="flex-1">
         <label className="text-xs text-gray-500 font-semibold uppercase tracking-wide block mb-2">{label}</label>
@@ -391,7 +391,7 @@ function FormSelect({
   required?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-4 bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-md hover:border-[#ffab1f]/30 transition-all group">
+    <div className="flex items-center gap-4 bg-linear-to-br from-gray-50 to-white p-5 rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-md hover:border-[#ffab1f]/30 transition-all group">
       <div className="text-[#ffab1f] group-hover:scale-110 transition-transform">{icon}</div>
       <div className="flex-1">
         <label className="text-xs text-gray-500 font-semibold uppercase tracking-wide block mb-2">{label}</label>

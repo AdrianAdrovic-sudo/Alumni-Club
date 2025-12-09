@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BiLogoDribbble, BiLogoLinkedinSquare } from "react-icons/bi";
 import { FaXTwitter } from "react-icons/fa6";
-import api from "../services/api"; // prilagoditi putanju po potrebi
+import api from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 type ImageProps = {
   src: string;
@@ -26,6 +27,7 @@ type SocialLink = {
 };
 
 type AlumniMember = {
+  id: number;
   image: ImageProps;
   name: string;
   jobTitle: string;
@@ -88,8 +90,13 @@ const Button: React.FC<
 };
 
 const AlumniMemberCard = ({ member }: { member: AlumniMember }) => {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex flex-col text-center">
+    <div
+      className="flex flex-col text-center cursor-pointer hover:scale-[1.02] transition"
+      onClick={() => navigate(`/alumni/${member.id}`)}
+    >
       <div className="rb-5 mb-5 flex w-full items-center justify-center md:mb-6">
         <img
           src={member.image.src}
@@ -114,11 +121,16 @@ const AlumniMemberCard = ({ member }: { member: AlumniMember }) => {
 };
 
 export const AlumniDirectory = (props: AlumniDirectoryProps) => {
-  const { tagline, heading, description, alumniMembers, footer } = {
+  const { tagline, heading, description, footer } = {
     ...AlumniDirectoryDefaults,
     ...props,
   };
 
+  // REAL alumni loaded from backend
+  const [alumniMembers, setAlumniMembers] = useState<AlumniMember[]>([]);
+  const [directoryLoading, setDirectoryLoading] = useState(true);
+
+  // ENROLL modal state (original behaviour)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -126,11 +138,48 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
     message: "",
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // submit loading for enroll
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const isLoggedIn = Boolean(localStorage.getItem("token"));
+
+  // Load real alumni from backend
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const res = await api.get("/alumni/directory");
+        const backendUsers = res.data.users;
+
+        const mapped: AlumniMember[] = backendUsers.map((u: any) => ({
+          id: u.id,
+          image: {
+            src:
+              u.profile_picture ||
+              "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+            alt: "Slika člana alumni kluba",
+          },
+          name: `${u.first_name} ${u.last_name}`,
+          jobTitle: u.occupation || "Nije navedeno",
+          description:
+            "Alumni član. Pogledajte profil za više informacija.",
+          socialLinks: [
+            { href: "#", icon: <BiLogoLinkedinSquare className="size-6" /> },
+            { href: "#", icon: <FaXTwitter className="size-6 p-0.5" /> },
+            { href: "#", icon: <BiLogoDribbble className="size-6" /> },
+          ],
+        }));
+
+        setAlumniMembers(mapped);
+      } catch (err) {
+        console.error("Greška pri učitavanju direktorijuma:", err);
+      } finally {
+        setDirectoryLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -181,6 +230,14 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
     }
   };
 
+  if (directoryLoading) {
+    return (
+      <section className="px-[5%] py-16 md:py-24 lg:py-28">
+        <div className="text-center text-gray-200">Učitavanje...</div>
+      </section>
+    );
+  }
+
   return (
     <>
       <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
@@ -204,11 +261,8 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                 {footer.heading}
               </h4>
               <p className="md:text-md">{footer.description}</p>
-              <div className="mt-6 flex items-center justify-center gap-x-4 text-center md:mt-8">
-                <Button
-                  {...footer.button}
-                  onClick={() => setIsModalOpen(true)}
-                >
+              <div className="mt-6 flex items-center justify-center gap-x-4 textcenter md:mt-8">
+                <Button {...footer.button} onClick={() => setIsModalOpen(true)}>
                   {footer.button.title}
                 </Button>
               </div>
@@ -250,7 +304,9 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       required
                     />
                     {errors.name && (
-                      <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.name}
+                      </p>
                     )}
                   </div>
 
@@ -273,7 +329,9 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       required
                     />
                     {errors.email && (
-                      <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.email}
+                      </p>
                     )}
                   </div>
 
@@ -296,7 +354,9 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
                       required
                     />
                     {errors.message && (
-                      <p className="mt-1 text-sm text-red-600">{errors.message}</p>
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.message}
+                      </p>
                     )}
                   </div>
 
@@ -341,9 +401,11 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
 export const AlumniDirectoryDefaults: Props = {
   tagline: "Mediteran FIT",
   heading: "Alumni Klub",
-  description: "Dobrodošli u naš alumni klub. Povezujemo bivše studente i pratimo njihove uspjehe.",
+  description:
+    "Dobrodošli u naš alumni klub. Povezujemo bivše studente i pratimo njihove uspjehe.",
   alumniMembers: [
     {
+      id: 0,
       image: {
         src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
         alt: "Slika člana alumni kluba",
@@ -358,7 +420,6 @@ export const AlumniDirectoryDefaults: Props = {
         { href: "#", icon: <BiLogoDribbble className="size-6" /> },
       ],
     },
-    // dodati ostale dummy alumni članove ako je potrebno
   ],
   footer: {
     heading: "Pridružite se Alumni Klubu!",
