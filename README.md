@@ -49,7 +49,7 @@ PRISMA_LOG_LEVEL=info
 SMTP_HOST=smtp.sendgrid.net
 SMTP_PORT=587
 SMTP_USER=apikey
-SMTP_PASS=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
+SMTP_PASS=????????????
 FROM_EMAIL=fit.alumni.club@gmail.com      
 ENROLL_TO=fit.alumni.club@gmail.com
 ```
