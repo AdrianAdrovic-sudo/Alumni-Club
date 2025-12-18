@@ -1,4 +1,3 @@
-// backend/src/config/mail.ts
 import nodemailer from "nodemailer";
 
 export const mailTransporter = nodemailer.createTransport({
@@ -10,3 +9,7 @@ export const mailTransporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASS,
   },
 });
+
+mailTransporter.verify()
+  .then(() => console.log("SMTP ready (SendGrid)"))
+  .catch(err => console.error("SMTP error:", err));

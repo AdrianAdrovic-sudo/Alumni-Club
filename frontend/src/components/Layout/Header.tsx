@@ -64,9 +64,11 @@ function Header() {
                 <Link to="/messages" className={buttonStyle}>Inbox</Link>
 
                 {isRegularUser && (
-                  <Link to="/MyProfile" className={buttonStyle}>Profil</Link>
+                  <>
+                    <Link to="/MyProfile" className={buttonStyle}>Profil</Link>
+                    <Link to="/events" className={buttonStyle}>Događaji</Link>
+                  </>
                 )}
-
                 {isAdmin && (
                   <Link to="/Dashboard" className={buttonStyle}>Dashboard</Link>
                 )}
@@ -157,13 +159,14 @@ function Header() {
                   </Link>
 
                   {isRegularUser && (
-                    <Link 
-                      onClick={() => setOpen(false)} 
-                      to="/MyProfile" 
-                      className="w-full text-center py-2.5 px-4 border-2 border-[#294a70] rounded-full hover:bg-[#eef2ff] transition"
-                    >
-                      Moj Profil
-                    </Link>
+                    <>
+                      <Link onClick={() => setOpen(false)} to="/MyProfile" className="w-full text-center py-2.5 px-4 border-2 border-[#294a70] rounded-full hover:bg-[#eef2ff] transition">
+                        Moj Profil
+                      </Link>
+                      <Link onClick={() => setOpen(false)} to="/events" className="w-full text-center py-2.5 px-4 border-2 border-[#294a70] rounded-full hover:bg-[#eef2ff] transition">
+                        Eventi
+                      </Link>
+                    </>
                   )}
 
                   {isAdmin && (

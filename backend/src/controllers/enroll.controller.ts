@@ -1,4 +1,3 @@
-// backend/src/controllers/enroll.controller.ts
 import { Request, Response } from "express";
 import { mailTransporter } from "../config/mail";
 
@@ -30,19 +29,21 @@ ${message}
       <p>${message.replace(/\n/g, "<br>")}</p>
     `;
 
+    const fromEmail = process.env.FROM_EMAIL || process.env.ENROLL_TO;
+
     // send to school/test address
     await mailTransporter.sendMail({
-      from: `"Alumni Club" <${process.env.SMTP_USER}>`,
-      to: process.env.ENROLL_TO,
+      from: `"Alumni Club" <${fromEmail}>`,
+      to: process.env.ENROLL_TO || fromEmail,
       replyTo: email,
       subject,
       text: textBody,
       html: htmlBody,
     });
 
-    // optional confirmation back to applicant
+    // confirmation back to applicant
     await mailTransporter.sendMail({
-      from: `"Alumni Club" <${process.env.SMTP_USER}>`,
+      from: `"Alumni Club" <${fromEmail}>`,
       to: email,
       subject: "Vaša prijava za Alumni Club je zaprimljena",
       text:
@@ -52,8 +53,6 @@ ${message}
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error("Enroll mail error:", error);
-    return res
-      .status(500)
-      .json({ error: "Failed to send application email." });
+    return res.status(500).json({ error: "Failed to send application email." });
   }
 };

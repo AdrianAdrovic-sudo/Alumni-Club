@@ -46,6 +46,12 @@ PORT=4000
 NODE_ENV=development
 JWT_SECRET="your_jwt_secret"
 PRISMA_LOG_LEVEL=info
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USER=apikey
+SMTP_PASS=????????????
+FROM_EMAIL=fit.alumni.club@gmail.com      
+ENROLL_TO=fit.alumni.club@gmail.com
 ```
 # 
 
