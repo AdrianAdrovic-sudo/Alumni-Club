@@ -32,23 +32,23 @@ function Header() {
     <header className="bg-white shadow-lg border-b-[3px] border-[#ffab1f] fixed top-0 w-full z-50">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-4">
-          
+
           {/* LOGO */}
           <div className="flex-shrink-0">
             <Link to="/Home">
-              <img 
-                src="/src/assets/akfit.png" 
-                alt="Logo" 
-                className="h-12 sm:h-14 lg:h-16 w-auto" 
+              <img
+                src="/src/assets/akfit.png"
+                alt="Logo"
+                className="h-12 sm:h-14 lg:h-16 w-auto"
               />
             </Link>
           </div>
 
           {/* DESKTOP NAV - Hidden on mobile/tablet */}
           <nav className="hidden lg:flex gap-6 xl:gap-8 font-medium">
-            <Link className={navLink} to="/Blog">Blog</Link>
-            <Link className={navLink} to="/AlumniDirectory">Alumnisti</Link>
             <Link className={navLink} to="/AboutUs">O nama</Link>
+            <Link className={navLink} to="/AlumniDirectory">Alumnisti</Link>
+            <Link className={navLink} to="/Blog">Blog</Link>
             <Link className={navLink} to="/Contact">Kontakt</Link>
             <Link className={navLink} to="/Theses">Diplomski radovi</Link>
           </nav>
@@ -102,39 +102,39 @@ function Header() {
       {open && (
         <div className="lg:hidden bg-white shadow-xl border-t border-gray-200 animate-slideDown">
           <nav className="flex flex-col p-4 gap-2 text-[#294a70] font-medium max-h-[calc(100vh-80px)] overflow-y-auto">
-            
+
             {/* Navigation Links */}
-            <Link 
-              onClick={() => setOpen(false)} 
-              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+            <Link
+              onClick={() => setOpen(false)}
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition"
               to="/Blog"
             >
               Blog
             </Link>
-            <Link 
-              onClick={() => setOpen(false)} 
-              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+            <Link
+              onClick={() => setOpen(false)}
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition"
               to="/AlumniDirectory"
             >
               Alumnisti
             </Link>
-            <Link 
-              onClick={() => setOpen(false)} 
-              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+            <Link
+              onClick={() => setOpen(false)}
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition"
               to="/AboutUs"
             >
               O nama
             </Link>
-            <Link 
-              onClick={() => setOpen(false)} 
-              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+            <Link
+              onClick={() => setOpen(false)}
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition"
               to="/Contact"
             >
               Kontakt
             </Link>
-            <Link 
-              onClick={() => setOpen(false)} 
-              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition" 
+            <Link
+              onClick={() => setOpen(false)}
+              className="py-3 px-2 hover:bg-gray-50 rounded-lg transition"
               to="/Theses"
             >
               Diplomski radovi
@@ -150,9 +150,9 @@ function Header() {
                     </span>
                   </div>
 
-                  <Link 
-                    onClick={() => setOpen(false)} 
-                    to="/messages" 
+                  <Link
+                    onClick={() => setOpen(false)}
+                    to="/messages"
                     className="w-full text-center py-2.5 px-4 border-2 border-[#294a70] rounded-full hover:bg-[#eef2ff] transition"
                   >
                     Inbox
@@ -170,9 +170,9 @@ function Header() {
                   )}
 
                   {isAdmin && (
-                    <Link 
-                      onClick={() => setOpen(false)} 
-                      to="/Dashboard" 
+                    <Link
+                      onClick={() => setOpen(false)}
+                      to="/Dashboard"
                       className="w-full text-center py-2.5 px-4 border-2 border-[#294a70] rounded-full hover:bg-[#eef2ff] transition"
                     >
                       Dashboard
