@@ -72,6 +72,44 @@ export default function App() {
                 </AdminRoute>
               }
             />
+            {/* Admin event routes */}
+            <Route
+              path="/admin/events"
+              element={
+                <AdminRoute>
+                  <EventList />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/events/:id"
+              element={
+                <AdminRoute>
+                  <AdminEventDetails />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/events/new"
+              element={
+                <AdminRoute>
+                  <EventForm />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/events/:id/edit"
+              element={
+                <AdminRoute>
+                  <EventForm />
+                </AdminRoute>
+              }
+            />
+
+            {/* Public event routes */}
+            <Route path="/events" element={<PublicEventList />} />
+            <Route path="/events/:id" element={<PublicEventDetails />} />
+
           </Routes>
         </main>
         <Footer />
