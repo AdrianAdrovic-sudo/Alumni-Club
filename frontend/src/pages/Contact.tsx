@@ -1,11 +1,55 @@
+import { useState } from "react";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from "react-icons/fa";
 
 export default function Contact() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSuccessMsg(null);
+    setErrorMsg(null);
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: fullName,
+          email,
+          subject,
+          message,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data?.error || "Neuspješno slanje poruke.");
+      }
+
+      setSuccessMsg("Poruka je poslata. Hvala!");
+      setFullName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Greška pri slanju poruke.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-white">
-
       {/* HERO */}
-      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white py-16 md:py-24 px-4 text-center">
+      <div className="bg-linear-to-br from-[#294a70] to-[#324D6B] text-white py-16 md:py-24 px-4 text-center">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
           Kontaktirajte Nas
         </h1>
@@ -16,7 +60,6 @@ export default function Contact() {
 
       {/* WRAPPER */}
       <div className="max-w-6xl mx-auto px-4 py-12 md:py-20">
-
         {/* INFO SECTION */}
         <div className="mb-20">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#294a70] text-center mb-12">
@@ -24,8 +67,6 @@ export default function Contact() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
-
-            {/* CARD TEMPLATE */}
             {[
               {
                 icon: <FaMapMarkerAlt />,
@@ -54,8 +95,8 @@ export default function Contact() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="bg-white p-6 md:p-8 rounded-2xl border-2 border-gray-200 
-                           text-center transition-all hover:border-[#ffab1f] hover:shadow-xl 
+                className="bg-white p-6 md:p-8 rounded-2xl border-2 border-gray-200
+                           text-center transition-all hover:border-[#ffab1f] hover:shadow-xl
                            hover:-translate-y-1"
               >
                 <div className="text-4xl text-[#ffab1f] mb-5">{item.icon}</div>
@@ -74,7 +115,6 @@ export default function Contact() {
                 ))}
               </div>
             ))}
-
           </div>
         </div>
 
@@ -84,54 +124,92 @@ export default function Contact() {
             Pošaljite nam poruku
           </h2>
 
-          <form className="bg-gray-100 p-6 md:p-10 rounded-2xl shadow-lg">
-            
-            {/* INPUT GROUPS */}
-            {[
-              { label: "Ime i Prezime", type: "text", placeholder: "Vaše ime i prezime" },
-              { label: "Email adresa", type: "email", placeholder: "vas@email.com" },
-              { label: "Naslov", type: "text", placeholder: "Naslov poruke" },
-            ].map((field, i) => (
-              <div key={i} className="mb-6">
-                <label className="block text-[#294a70] font-medium mb-2">
-                  {field.label}
-                </label>
+          <form
+            onSubmit={onSubmit}
+            className="bg-gray-100 p-6 md:p-10 rounded-2xl shadow-lg"
+          >
+            <div className="mb-6">
+              <label className="block text-[#294a70] font-medium mb-2">
+                Ime i Prezime
+              </label>
+              <input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                type="text"
+                placeholder="Vaše ime i prezime"
+                className="w-full p-3 border-2 border-gray-300 rounded-lg
+                           text-gray-800 focus:outline-none focus:border-[#ffab1f]
+                           transition"
+              />
+            </div>
 
-                <input
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  className="w-full p-3 border-2 border-gray-300 rounded-lg 
-                             text-gray-800 focus:outline-none focus:border-[#ffab1f]
-                             transition"
-                />
-              </div>
-            ))}
+            <div className="mb-6">
+              <label className="block text-[#294a70] font-medium mb-2">
+                Email adresa
+              </label>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                placeholder="vas@email.com"
+                className="w-full p-3 border-2 border-gray-300 rounded-lg
+                           text-gray-800 focus:outline-none focus:border-[#ffab1f]
+                           transition"
+              />
+            </div>
 
-            {/* TEXTAREA */}
+            <div className="mb-6">
+              <label className="block text-[#294a70] font-medium mb-2">
+                Naslov
+              </label>
+              <input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                type="text"
+                placeholder="Naslov poruke"
+                className="w-full p-3 border-2 border-gray-300 rounded-lg
+                           text-gray-800 focus:outline-none focus:border-[#ffab1f]
+                           transition"
+              />
+            </div>
+
             <div className="mb-6">
               <label className="block text-[#294a70] font-medium mb-2">
                 Poruka
               </label>
-
               <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="Vaša poruka..."
-                className="w-full p-3 border-2 border-gray-300 rounded-lg text-gray-800 
+                className="w-full p-3 border-2 border-gray-300 rounded-lg text-gray-800
                            focus:outline-none focus:border-[#ffab1f] transition min-h-[140px] resize-y"
               />
             </div>
 
-            {/* SUBMIT BUTTON */}
+            {successMsg && (
+              <div className="mb-4 p-3 rounded-lg bg-green-100 text-green-800 border border-green-200">
+                {successMsg}
+              </div>
+            )}
+
+            {errorMsg && (
+              <div className="mb-4 p-3 rounded-lg bg-red-100 text-red-800 border border-red-200">
+                {errorMsg}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full py-3 rounded-lg text-white font-semibold text-lg
-                         bg-gradient-to-br from-[#294a70] to-[#324D6B]
+              disabled={loading}
+              className={`w-full py-3 rounded-lg text-white font-semibold text-lg
+                         bg-linear-to-br from-[#294a70] to-[#324D6B]
                          hover:from-[#ffab1f] hover:to-[#ff9500]
                          transform transition hover:-translate-y-1
-                         shadow-md hover:shadow-xl"
+                         shadow-md hover:shadow-xl
+                         ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
             >
-              Pošalji Poruku
+              {loading ? "Šaljem..." : "Pošalji Poruku"}
             </button>
-
           </form>
         </div>
 
@@ -150,7 +228,6 @@ export default function Contact() {
             />
           </div>
         </div>
-
       </div>
     </div>
   );
