@@ -1,4 +1,4 @@
-// src/services/messages.service.ts
+// backend/src/services/messages.service.ts
 import prisma from "../prisma";
 import { Prisma } from "@prisma/client";
 
@@ -32,9 +32,7 @@ function mapMessage(m: PrivateMessageWithUsers): PrivateMessageRow {
     id: m.id,
     subject: m.subject,
     content: m.content,
-    sent_date: m.sent_date
-      ? m.sent_date.toISOString()
-      : new Date().toISOString(),
+    sent_date: m.sent_date ? m.sent_date.toISOString() : new Date().toISOString(),
     read_at: m.read_at ? m.read_at.toISOString() : null,
     sender_id: m.sender_id,
     receiver_id: m.receiver_id,
@@ -72,56 +70,96 @@ export async function createPrivateMessage(
   return mapMessage(msg as PrivateMessageWithUsers);
 }
 
-// Inbox: messages received by the current user
-export async function getInboxMessages(
-  userId: number
+// Bulk create: one row per receiver (privacy friendly)
+export async function createPrivateMessagesBulk(
+  senderId: number,
+  receiverIds: number[],
+  subject: string,
+  content: string
 ): Promise<PrivateMessageRow[]> {
-  const msgs: PrivateMessageWithUsers[] =
-    await prisma.private_messages.findMany({
-      where: { receiver_id: userId },
-      orderBy: { sent_date: "desc" },
-      include: {
-        users_private_messages_sender_idTousers: {
-          select: { first_name: true, last_name: true },
-        },
-        users_private_messages_receiver_idTousers: {
-          select: { first_name: true, last_name: true },
-        },
+  const created: PrivateMessageRow[] = [];
+
+  // Simple sequential loop is fine for school project.
+  // If you want faster, we can Promise.all, but this is safer for DB load.
+  for (const receiverId of receiverIds) {
+    const row = await createPrivateMessage(senderId, receiverId, subject, content);
+    created.push(row);
+  }
+
+  return created;
+}
+
+// Inbox: messages received by the current user
+export async function getInboxMessages(userId: number): Promise<PrivateMessageRow[]> {
+  const msgs: PrivateMessageWithUsers[] = await prisma.private_messages.findMany({
+    where: { receiver_id: userId },
+    orderBy: { sent_date: "desc" },
+    include: {
+      users_private_messages_sender_idTousers: {
+        select: { first_name: true, last_name: true },
       },
-    });
+      users_private_messages_receiver_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+    },
+  });
 
   return msgs.map((m) => mapMessage(m));
 }
 
 // Sent messages: messages sent by the current user
-export async function getSentMessages(
-  userId: number
-): Promise<PrivateMessageRow[]> {
-  const msgs: PrivateMessageWithUsers[] =
-    await prisma.private_messages.findMany({
-      where: { sender_id: userId },
-      orderBy: { sent_date: "desc" },
-      include: {
-        users_private_messages_sender_idTousers: {
-          select: { first_name: true, last_name: true },
-        },
-        users_private_messages_receiver_idTousers: {
-          select: { first_name: true, last_name: true },
-        },
+export async function getSentMessages(userId: number): Promise<PrivateMessageRow[]> {
+  const msgs: PrivateMessageWithUsers[] = await prisma.private_messages.findMany({
+    where: { sender_id: userId },
+    orderBy: { sent_date: "desc" },
+    include: {
+      users_private_messages_sender_idTousers: {
+        select: { first_name: true, last_name: true },
       },
-    });
+      users_private_messages_receiver_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+    },
+  });
 
   return msgs.map((m) => mapMessage(m));
 }
 
-// Mark message as read
+// Mark message as read (real DB update now)
 export async function markMessageAsRead(
   messageId: number,
   userId: number
 ): Promise<PrivateMessageRow | null> {
-  // Temporarily disabled DB update for read status to avoid Prisma / schema mismatch.
-  // Read status will be handled on the frontend only.
-  return null;
+  // Only the receiver can mark it read
+  const existing = await prisma.private_messages.findFirst({
+    where: { id: messageId, receiver_id: userId },
+    include: {
+      users_private_messages_sender_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+      users_private_messages_receiver_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+    },
+  });
+
+  if (!existing) return null;
+
+  // If already read, return as is
+  if (existing.read_at) return mapMessage(existing as PrivateMessageWithUsers);
+
+  const updated = await prisma.private_messages.update({
+    where: { id: messageId },
+    data: { read_at: new Date() },
+    include: {
+      users_private_messages_sender_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+      users_private_messages_receiver_idTousers: {
+        select: { first_name: true, last_name: true },
+      },
+    },
+  });
+
+  return mapMessage(updated as PrivateMessageWithUsers);
 }
-
-
