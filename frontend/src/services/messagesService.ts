@@ -15,17 +15,21 @@ export interface Message {
   receiver_last_name?: string;
 }
 
-export interface SendMessageData {
-  receiverUsername: string;
-  subject: string;
-  content: string;
-}
-
 export interface UserSuggestion {
   id: number;
   username: string;
   first_name: string;
   last_name: string;
+}
+
+// Supports both:
+// 1) receiverUsername (single)
+// 2) receiverUsernames (multi)
+export interface SendMessageData {
+  receiverUsername?: string;
+  receiverUsernames?: string[];
+  subject: string;
+  content: string;
 }
 
 class MessagesService {
@@ -39,21 +43,34 @@ class MessagesService {
     return response.data;
   }
 
-  async sendMessage(messageData: SendMessageData): Promise<{ message: Message }> {
+  /**
+   * POST /api/messages
+   * If you send receiverUsernames[], backend will create 1 message per receiver.
+   * If you send receiverUsername, backend will create 1 message.
+   */
+  async sendMessage(
+    messageData: SendMessageData
+  ): Promise<{ message?: Message; messages?: Message[]; count?: number }> {
     const response = await api.post('/messages', messageData);
     return response.data;
   }
 
- async markAsRead(messageId: number): Promise<void> {
-  // Read status is handled locally on the frontend (localStorage).
-  // No backend call to avoid Prisma / schema issues.
-  return;
-}
+  /**
+   * PATCH /api/messages/:id/read
+   * Now we store read_at in the database (no more local-only).
+   */
+  async markAsRead(messageId: number): Promise<{ message: Message }> {
+    const response = await api.patch(`/messages/${messageId}/read`);
+    return response.data;
+  }
 
-
-  async searchUsers(query: string): Promise<{ users: UserSuggestion[] }> {
-    const response = await api.get('/users/search', {
-      params: { query },
+  /**
+   * GET /api/messages/users/search?q=...
+   * Backend returns { users: [...] }
+   */
+  async searchUsers(q: string): Promise<{ users: UserSuggestion[] }> {
+    const response = await api.get('/messages/users/search', {
+      params: { q },
     });
     return response.data;
   }
