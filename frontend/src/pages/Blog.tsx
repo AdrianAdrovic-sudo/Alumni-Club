@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../css/Blog.css';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../css/Blog.css";
 
 type ImageProps = {
   src: string;
@@ -8,6 +8,7 @@ type ImageProps = {
 };
 
 type BlogPost = {
+  id: number;
   url: string;
   image: ImageProps;
   category: string;
@@ -30,51 +31,118 @@ type Props = {
   blogPosts: BlogPost[];
 };
 
-export type BlogProps = React.ComponentPropsWithoutRef<"section"> & Partial<Props>;
+export type BlogProps = React.ComponentPropsWithoutRef<"section"> &
+  Partial<Props>;
 
 const ITEMS_PER_PAGE = 3;
 
 export const Blog = (props: BlogProps) => {
-  const { tagline, heading, description, button, blogPosts } = {
+  const { tagline, heading, description, button } = {
     ...BlogDefaults,
     ...props,
   };
 
   const navigate = useNavigate();
+
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 🔥 UZIMAMO BLOGOVE SA BACKENDA
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch("/api/posts"); // ako backend radi na drugom prefixu, ovdje promijeni
+        if (!res.ok) {
+          console.error("Failed to fetch posts:", res.status);
+          setLoading(false);
+          return;
+        }
+
+        const data = await res.json();
+
+        const mapped: BlogPost[] = data.map((post: any) => ({
+          id: post.id,
+          url: `/blog/${post.id}`, // ili kako god ćete raditi detaljni prikaz
+          image: {
+            src:
+              post.image_url ||
+              "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
+            alt: post.title,
+          },
+          category: post.category,
+          readTime: post.read_time || "5 min read",
+          title: post.title,
+          description: post.short_desc,
+          avatar: {
+            src:
+              post.users?.profile_picture ||
+              "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+            alt: post.users
+              ? `${post.users.first_name} ${post.users.last_name}`
+              : "Author",
+          },
+          fullName: post.users
+            ? `${post.users.first_name} ${post.users.last_name}`
+            : "Unknown author",
+          date: post.created_at
+            ? new Date(post.created_at).toLocaleDateString()
+            : "",
+        }));
+
+        setPosts(mapped);
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
   const [showAll, setShowAll] = useState(false);
+
+  const blogPosts = posts;
 
   const visiblePosts = blogPosts.slice(0, ITEMS_PER_PAGE);
   const hiddenPosts = blogPosts.slice(ITEMS_PER_PAGE);
   const hasMorePosts = blogPosts.length > ITEMS_PER_PAGE;
 
-  // Calculate remaining items for centering logic (only when showing all)
   const remainingItems = showAll ? blogPosts.length % 3 : 0;
 
-  const renderCard = (post: BlogPost, index: number, isHidden: boolean = false) => {
+  const renderCard = (
+    post: BlogPost,
+    index: number,
+    isHidden: boolean = false
+  ) => {
     const totalIndex = isHidden ? ITEMS_PER_PAGE + index : index;
-    const isLastRow = showAll && totalIndex >= blogPosts.length - remainingItems;
+    const isLastRow =
+      showAll && totalIndex >= blogPosts.length - remainingItems;
 
-    // Calculate column span for last row items
-    let columnSpan = '';
+    let columnSpan = "";
     if (isLastRow && remainingItems === 1) {
-      columnSpan = 'lg:col-start-2';
+      columnSpan = "lg:col-start-2";
     } else if (isLastRow && remainingItems === 2) {
       const isFirstOfTwo = totalIndex === blogPosts.length - 2;
       if (isFirstOfTwo) {
-        columnSpan = 'lg:col-start-1 lg:col-end-2';
+        columnSpan = "lg:col-start-1 lg:col-end-2";
       } else {
-        columnSpan = 'lg:col-start-3 lg:col-end-4';
+        columnSpan = "lg:col-start-3 lg:col-end-4";
       }
     }
 
     return (
       <div
-        key={totalIndex}
-        className={`${columnSpan} ${isHidden ? 'animate-slide-in' : ''}`}
-        style={isHidden ? {
-          animationDelay: `${index * 100}ms`,
-          animationFillMode: 'both'
-        } : {}}
+        key={post.id}
+        className={`${columnSpan} ${isHidden ? "animate-slide-in" : ""}`}
+        style={
+          isHidden
+            ? {
+                animationDelay: `${index * 100}ms`,
+                animationFillMode: "both",
+              }
+            : {}
+        }
       >
         <a href={post.url} className="mb-6 inline-block w-full max-w-full">
           <div className="w-full overflow-hidden">
@@ -130,33 +198,44 @@ export const Blog = (props: BlogProps) => {
           </div>
         </div>
 
-        {/* Add Blog Button Section */}
         <div className="mb-8 flex justify-end">
           <button
-            onClick={() => navigate('/AddBlog')}
+            onClick={() => navigate("/AddBlog")}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border-[3px] border-white"
           >
             Add Blog
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
-          {/* Always visible posts */}
-          {visiblePosts.map((post, index) => renderCard(post, index, false))}
+        {loading ? (
+          <p className="text-center">Loading...</p>
+        ) : blogPosts.length === 0 ? (
+          <p className="text-center">No blog posts yet.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
+              {visiblePosts.map((post, index) =>
+                renderCard(post, index, false)
+              )}
+              {showAll &&
+                hiddenPosts.map((post, index) => renderCard(post, index, true))}
+            </div>
 
-          {/* Hidden posts with animation */}
-          {showAll && hiddenPosts.map((post, index) => renderCard(post, index, true))}
-        </div>
-
-        {hasMorePosts && (
-          <div className="flex items-center justify-center">
-            <button
-              className={`default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white ${button.variant === "secondary" ? "default-blog-btn-secondary" : ""}`}
-              onClick={() => setShowAll(!showAll)}
-            >
-              {showAll ? "Show less" : button.title}
-            </button>
-          </div>
+            {hasMorePosts && (
+              <div className="flex items-center justify-center">
+                <button
+                  className={`default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white ${
+                    button.variant === "secondary"
+                      ? "default-blog-btn-secondary"
+                      : ""
+                  }`}
+                  onClick={() => setShowAll(!showAll)}
+                >
+                  {showAll ? "Show less" : button.title}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
@@ -168,80 +247,7 @@ export const BlogDefaults: Props = {
   heading: "Short heading goes here",
   description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
   button: { title: "View all", variant: "secondary" },
-  blogPosts: [
-    {
-      url: "#",
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
-        alt: "Relume placeholder image 1",
-      },
-      category: "Category",
-      title: "Blog title heading will go here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
-      avatar: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder avatar 3",
-      },
-      fullName: "Full name",
-      date: "11 Jan 2022",
-      readTime: "5 min read",
-    },
-    {
-      url: "#",
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
-        alt: "Relume placeholder image 2",
-      },
-      category: "Category",
-      title: "Blog title heading will go here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
-      avatar: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder avatar 3",
-      },
-      fullName: "Full name",
-      date: "11 Jan 2022",
-      readTime: "5 min read",
-    },
-    {
-      url: "#",
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
-        alt: "Relume placeholder image 2",
-      },
-      category: "Category",
-      title: "Blog title heading will go here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
-      avatar: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder avatar 3",
-      },
-      fullName: "Full name",
-      date: "11 Jan 2022",
-      readTime: "5 min read",
-    },
-    {
-      url: "#",
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
-        alt: "Relume placeholder image 3",
-      },
-      category: "Category",
-      title: "Blog title heading will go here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
-      avatar: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder avatar 3",
-      },
-      fullName: "Full name",
-      date: "11 Jan 2022",
-      readTime: "5 min read",
-    },
-  ],
+  blogPosts: [],
 };
 
 export default Blog;
