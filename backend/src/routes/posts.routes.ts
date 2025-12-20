@@ -108,7 +108,7 @@ router.delete("/posts/:id", authenticate, async (req, res) => {
     // 2) Ako NIJE admin – može brisati samo SVOJ post
     const post = await getPostById(id);
 
-    if (!post || post.is_deleted) {
+    if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
 
