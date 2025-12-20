@@ -52,6 +52,7 @@ SMTP_USER=apikey
 SMTP_PASS=????????????
 FROM_EMAIL=fit.alumni.club@gmail.com      
 ENROLL_TO=fit.alumni.club@gmail.com
+CONTACT_INBOX_EMAIL=fit.alumni.club@gmail.com
 ```
 # 
 
