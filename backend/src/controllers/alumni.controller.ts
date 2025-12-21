@@ -11,6 +11,7 @@ export const getAlumniDirectory = async (req: Request, res: Response) => {
         last_name: true,
         occupation: true,
         profile_picture: true,
+        is_public: true
       },
       orderBy: { first_name: "asc" },
     });
@@ -37,11 +38,16 @@ export const getAlumniProfile = async (req: Request, res: Response) => {
         occupation: true,
         enrollment_year: true,
         profile_picture: true,
+        is_public: true
       },
     });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.is_public) {
+      return res.status(403).json({ message: "Profile is private" });
     }
 
     return res.json({ user });

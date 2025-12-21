@@ -12,6 +12,8 @@ export default function PublicProfile() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const API_BASE_URL = "http://localhost:4000";
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -39,7 +41,7 @@ export default function PublicProfile() {
     <div className="w-full min-h-screen bg-white">
       <div className="bg-[#294a70] text-white py-16 text-center">
         <img
-          src={user.profile_picture || "https://via.placeholder.com/120"}
+          src={user.profile_picture ? `${API_BASE_URL}${user.profile_picture}` : "https://via.placeholder.com/120"} 
           className="w-32 h-32 mx-auto rounded-full object-cover border-4 border-white shadow-lg"
         />
         <h1 className="mt-4 text-3xl font-bold">
