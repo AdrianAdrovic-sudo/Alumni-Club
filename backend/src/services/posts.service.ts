@@ -61,7 +61,13 @@ export const getPendingPosts = async () => {
           id: true,
           first_name: true,
           last_name: true,
-          profile_picture: true,
+          username: true,
+        },
+      },
+      _count: {
+        select: {
+          comments: true,
+          post_likes: true,
         },
       },
     },
