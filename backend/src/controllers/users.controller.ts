@@ -131,8 +131,9 @@ export async function updateMyProfile(req: Request, res: Response) {
     }
 
     // Javni/privatan profil: "javniProfil" (boolean)
-    if (typeof body.javniProfil === "boolean") {
-      data.is_public = body.javniProfil;
+    const isPublic = body.javniProfil ?? body.is_public;
+    if (typeof isPublic === "boolean") {
+      data.is_public = isPublic;
     }
 
     // URL slike profila (ako se šalje kao string, npr. neki URL sa fronta)

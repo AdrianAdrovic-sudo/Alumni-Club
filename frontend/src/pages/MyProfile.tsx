@@ -130,13 +130,13 @@ export default function MyProfile() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ime: profileData.ime,
-          prezime: profileData.prezime,
-          godinaZavrsetka: profileData.godinaZavrsetka,
-          mjestoRada: profileData.mjestoRada,
-          firma: profileData.firma,
-          javniProfil: profileData.javniProfil,
-        }),
+        first_name: profileData.ime,
+        last_name: profileData.prezime,
+        enrollment_year: profileData.godinaZavrsetka,
+        work_location: profileData.mjestoRada,
+        occupation: profileData.firma,
+        is_public: profileData.javniProfil,
+      }),
       });
 
       // Upload avatar
