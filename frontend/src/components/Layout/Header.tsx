@@ -107,9 +107,9 @@ function Header() {
             <Link
               onClick={() => setOpen(false)}
               className="py-3 px-2 hover:bg-gray-50 rounded-lg transition"
-              to="/Blog"
+              to="/AboutUs"
             >
-              Blog
+              O nama
             </Link>
             <Link
               onClick={() => setOpen(false)}
@@ -121,9 +121,9 @@ function Header() {
             <Link
               onClick={() => setOpen(false)}
               className="py-3 px-2 hover:bg-gray-50 rounded-lg transition"
-              to="/AboutUs"
+              to="/Blog"
             >
-              O nama
+              Blog
             </Link>
             <Link
               onClick={() => setOpen(false)}

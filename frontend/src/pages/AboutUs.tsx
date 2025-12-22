@@ -5,7 +5,7 @@ function AboutUs() {
       {/* HERO */}
       <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white py-16 md:py-24 px-4 text-center">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-          O Nama
+          O nama
         </h1>
 
         <p className="text-sm sm:text-base md:text-lg opacity-90 max-w-xl mx-auto">
