@@ -5,6 +5,7 @@ import AdminService from "../services/adminService";
 import StatsCards from "../components/admin/StatsCards";
 import UserManagement from "../components/admin/UserManagement";
 import ContentManagement from "../components/admin/ContentManagement";
+import AdminInquiries from "../components/admin/AdminInquiries";
 
 interface Stats {
   totalUsers: number;
@@ -19,7 +20,9 @@ interface Stats {
 export default function Dashboard() {
   const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'content'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "users" | "content" | "inquiries"
+  >("overview");
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
 
@@ -30,7 +33,7 @@ export default function Dashboard() {
   }, [user, loading, navigate]);
 
   useEffect(() => {
-    if (user && user.role === 'admin' && activeTab === 'overview') {
+    if (user && user.role === "admin" && activeTab === "overview") {
       loadStats();
     }
   }, [user, activeTab]);
@@ -41,8 +44,8 @@ export default function Dashboard() {
       const statsData = await AdminService.getStats();
       setStats(statsData);
     } catch (error) {
-      console.error('Error loading stats:', error);
-      alert('Error loading dashboard statistics');
+      console.error("Error loading stats:", error);
+      alert("Error loading dashboard statistics");
     } finally {
       setStatsLoading(false);
     }
@@ -63,7 +66,7 @@ export default function Dashboard() {
     return null;
   }
 
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user.role === "admin";
 
   return (
     <div className="min-h-screen bg-white py-8">
@@ -71,13 +74,12 @@ export default function Dashboard() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            {isAdmin ? 'Admin Dashboard' : 'User Dashboard'}
+            {isAdmin ? "Admin Dashboard" : "User Dashboard"}
           </h1>
           <p className="text-lg text-gray-600">
             {isAdmin
-              ? 'Welcome to your administration panel'
-              : 'Welcome to your personal dashboard'
-            }
+              ? "Welcome to your administration panel"
+              : "Welcome to your personal dashboard"}
           </p>
         </div>
 
@@ -86,32 +88,47 @@ export default function Dashboard() {
           <div className="bg-gray-50 rounded-xl shadow-lg p-4 mb-8 border border-gray-200">
             <nav className="flex space-x-4">
               <button
-                onClick={() => setActiveTab('overview')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'overview'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                  }`}
+                onClick={() => setActiveTab("overview")}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === "overview"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                }`}
               >
                 Overview
               </button>
               <button
-                onClick={() => setActiveTab('users')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'users'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                  }`}
+                onClick={() => setActiveTab("users")}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === "users"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                }`}
               >
                 User Management
               </button>
               <button
-                onClick={() => setActiveTab('content')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'content'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                  }`}
+                onClick={() => setActiveTab("content")}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === "content"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                }`}
               >
                 Content Management
               </button>
+
+              <button
+                onClick={() => setActiveTab("inquiries")}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === "inquiries"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                }`}
+              >
+                Inquiries
+              </button>
+
               <button
                 onClick={() => navigate("/admin/events")}
                 className="px-4 py-2 rounded-lg font-medium transition bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
@@ -125,7 +142,7 @@ export default function Dashboard() {
         {/* Admin Content */}
         {isAdmin && (
           <div className="mb-8">
-            {activeTab === 'overview' && (
+            {activeTab === "overview" && (
               <div>
                 {statsLoading ? (
                   <div className="text-center py-8">
@@ -138,8 +155,9 @@ export default function Dashboard() {
               </div>
             )}
 
-            {activeTab === 'users' && <UserManagement />}
-            {activeTab === 'content' && <ContentManagement />}
+            {activeTab === "users" && <UserManagement />}
+            {activeTab === "content" && <ContentManagement />}
+            {activeTab === "inquiries" && <AdminInquiries />}
           </div>
         )}
 
@@ -159,7 +177,9 @@ export default function Dashboard() {
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Full Name:</span>
-              <span>{user.first_name} {user.last_name}</span>
+              <span>
+                {user.first_name} {user.last_name}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Enrollment Year:</span>
@@ -167,14 +187,17 @@ export default function Dashboard() {
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Occupation:</span>
-              <span>{user.occupation || 'Not specified'}</span>
+              <span>{user.occupation || "Not specified"}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Role:</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${user.role === 'admin'
-                ? 'bg-purple-100 text-purple-800'
-                : 'bg-blue-100 text-blue-800'
-                }`}>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  user.role === "admin"
+                    ? "bg-purple-100 text-purple-800"
+                    : "bg-blue-100 text-blue-800"
+                }`}
+              >
                 {user.role}
               </span>
             </div>
