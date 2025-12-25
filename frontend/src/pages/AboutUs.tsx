@@ -16,18 +16,21 @@ function AboutUs() {
       {/* WRAPPER */}
       <div className="max-w-7xl mx-auto py-12 md:py-20 px-4">
 
-        {/* SECTION 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24">
           <div className="space-y-5 text-justify">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#294a70]">
               Kako je nastao Alumni Klub
             </h2>
             <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
-              Alumni FIT je nastao kao projekat koji su realizovali studenti 3. godine Fakulteta...
+            Alumni FIT je nastao kao projekat koji su realizovali studenti 3. godine Fakulteta za 
+            informacione tehnologije na Univerzitetu Mediteran. Projekat je razvijen u okviru predmeta 
+            Distribuirani razvoj softvera, sa ciljem da kreira platformu koja će dugoročno služiti 
+            povezivanju bivših studenata i akademske zajednice. Svjesni da diplome predstavljaju tek početak jednog putovanja, 
+            shvatili smo koliko je važno održavati mostove između prošlosti, sadašnjosti i budućnosti našeg fakulteta. 
+            Danas, Alumni Klub FIT predstavlja dinamičnu zajednicu stručnjaka iz IT industrije koji dijele zajedničko 
+            iskustvo obrazovanja na FIT-u.
             </p>
-            <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
-              Ono što je počelo kao studentski projekat, preraslo je u vitalni alat za networking...
-            </p>
+            
           </div>
         </div>
 
@@ -39,12 +42,15 @@ function AboutUs() {
             </h2>
 
             <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
-              Alumni FIT je platforma koja povezuje bivše studente...
+            Alumni FIT je platforma koja povezuje bivše studente Fakulteta informacionih tehnologija, 
+            omogućavajući im da grade trajne profesionalne odnose, razmjenjuju iskustva i doprinose 
+            razvoju buduće generacije IT stručnjaka. Vjerujemo u snagu zajednice i želimo da svaki 
+            alumni član ima pristup resursima koji će mu pomoći u karijeri, mogućnost da ostane u 
+            kontaktu sa kolegama i priliku da vrati fakultetu kroz mentorstvo i podršku trenutnim studentima. 
+            Naša vizija je da stvorimo zajednicu u kojoj uspjeh jednog postaje inspiracija za sve.
             </p>
 
-            <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
-              Vjerujemo u snagu zajednice i želimo da svaki alumni član ima pristup resursima...
-            </p>
+            
           </div>
         </div>
 
@@ -56,7 +62,12 @@ function AboutUs() {
             </h2>
 
             <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
-              Kroz našu platformu možete pronaći stare kolege, pratiti njihovu karijeru...
+            Kroz našu platformu možete pronaći stare kolege, pratiti njihovu karijeru i uspostaviti 
+            nove profesionalne kontakte. 
+            Učestvujte u programima mentorstva gdje možete prenijeti svoje znanje studentima ili, ako 
+            ste fresh graduate, dobiti podršku od iskusnijih kolega. 
+            Kao alumni član, imate priliku da aktivno učestvujete u razvoju fakulteta kroz gostujuća predavanja, 
+            učešće u kurikulumu, stipendijske programe i podršku studentskim projektima.
             </p>
           </div>
         </div>

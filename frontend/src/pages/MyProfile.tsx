@@ -2,22 +2,21 @@ import React, { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Camera,
-  Save,
-  Eye,
-  EyeOff,
-  Upload,
-  X,
+
   Mail,
   Briefcase,
   User,
-  FileText,
+  MapPin,
+  BookOpen,
 } from "lucide-react";
 
 type ProfileData = {
   ime: string;
   prezime: string;
   email: string;
+  pozicija: string;
+  nivoStudija: string;
+  smjer: string;
   godinaZavrsetka: string;
   mjestoRada: string;
   firma: string;
@@ -31,6 +30,9 @@ export default function MyProfile() {
     ime: "",
     prezime: "",
     email: "",
+    pozicija: "",
+    nivoStudija: "",
+    smjer: "",
     godinaZavrsetka: "",
     mjestoRada: "",
     firma: "",
@@ -42,9 +44,7 @@ export default function MyProfile() {
   const [saved, setSaved] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
-  // --------------------------------------------------------
-  // LOAD USER FROM BACKEND
-  // --------------------------------------------------------
+  
   useEffect(() => {
     async function loadProfile() {
       try {
@@ -63,6 +63,9 @@ export default function MyProfile() {
           ime: data.first_name || "",
           prezime: data.last_name || "",
           email: data.email || "",
+          pozicija: data.position || "",
+          nivoStudija: data.study_level || "",
+          smjer: data.study_direction || "",
           godinaZavrsetka: String(data.enrollment_year || ""),
           mjestoRada: data.work_location || "",
           firma: data.occupation || "",
@@ -112,9 +115,7 @@ export default function MyProfile() {
 
   const removeCv = () => setCvFile(null);
 
-  // --------------------------------------------------------
-  // SUBMIT UPDATE TO BACKEND
-  // --------------------------------------------------------
+ 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -122,7 +123,6 @@ export default function MyProfile() {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      // Update main profile info
       await fetch("http://localhost:4000/api/users/me", {
         method: "PUT",
         headers: {
@@ -132,6 +132,9 @@ export default function MyProfile() {
         body: JSON.stringify({
           ime: profileData.ime,
           prezime: profileData.prezime,
+          pozicija: profileData.pozicija,
+          nivoStudija: profileData.nivoStudija,
+          smjer: profileData.smjer,
           godinaZavrsetka: profileData.godinaZavrsetka,
           mjestoRada: profileData.mjestoRada,
           firma: profileData.firma,
@@ -187,33 +190,19 @@ export default function MyProfile() {
         >
           {/* Avatar */}
           <div className="flex flex-col items-center">
-            <div className="relative">
-              <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-300 border-4 border-white shadow-xl">
-                {profilnaSlika ? (
-                  <img
-                    src={profilnaSlika}
-                    alt="Profil"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-linear-to-r from-[#294a70] to-[#324D6B]">
-                    <Camera className="w-16 h-16 text-white" />
-                  </div>
-                )}
-              </div>
-              <label className="absolute bottom-0 right-0 bg-[#ffab1f] rounded-full p-3 cursor-pointer shadow-lg border-4 border-white hover:bg-[#ff9500] transition-all hover:scale-110">
-                <Camera className="w-6 h-6 text-white" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
+            <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-300 border-4 border-white shadow-xl">
+              {profilnaSlika ? (
+                <img
+                  src={profilnaSlika}
+                  alt="Profil"
+                  className="w-full h-full object-cover"
                 />
-              </label>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-linear-to-r from-[#294a70] to-[#324D6B]">
+                  <User className="w-16 h-16 text-white" />
+                </div>
+              )}
             </div>
-            <p className="text-sm text-gray-600 mt-4">
-              Klikni na kameru za promjenu slike
-            </p>
           </div>
 
           {/* Ime + prezime */}
@@ -223,140 +212,28 @@ export default function MyProfile() {
             </h2>
           </div>
 
-          {/* GODINA DIPLOMIRANJA */}
-          <div>
-            <label className="block text-base font-semibold text-black mb-2">
-              Godina diplomiranja *
-            </label>
-            <select
-              name="godinaZavrsetka"
-              value={String(profileData.godinaZavrsetka)}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-black text-base"
-            >
-              <option value="">Izaberite godinu</option>
-              {years.map((year) => (
-                <option key={year} value={String(year)}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* EMAIL */}
           <Item icon={<Mail />} label="Email" value={profileData.email} />
 
-          {/* CV UPLOAD */}
-          <div>
-            <label className="block text-base font-semibold text-[#294a70] mb-2">
-              CV (PDF)
-            </label>
+          {/* POZICIJA */}
+          <Item icon={<Briefcase />} label="Pozicija" value={profileData.pozicija} />
 
-            {cvFile ? (
-              <div className="flex items-center justify-between px-5 py-4 bg-white rounded-lg border-2 border-gray-300">
-                <div className="flex items-center gap-3">
-                  <Upload className="w-10 h-10 text-[#ffab1f]" />
-                  <span className="text-sm text-gray-800 font-medium">
-                    {cvFile.name}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={removeCv}
-                  className="bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-all hover:scale-110"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center py-10 px-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:border-[#ffab1f] hover:bg-[#fffbf5] transition-all">
-                <Upload className="w-10 h-10 text-[#ffab1f] mb-3" />
-                <span className="text-base text-gray-700">
-                  Klikni za upload CV-a
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleCvUpload}
-                  className="hidden"
-                />
-              </label>
-            )}
-          </div>
+          {/* NIVO STUDIJA */}
+          <Item icon={<BookOpen />} label="Nivo studija" value={profileData.nivoStudija} />
 
-          {/* VIDLJIVOST PROFILA */}
-          <div className="bg-white p-6 rounded-lg border-2 border-gray-300">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-base font-semibold text-[#294a70]">
-                Vidljivost profila
-              </span>
-              {profileData.javniProfil ? (
-                <Eye className="w-6 h-6 text-[#ffab1f]" />
-              ) : (
-                <EyeOff className="w-6 h-6 text-[#ffab1f]" />
-              )}
-            </div>
+          {/* SMJER */}
+          <Item icon={<BookOpen />} label="Smjer" value={profileData.smjer} />
 
-            <div className="flex gap-3 mb-4">
-              <button
-                type="button"
-                onClick={() =>
-                  setProfileData((prev) => ({ ...prev, javniProfil: false }))
-                }
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg text-sm font-semibold transition-all ${
-                  !profileData.javniProfil
-                    ? "border-[#ffab1f] bg-[#ffab1f] text-white"
-                    : "border-gray-300 bg-white text-gray-600"
-                }`}
-              >
-                <EyeOff className="w-5 h-5" />
-                Privatan
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setProfileData((prev) => ({ ...prev, javniProfil: true }))
-                }
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg text-sm font-semibold transition-all ${
-                  profileData.javniProfil
-                    ? "border-[#ffab1f] bg-[#ffab1f] text-white"
-                    : "border-gray-300 bg-white text-gray-600"
-                }`}
-              >
-                <Eye className="w-5 h-5" />
-                Javan
-              </button>
-            </div>
+          {/* GODINA DIPLOMIRANJA */}
+          <Item icon={<BookOpen />} label="Godina diplomiranja" value={profileData.godinaZavrsetka} />
 
-            <p className="text-sm text-gray-600 leading-relaxed">
-              {profileData.javniProfil
-                ? "Tvoj profil je vidljiv svim članovima Alumni kluba"
-                : "Tvoj profil je privatan i vidljiv samo tebi"}
-            </p>
-          </div>
+          {/* MJESTO RADA */}
+          <Item icon={<MapPin />} label="Mjesto rada" value={profileData.mjestoRada} />
 
-          {/* Firma + Vidljivost Summary + CV */}
-          <div className="space-y-4">
-            <Item icon={<Briefcase />} label="Firma" value={profileData.firma} />
-            <Item
-              icon={<User />}
-              label="Vidljivost profila"
-              value={profileData.javniProfil ? "Javan" : "Privatan"}
-            />
-            {cvFile && (
-              <Item icon={<FileText />} label="CV" value={cvFile.name} />
-            )}
-          </div>
+          {/* FIRMA */}
+          <Item icon={<Briefcase />} label="Firma" value={profileData.firma} />
 
-          {/* SAVE BUTTON */}
-          <button
-            type="submit"
-            className="w-full flex items-center justify-center gap-2 py-3.5 px-8 bg-linear-to-r from-[#294a70] to-[#324D6B] text-white rounded-lg text-base font-semibold hover:from-[#ffab1f] hover:to-[#ff9500] transition-all hover:-translate-y-0.5 shadow-md hover:shadow-xl"
-          >
-            <Save className="w-5 h-5" />
-            Sačuvaj promjene
-          </button>
+                 
 
           {saved && (
             <p className="text-center text-sm text-green-600 mt-2">

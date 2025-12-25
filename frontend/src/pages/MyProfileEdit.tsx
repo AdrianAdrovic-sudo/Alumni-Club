@@ -164,7 +164,7 @@ export default function MyProfileEdit() {
     <>
       <div className="w-full min-h-screen bg-white">
         <div className="bg-linear-to-br from-[#294a70] to-[#324D6B] text-white py-20 px-5 text-center">
-          <h1 className="text-5xl mb-4 font-bold">Izmijenite Profil</h1>
+          <h1 className="text-5xl mb-4 font-bold">Izmijenite profil</h1>
           <p className="text-xl opacity-90">Ažurirajte svoje podatke</p>
         </div>
 
@@ -201,12 +201,13 @@ export default function MyProfileEdit() {
 
             {formData.nivoStudija && (
               <FormSelect
-                icon={<BookOpen />}
-                label="Smjer"
-                name="smjer"
-                value={formData.smjer}
-                onChange={handleChange}
-                options={smjerOpcije[formData.nivoStudija]}
+              icon={<BookOpen />}
+              label="Smjer"
+              name="smjer"
+              value={formData.smjer}
+              onChange={handleChange}
+              options={formData.nivoStudija ? smjerOpcije[formData.nivoStudija] : []}
+              disabled={!formData.nivoStudija}
               />
             )}
 
@@ -222,7 +223,7 @@ export default function MyProfileEdit() {
                 <label className="text-xs text-gray-500 font-semibold uppercase tracking-wide block mb-2">CV</label>
               </div>
 
-              <label className="px-5 py-2.5 text-white font-bold text-sm bg-linear-to-br from-[#294a70] to-[#3a5a80] rounded-xl cursor-pointer">
+              <label className="px-5 py-2.5 bg-white text-[#294a70] font-bold text-sm rounded-xl cursor-pointer border border-gray-200 hover:bg-gray-50 transition">
                 Dodaj CV
                 <input type="file" accept=".pdf,.doc,.docx" onChange={handleCVUpload} className="hidden" />
               </label>
@@ -317,7 +318,7 @@ function FormField({ icon, label, name, type = "text", value, onChange, placehol
   );
 }
 
-function FormSelect({ icon, label, name, value, onChange, options }: any) {
+function FormSelect({ icon, label, name, value, onChange, options, disabled }: any){
   return (
     <div className="flex items-center gap-4 bg-linear-to-br from-gray-50 to-white p-5 rounded-2xl border-2 border-gray-100 shadow-sm">
       <div className="text-[#ffab1f]">{icon}</div>
@@ -327,7 +328,9 @@ function FormSelect({ icon, label, name, value, onChange, options }: any) {
           name={name}
           value={value}
           onChange={onChange}
-          className="w-full text-lg font-bold text-[#294a70] bg-transparent border-none focus:outline-none"
+          disabled={disabled}
+          className={`w-full text-lg font-bold bg-transparent border-none focus:outline-none
+            ${disabled ? "text-gray-400 cursor-not-allowed" : "text-[#294a70]"}`}
         >
           <option value="" disabled>Izaberite...</option>
           {options.map((op: string) => (
