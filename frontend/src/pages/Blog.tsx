@@ -203,14 +203,14 @@ export const Blog = (props: BlogProps) => {
             onClick={() => navigate("/AddBlog")}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border-[3px] border-white"
           >
-            Add Blog
+            Dodajte blog
           </button>
         </div>
 
         {loading ? (
-          <p className="text-center">Loading...</p>
+          <p className="text-center">Učitavanje...</p>
         ) : blogPosts.length === 0 ? (
-          <p className="text-center">No blog posts yet.</p>
+          <p className="text-center">Nema blogova</p>
         ) : (
           <>
             <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
@@ -244,8 +244,8 @@ export const Blog = (props: BlogProps) => {
 
 export const BlogDefaults: Props = {
   tagline: "Blog",
-  heading: "Short heading goes here",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  heading: "Naslov bloga",
+  description: "tekst",
   button: { title: "View all", variant: "secondary" },
   blogPosts: [],
 };

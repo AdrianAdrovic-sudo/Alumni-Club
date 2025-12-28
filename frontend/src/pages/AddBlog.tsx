@@ -48,7 +48,7 @@ const AddBlog = () => {
       content: formData.content,
     };
 
-    console.log("Blog payload:", payload);
+    console.log("Sadržaj bloga:", payload);
 
     try {
       // 2) Uzmemo token (prilagodi ključ ako kod vas drugačije)
@@ -95,10 +95,10 @@ const AddBlog = () => {
       <div className="container mx-auto max-w-4xl">
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
-            Create New Blog Post
+            Kreiraj novi blog post
           </h1>
           <p className="text-gray-300">
-            Fill in the details below to create a new blog post
+            Ispunite detalje ispod da biste kreirali novi blog post
           </p>
         </div>
 
@@ -111,7 +111,7 @@ const AddBlog = () => {
               htmlFor="title"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Blog Title <span className="text-red-500">*</span>
+              Naslov bloga <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -121,7 +121,7 @@ const AddBlog = () => {
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter blog title"
+              placeholder="Unesite naziv bloga"
             />
           </div>
 
@@ -130,7 +130,7 @@ const AddBlog = () => {
               htmlFor="category"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Category <span className="text-red-500">*</span>
+              Kategorija <span className="text-red-500">*</span>
             </label>
             <select
               id="category"
@@ -140,13 +140,13 @@ const AddBlog = () => {
               required
               className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">Select a category</option>
-              <option value="Technology">Technology</option>
-              <option value="Business">Business</option>
+              <option value="">Izaberite kategoriju</option>
+              <option value="Technology">Tehnologija</option>
+              <option value="Business">Biznis</option>
               <option value="Lifestyle">Lifestyle</option>
-              <option value="Education">Education</option>
-              <option value="Career">Career</option>
-              <option value="Other">Other</option>
+              <option value="Education">Edukacija</option>
+              <option value="Career">Karijera</option>
+              <option value="Other">Ostalo</option>
             </select>
           </div>
 
@@ -155,7 +155,7 @@ const AddBlog = () => {
               htmlFor="image"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Image URL <span className="text-red-500">*</span>
+              URL slike <span className="text-red-500">*</span>
             </label>
             <input
               type="url"
@@ -174,7 +174,7 @@ const AddBlog = () => {
               htmlFor="readTime"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Read Time <span className="text-red-500">*</span>
+              Vrijeme čitanja <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -184,7 +184,7 @@ const AddBlog = () => {
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., 5 min read"
+              placeholder="npr. 5 minuta čitanja"
             />
           </div>
 
@@ -193,7 +193,7 @@ const AddBlog = () => {
               htmlFor="description"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Short Description <span className="text-red-500">*</span>
+              Kratak opis <span className="text-red-500">*</span>
             </label>
             <textarea
               id="description"
@@ -203,7 +203,7 @@ const AddBlog = () => {
               required
               rows={3}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              placeholder="Brief description of the blog post"
+              placeholder="Kratak opis blog posta"
             />
           </div>
 
@@ -212,7 +212,7 @@ const AddBlog = () => {
               htmlFor="content"
               className="block text-gray-700 font-semibold mb-2"
             >
-              Blog Content <span className="text-red-500">*</span>
+              Sadržaj bloga <span className="text-red-500">*</span>
             </label>
 
             {/* If key is missing, we still render, but TinyMCE will show setup nag */}
@@ -237,14 +237,13 @@ const AddBlog = () => {
                   "bullist numlist outdent indent | link image | code | removeformat",
                 content_style:
                   'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px }',
-                placeholder: "Write your blog content here...",
+                placeholder: "Napišite sadržaj bloga...",
               }}
             />
 
             {!TINYMCE_KEY && (
               <p className="mt-2 text-sm text-red-600">
-                Missing VITE_TINYMCE_API_KEY in frontend/.env. TinyMCE will show
-                the setup screen until you add a key.
+                Nedostaje TinyMCE API ključ. Dodajte VITE_TINYMCE_API_KEY u .env fajl.
               </p>
             )}
           </div>
@@ -255,13 +254,13 @@ const AddBlog = () => {
               onClick={handleCancel}
               className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md transition-all duration-300"
             >
-              Cancel
+              Poništi
             </button>
             <button
               type="submit"
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg"
             >
-              Publish Blog
+              Postavi blog
             </button>
           </div>
         </form>

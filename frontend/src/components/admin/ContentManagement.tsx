@@ -52,7 +52,7 @@ export default function ContentManagement() {
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         console.error("Greška prilikom učitavanja objava:", res.status, body);
-        setError(body?.message || "Neuspešno učitavanje objava.");
+        setError(body?.message || "Neuspješno učitavanje objava.");
         return;
       }
 

@@ -25,43 +25,43 @@ type Props = {
 };
 
 const defaultProps: Props = {
-  tagline: "Tagline",
-  heading: "Alumni Club Mediteran",
+  tagline: "Dobrodošli",
+  heading: "Alumni Klub Mediteran",
   description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim u eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam libero vitae erat.",
   sections: [
     {
       image: {
-        src:img1,
-        alt: "Placeholder image 1",
+        src: img1,
+        alt: "Slika 1",
       },
-      heading: "Medium length section heading goes here",
+      heading: "Naslov sekcije srednje dužine",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla.",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim u eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla.",
     },
     {
       image: {
         src: img2,
-        alt: "Placeholder image 2",
+        alt: "Slika 2",
       },
-      heading: "Medium length section heading goes here",
+      heading: "Naslov sekcije srednje dužine",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla.",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim u eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla.",
     },
     {
       image: {
         src: img3,
-        alt: "Placeholder image 3",
+        alt: "Slika 3",
       },
-      heading: "Medium length section heading goes here",
+      heading: "Naslov sekcije srednje dužine",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla.",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim u eros elementum tristique. Duis cursus, mi quis viverra ornare, eros dolor interdum nulla.",
     },
   ],
   buttons: [
-    { title: "Button", variant: "secondary" },
+    { title: "Dugme", variant: "secondary" },
     {
-      title: "Button",
+      title: "Dugme",
       variant: "link",
       size: "link",
       iconRight: <RxChevronRight />,
@@ -110,7 +110,7 @@ const Home: React.FC<Partial<Props>> = (props) => {
       </section>
       <button className="btn-31">
         <span className="text-container">
-          <span className="text">Read more...</span>
+          <span className="text">Pročitaj više...</span>
         </span>
       </button>
     </main>
@@ -118,4 +118,3 @@ const Home: React.FC<Partial<Props>> = (props) => {
 };
 
 export default Home;
-
