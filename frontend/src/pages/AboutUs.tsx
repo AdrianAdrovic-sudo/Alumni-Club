@@ -16,7 +16,8 @@ function AboutUs() {
       {/* WRAPPER */}
       <div className="max-w-7xl mx-auto py-12 md:py-20 px-4">
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24">
+        {/* SECTION 1 - Kako je nastao */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24">
           <div className="space-y-5 text-justify">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#294a70]">
               Kako je nastao Alumni Klub
@@ -30,13 +31,32 @@ function AboutUs() {
             Danas, Alumni Klub FIT predstavlja dinamičnu zajednicu stručnjaka iz IT industrije koji dijele zajedničko 
             iskustvo obrazovanja na FIT-u.
             </p>
-            
+          </div>
+          
+          {/* Slika studenti za računarima */}
+          <div className="relative">
+            <img 
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop" 
+              alt="Studenti za računarima"
+              className="w-full h-[400px] object-cover rounded-2xl shadow-2xl"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#294a70]/20 to-transparent rounded-2xl"></div>
           </div>
         </div>
 
-        {/* SECTION 2 (REVERSED) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24 lg:[direction:rtl]">
-          <div className="space-y-5 lg:[direction:ltr] text-justify">
+        {/* SECTION 2 - Naša Misija (REVERSED) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24">
+          {/* Slika networking/saradnja */}
+          <div className="relative lg:order-1">
+            <img 
+              src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=600&fit=crop" 
+              alt="Profesionalno umrežavanje"
+              className="w-full h-[400px] object-cover rounded-2xl shadow-2xl"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#294a70]/20 to-transparent rounded-2xl"></div>
+          </div>
+
+          <div className="space-y-5 text-justify lg:order-2">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#294a70]">
               Naša Misija
             </h2>
@@ -49,14 +69,12 @@ function AboutUs() {
             kontaktu sa kolegama i priliku da vrati fakultetu kroz mentorstvo i podršku trenutnim studentima. 
             Naša vizija je da stvorimo zajednicu u kojoj uspjeh jednog postaje inspiracija za sve.
             </p>
-
-            
           </div>
         </div>
 
-        {/* SECTION 3 (REVERSED) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24 lg:[direction:rtl]">
-          <div className="space-y-5 lg:[direction:ltr] text-justify">
+        {/* SECTION 3 - Šta Nudimo */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-20 items-center mb-16 md:mb-24">
+          <div className="space-y-5 text-justify">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#294a70]">
               Šta Nudimo
             </h2>
@@ -70,11 +88,20 @@ function AboutUs() {
             učešće u kurikulumu, stipendijske programe i podršku studentskim projektima.
             </p>
           </div>
+
+          {/* Slika mentorstvo/predavanje */}
+          <div className="relative">
+            <img 
+              src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=600&fit=crop" 
+              alt="Mentorstvo i edukacija"
+              className="w-full h-[400px] object-cover rounded-2xl shadow-2xl"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#294a70]/20 to-transparent rounded-2xl"></div>
+          </div>
         </div>
 
         {/* STATS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10 my-20">
-
           {[
             { number: "500+", label: "Alumni članova" },
             { number: "50+", label: "Kompanija" },
@@ -93,8 +120,9 @@ function AboutUs() {
               </p>
             </div>
           ))}
-
         </div>
+
+        
 
         {/* VALUES */}
         <div className="mt-20">
@@ -103,7 +131,6 @@ function AboutUs() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-
             {[
               { icon: "🤝", title: "Povezanost", text: "Gradimo mostove između generacija i profesionalaca" },
               { icon: "💡", title: "Inovacija", text: "Podsticanje kreativnosti i novih ideja" },
@@ -125,7 +152,6 @@ function AboutUs() {
                 </p>
               </div>
             ))}
-
           </div>
         </div>
 

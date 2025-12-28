@@ -48,7 +48,7 @@ function Footer() {
 
             <div className="bg-white/5 rounded-xl p-6 border border-white/20">
               <div className="flex gap-4">
-                <div className="p-2.5 bg-[#ffab1f] rounded-lg">
+                <div className="w-12 h-12 bg-[#ffab1f]  rounded-xl flex items-center justify-center">
                   <FaMapMarkerAlt />
                 </div>
                 <div>
