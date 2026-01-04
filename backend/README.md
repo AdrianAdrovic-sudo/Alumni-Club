@@ -56,6 +56,7 @@ This project is a backend application for the Alumni Club, built using TypeScrip
    npm test
    ```
    To run one of each:
+   ```
    npx jest testing/enroll.tests.ts --runInBand
    npx jest testing/contact.tests.ts --runInBand
    npx jest testing/profile-visibillity.tests.ts --runInBand
