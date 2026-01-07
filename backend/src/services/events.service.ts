@@ -1,7 +1,8 @@
 import { PrismaClient, RSVPStatus, EventStatus } from "@prisma/client";
 import { writeFileSync } from "fs";
 import { join } from "path";
-import { createEvents, EventAttributes } from "ics";
+import { createEvents } from "ics";
+import type { EventAttributes } from "ics";
 
 const prisma = new PrismaClient();
 
@@ -22,12 +23,10 @@ export async function rsvpEvent(userId: number, eventId: number) {
     (e) => e.rsvp === RSVPStatus.Going
   ).length;
 
-  let rsvpStatus: RSVPStatus;
-  if (event.capacity && goingCount >= event.capacity) {
-    rsvpStatus = RSVPStatus.Waitlist;
-  } else {
-    rsvpStatus = RSVPStatus.Going;
-  }
+  const rsvpStatus: RSVPStatus =
+    event.capacity && goingCount >= event.capacity
+      ? RSVPStatus.Waitlist
+      : RSVPStatus.Going;
 
   const registration = await prisma.event_registration.upsert({
     where: { user_id_event_id: { user_id: userId, event_id: eventId } },
@@ -35,7 +34,9 @@ export async function rsvpEvent(userId: number, eventId: number) {
     create: { user_id: userId, event_id: eventId, rsvp: rsvpStatus },
   });
 
-  console.log(`[RSVP] User ${userId} RSVP'd as ${rsvpStatus} for event ${eventId}`);
+  console.log(
+    `[RSVP] User ${userId} RSVP'd as ${rsvpStatus} for event ${eventId}`
+  );
 
   await prisma.outbox_emails.create({
     data: {
@@ -74,6 +75,7 @@ export async function cancelRsvp(userId: number, eventId: number) {
 
   console.log("Going count after cancellation:", goingCount);
 
+  // Ako se oslobodilo mjesto, promovisi prvog sa waitliste
   if (event.capacity && goingCount < event.capacity) {
     const nextOnWaitlist = await prisma.event_registration.findFirst({
       where: { event_id: eventId, rsvp: RSVPStatus.Waitlist },
@@ -153,6 +155,17 @@ export async function archiveEvent(eventId: number) {
   });
 }
 
+type IcsDateArray = [number, number, number, number?, number?, number?];
+
+type IcsEvent = {
+  start: IcsDateArray;
+  end: IcsDateArray;
+  title: string;
+  description?: string;
+  location?: string;
+  url?: string;
+};
+
 /**
  * Generate iCal feed for all events or single event
  */
@@ -167,28 +180,30 @@ export async function generateICalFeed(eventId?: number) {
 
   if (!events.length) return null;
 
-  const icsEvents: EventAttributes[] = events.map((ev) => ({
-    start: [
-      ev.start_time.getFullYear(),
-      ev.start_time.getMonth() + 1,
-      ev.start_time.getDate(),
-      ev.start_time.getHours(),
-      ev.start_time.getMinutes(),
-    ],
-    end: [
-      ev.end_time.getFullYear(),
-      ev.end_time.getMonth() + 1,
-      ev.end_time.getDate(),
-      ev.end_time.getHours(),
-      ev.end_time.getMinutes(),
-    ],
-    title: ev.title || "",
-    description: ev.description || "",
-    location: ev.location || "",
-    url: `http://localhost:3000/events/${ev.id}`,
-  }));
+  const icsEvents: IcsEvent[] = events.map((ev) => ({
+  start: [
+    ev.start_time.getFullYear(),
+    ev.start_time.getMonth() + 1,
+    ev.start_time.getDate(),
+    ev.start_time.getHours(),
+    ev.start_time.getMinutes(),
+  ],
+  end: [
+    ev.end_time.getFullYear(),
+    ev.end_time.getMonth() + 1,
+    ev.end_time.getDate(),
+    ev.end_time.getHours(),
+    ev.end_time.getMinutes(),
+  ],
+  title: ev.title || "",
+  description: ev.description || "",
+  location: ev.location || "",
+  url: `http://localhost:3000/events/${ev.id}`,
+}));
 
-  const { error, value } = createEvents(icsEvents);
+
+
+  const { error, value } = createEvents(icsEvents as any);
   if (error) throw error;
 
   if (!eventId) {

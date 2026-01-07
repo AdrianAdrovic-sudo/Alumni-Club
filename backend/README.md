@@ -50,6 +50,18 @@ This project is a backend application for the Alumni Club, built using TypeScrip
    npx prisma migrate dev
    ```
 
+9. How to run tests
+   ```
+   To run all:
+   npm test
+   ```
+   To run one of each:
+   ```
+   npx jest testing/enroll.tests.ts --runInBand
+   npx jest testing/contact.tests.ts --runInBand
+   npx jest testing/profile-visibillity.tests.ts --runInBand
+   ```
+
 ### Usage
 - Start the server:
   ```
