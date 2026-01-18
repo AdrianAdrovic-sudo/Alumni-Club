@@ -13,7 +13,6 @@ interface Event {
   visibility: "Public" | "Members" | "Private";
   status: "Draft" | "Published" | "Archived";
 
-  // Za statistiku RSVP-a
   goingCount?: number;
   waitlistCount?: number;
   remainingSeats?: number;
@@ -39,6 +38,12 @@ export default function PublicEventDetails() {
   const [rsvpError, setRsvpError] = useState<string | null>(null);
   const [rsvpLoading, setRsvpLoading] = useState(false);
 
+  // GUEST RSVP STATE
+  const [guestFirstName, setGuestFirstName] = useState("");
+  const [guestLastName, setGuestLastName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestSuccess, setGuestSuccess] = useState(false);
+
   const token = localStorage.getItem("token");
 
   const loadEvent = async () => {
@@ -47,7 +52,7 @@ export default function PublicEventDetails() {
       if (!res.ok) throw new Error("Neuspjelo učitavanje događaja");
       const data: Event = await res.json();
       setEvent(data);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
     }
   };
@@ -67,7 +72,7 @@ export default function PublicEventDetails() {
         setRsvp("loading");
         const res = await fetch(`/api/events/${id}/rsvp/me`, {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         if (res.status === 401) {
@@ -99,18 +104,16 @@ export default function PublicEventDetails() {
     try {
       let res;
       if (rsvp) {
-        // DELETE RSVP
         res = await fetch(`/api/events/${id}/rsvp`, {
           method: "DELETE",
-          headers: { "Authorization": `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Neuspjelo otkazivanje RSVP-a");
         setRsvp(null);
       } else {
-        // POST RSVP
         res = await fetch(`/api/events/${id}/rsvp`, {
           method: "POST",
-          headers: { "Authorization": `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
@@ -120,11 +123,41 @@ export default function PublicEventDetails() {
         setRsvp(data);
       }
 
-      // Nakon RSVP, ponovo učitaj event statistiku
       await loadEvent();
     } catch (err: any) {
       console.error(err);
       setRsvpError(err.message || "Greška pri RSVP");
+    } finally {
+      setRsvpLoading(false);
+    }
+  };
+
+  const handleGuestRsvp = async () => {
+    if (!id) return;
+
+    setRsvpLoading(true);
+    setRsvpError(null);
+
+    try {
+      const res = await fetch(`/api/events/${id}/rsvp/guest`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: guestFirstName,
+          lastName: guestLastName,
+          email: guestEmail,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || "Neuspjela prijava");
+      }
+
+      setGuestSuccess(true);
+      await loadEvent();
+    } catch (err: any) {
+      setRsvpError(err.message);
     } finally {
       setRsvpLoading(false);
     }
@@ -148,6 +181,7 @@ export default function PublicEventDetails() {
       {/* CONTENT */}
       <div className="max-w-4xl mx-auto py-16 px-5">
         <div className="bg-[#f9f9f9] rounded-2xl shadow-xl border border-gray-200 p-8 space-y-8">
+
           {/* DATUM */}
           <div className="flex items-center gap-2 text-[#294a70] font-semibold">
             <Calendar className="w-5 h-5 text-[#ffab1f]" />
@@ -190,13 +224,13 @@ export default function PublicEventDetails() {
             </p>
           </div>
 
-          {/* RSVP STATUS + DUGME */}
+          {/* USER RSVP + WAITLIST (ORIGINAL) */}
           <div className="mt-4 p-4 bg-white border border-gray-300 rounded-xl text-gray-700 space-y-2">
             {rsvp === "loading" && <div>Učitavam vaš status...</div>}
 
             {rsvpError && <div className="text-red-600">Greška: {rsvpError}</div>}
 
-            {!rsvpError && rsvp === null && (
+            {!rsvpError && rsvp === null && token && (
               <div className="italic text-gray-600">
                 Trenutno niste prijavljeni za ovaj događaj.
               </div>
@@ -215,7 +249,6 @@ export default function PublicEventDetails() {
               </div>
             )}
 
-            {/* Statistika RSVP + progress bar */}
             {event.capacity !== null && (
               <div className="mt-2">
                 <div className="text-sm text-gray-500 mb-1">
@@ -236,25 +269,84 @@ export default function PublicEventDetails() {
                         100,
                         ((event.goingCount ?? 0) / event.capacity) * 100
                       )}%`,
-                      transition: "width 0.3s ease",
                     }}
                   />
                 </div>
               </div>
             )}
 
-            <button
-              onClick={handleRsvp}
-              disabled={rsvpLoading}
-              className="mt-2 w-full py-2 rounded-xl font-semibold text-white bg-linear-to-r from-[#294a70] to-[#324D6B] hover:from-[#ffab1f] hover:to-[#ff9500] transition-all shadow-md hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {rsvp ? "Otkaži prijavu" : "Prijavi se"}
-            </button>
+            {token && (
+              <button
+                onClick={handleRsvp}
+                disabled={rsvpLoading}
+                className="mt-2 w-full py-2 rounded-xl font-semibold text-white bg-linear-to-r from-[#294a70] to-[#324D6B] hover:from-[#ffab1f] hover:to-[#ff9500] transition-all shadow-md hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {rsvp ? "Otkaži prijavu" : "Prijavi se"}
+              </button>
+            )}
           </div>
+
+          {/* GUEST RSVP – DODATO, ODVOJENO */}
+          {!token &&
+                     event.visibility === "Public" &&
+                    (event.remainingSeats ?? 0) > 0 && (
+            <div className="mt-6 p-4 bg-gray-50 border border-gray-300 rounded-xl space-y-3">
+              <h3 className="text-lg font-semibold text-[#294a70]">
+                Prijava bez naloga
+              </h3>
+
+              {guestSuccess ? (
+                <div className="text-green-700">
+                  Uspešno ste se prijavili 🎉
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Ime"
+                    className="w-full border rounded px-3 py-2"
+                    value={guestFirstName}
+                    onChange={(e) => setGuestFirstName(e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Prezime"
+                    className="w-full border rounded px-3 py-2"
+                    value={guestLastName}
+                    onChange={(e) => setGuestLastName(e.target.value)}
+                  />
+
+                  <input
+                    type="email"
+                    placeholder="Email adresa"
+                    className="w-full border rounded px-3 py-2"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                  />
+
+                  <button
+                    onClick={handleGuestRsvp}
+                    disabled={rsvpLoading}
+                    className="w-full py-2 rounded-xl font-semibold text-white bg-linear-to-r from-[#294a70] to-[#324D6B] hover:from-[#ffab1f] hover:to-[#ff9500] transition-all shadow-md hover:shadow-xl disabled:opacity-50"
+                  >
+                    Prijavi se kao gost
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+          {!token &&
+                      event.visibility === "Public" &&
+                      (event.remainingSeats ?? 0) === 0 && (
+                        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded-xl text-yellow-800">
+                          Događaj je trenutno popunjen. Prijava za goste nije moguća.
+                        </div>
+                    )}
 
           <Link
             to="/events"
-            className="block text-center py-3 rounded-xl font-semibold text-white bg-linear-to-r from-[#294a70] to-[#324D6B] hover:from-[#ffab1f] hover:to-[#ff9500] transition-all shadow-md hover:shadow-xl"
+            className="block text-center py-3 rounded-xl font-semibold text-white bg-linear-to-r from-[#294a70] to-[#324D6B] hover:from-[#ffab1f] hover:to-[#ff9500]"
           >
             ← Nazad na događaje
           </Link>

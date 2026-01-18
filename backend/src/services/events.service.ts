@@ -126,42 +126,44 @@ export async function rsvpGuestEvent(
     where: { id: eventId },
     include: { event_registration: true },
   });
-  if (!event) throw new Error("Event not found");
 
-  if (event.visibility === EventVisibility.Public) {
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  // Guest RSVP dozvoljen samo za PUBLIC evente
+  if (event.visibility !== "Public") {
     throw new Error("Guest RSVP not allowed for this event");
   }
 
-  const existing = await prisma.event_registration.findFirst({
-    where: {
-      event_id: eventId,
-      guest_email: guest.email,
-    },
-  });
+  // Guest NE IDE na waitlist → ako je puno, zabrani
+  if (event.capacity !== null) {
+    const goingCount = event.event_registration.filter(
+      (r) => r.rsvp === "Going"
+    ).length;
 
-  if (existing) {
-    throw new Error("Already registered for this event");
+    if (goingCount >= event.capacity) {
+      throw new Error(
+        "Događaj je popunjen. Prijava za goste nije moguća."
+      );
+    }
   }
 
-  const goingCount = event.event_registration.filter(
-    (e) => e.rsvp === RSVPStatus.Going
-  ).length;
-
-  const rsvpStatus =
-    event.capacity && goingCount >= event.capacity
-      ? RSVPStatus.Waitlist
-      : RSVPStatus.Going;
-
-  return prisma.event_registration.create({
+  // Upis guest RSVP-a
+  const registration = await prisma.event_registration.create({
     data: {
       event_id: eventId,
+      user_id: null, // gost nema user nalog
+      rsvp: "Going",
       guest_first_name: guest.firstName,
       guest_last_name: guest.lastName,
       guest_email: guest.email,
-      rsvp: rsvpStatus,
     },
   });
+
+  return registration;
 }
+
 
 /**
  * Lista učesnika (admin)
