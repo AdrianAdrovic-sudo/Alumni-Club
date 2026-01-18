@@ -244,3 +244,60 @@ export async function getEventWithStats(eventId: number) {
     remainingSeats,
   };
 }
+
+/**
+ * Guest RSVP (samo za PUBLIC događaje)
+ */
+export async function rsvpGuestEvent(
+  eventId: number,
+  guest: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  }
+) {
+  const event = await prisma.events.findUnique({
+    where: { id: eventId },
+    include: { event_registration: true },
+  });
+
+  if (!event) throw new Error("Event not found");
+
+  if (event.type !== "PUBLIC") {
+    throw new Error("Guest RSVP is not allowed for this event");
+  }
+
+  // Provera duple prijave
+  const existing = await prisma.event_registration.findFirst({
+    where: {
+      event_id: eventId,
+      guest_email: guest.email,
+    },
+  });
+
+  if (existing) {
+    throw new Error("You have already RSVP'd for this event");
+  }
+
+  const goingCount = event.event_registration.filter(
+    (e) => e.rsvp === RSVPStatus.Going
+  ).length;
+
+  const rsvpStatus: RSVPStatus =
+    event.capacity && goingCount >= event.capacity
+      ? RSVPStatus.Waitlist
+      : RSVPStatus.Going;
+
+  const registration = await prisma.event_registration.create({
+    data: {
+      event_id: eventId,
+      guest_first_name: guest.firstName,
+      guest_last_name: guest.lastName,
+      guest_email: guest.email,
+      rsvp: rsvpStatus,
+    },
+  });
+
+  return registration;
+}
+
