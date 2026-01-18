@@ -208,6 +208,13 @@ const EventForm: React.FC<EventFormProps> = ({ eventId }) => {
             >
               Sačuvaj događaj
             </button>
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+            >
+              ← Nazad na dashboard
+            </button>
           </form>
         </div>
       </div>

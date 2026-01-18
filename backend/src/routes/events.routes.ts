@@ -5,6 +5,7 @@ import { authenticate, requireAdmin } from "../middlewares/auth.middleware";
 import { EventVisibility, EventStatus } from "../types/enums";
 import {
   rsvpEvent,
+  rsvpGuestEvent,
   cancelRsvp,
   listAttendees,
   publishEvent,
@@ -135,6 +136,32 @@ router.post("/:id/rsvp", authenticate, async (req, res) => {
 
   try {
     const registration = await rsvpEvent(userId, eventId);
+    res.json(registration);
+  } catch (err: any) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// --- POST /api/events/:id/rsvp/guest ---
+// Guest RSVP (bez autentifikacije)
+router.post("/:id/rsvp/guest", async (req, res) => {
+  const eventId = Number(req.params.id);
+  const { firstName, lastName, email } = req.body;
+
+  if (!firstName || !lastName || !email) {
+    return res.status(400).json({
+      error: "Ime, prezime i email su obavezni",
+    });
+  }
+
+  try {
+    const registration = await rsvpGuestEvent(eventId, {
+      firstName,
+      lastName,
+      email,
+    });
+
     res.json(registration);
   } catch (err: any) {
     console.error(err);

@@ -4,9 +4,9 @@ async function createAdminUser() {
   console.log("👑 Creating Admin User...\n");
 
   const adminUser = {
-    username: "superadmin", // ili 'superadmin' - izaberite jedinstven username
+    username: "admin", // ili 'superadmin' - izaberite jedinstven username
     email: "akurbardovic9@gmail.com", // promenite na vaš email
-    password: "Ansar123!", // promenite na jaku šifru
+    password: "admin123", // promenite na jaku šifru
     firstName: "Ansar",
     lastName: "Kurbardovic",
     enrollmentYear: 2025, // ili godina kada ste diplomirali
