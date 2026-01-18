@@ -203,7 +203,7 @@ export const Blog = (props: BlogProps) => {
             onClick={() => navigate("/AddBlog")}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border-[3px] border-white"
           >
-            Add Blog
+            Dodajte blog
           </button>
         </div>
 
@@ -244,8 +244,8 @@ export const Blog = (props: BlogProps) => {
 
 export const BlogDefaults: Props = {
   tagline: "Blog",
-  heading: "Short heading goes here",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  heading: "Naslov bloga",
+  description: "tekst",
   button: { title: "View all", variant: "secondary" },
   blogPosts: [],
 };

@@ -19,7 +19,7 @@ export default function AdminInquiries() {
       const list = await AdminService.getInquiries();
       setItems(list);
     } catch (e: any) {
-      setError(e.message || "Failed to load inquiries");
+      setError(e.message || "Učitavanje poruka nije uspjelo");
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ export default function AdminInquiries() {
       const updated = await AdminService.markInquiryRead(id);
       setItems((prev) => prev.map((x) => (x.id === id ? updated : x)));
     } catch (e: any) {
-      alert(e.message || "Failed to mark as read");
+      alert(e.message || "Označavanje kao pročitano nije uspjelo");
     }
   };
 
@@ -44,24 +44,24 @@ export default function AdminInquiries() {
       await AdminService.deleteInquiry(id);
       setItems((prev) => prev.filter((x) => x.id !== id));
     } catch (e: any) {
-      alert(e.message || "Failed to delete");
+      alert(e.message || "Brisanje nije uspjelo");
     }
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-800">Inquiries</h2>
+        <h2 className="text-2xl font-semibold text-gray-800">Poruke</h2>
         <button
           onClick={load}
           className="px-4 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-100 transition"
         >
-          Refresh
+          Osvježi
         </button>
       </div>
 
       {loading && (
-        <div className="text-center py-10 text-gray-600">Loading...</div>
+        <div className="text-center py-10 text-gray-600">Učitavanje...</div>
       )}
 
       {error && (
@@ -72,7 +72,7 @@ export default function AdminInquiries() {
 
       {!loading && items.length === 0 && (
         <div className="text-center py-10 text-gray-600">
-          No inquiries yet.
+          Nema poruka.
         </div>
       )}
 
@@ -94,11 +94,11 @@ export default function AdminInquiries() {
                     </h3>
                     {unread ? (
                       <span className="text-xs px-2 py-1 rounded-full bg-[#ffab1f] text-white">
-                        NEW
+                        NOVO
                       </span>
                     ) : (
                       <span className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-700">
-                        Read
+                        Pročitano
                       </span>
                     )}
                   </div>
@@ -119,14 +119,14 @@ export default function AdminInquiries() {
                       onClick={() => markRead(x.id)}
                       className="px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-100 transition"
                     >
-                      Mark read
+                      Označi kao pročitano
                     </button>
                   )}
                   <button
                     onClick={() => remove(x.id)}
                     className="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition"
                   >
-                    Delete
+                    Obriši
                   </button>
                 </div>
               </div>

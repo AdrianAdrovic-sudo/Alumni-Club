@@ -130,7 +130,6 @@ export default function DiplomskiRadovi() {
                 </button>
               </div>
 
-              {/* Thesis Type Filter Options */}
               <div className="pt-2">
                 <div className="px-4 py-2 text-xs text-gray-300 font-semibold uppercase">Tip rada</div>
                 <button
@@ -245,7 +244,6 @@ export default function DiplomskiRadovi() {
         </div>
       </div>
 
-      {/* Upload Thesis Modal */}
       <UploadThesisModal
         isOpen={showUploadModal}
         onClose={() => {

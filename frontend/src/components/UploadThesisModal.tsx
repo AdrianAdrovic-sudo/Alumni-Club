@@ -39,9 +39,8 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
         const selectedFile = e.target.files?.[0];
 
         if (selectedFile) {
-            // Validate PDF file type
             if (selectedFile.type !== 'application/pdf') {
-                setErrors(prev => ({ ...prev, file: 'Only PDF files are allowed' }));
+                setErrors(prev => ({ ...prev, file: 'Dozvoljeni su samo PDF fajlovi' }));
                 setFormData(prev => ({ ...prev, file: null }));
                 return;
             }
@@ -54,15 +53,14 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validate required fields
         const newErrors: { thesisType?: string; file?: string } = {};
 
         if (!formData.thesisType) {
-            newErrors.thesisType = 'Thesis type is required';
+            newErrors.thesisType = 'Obavezno je odabrati tip rada';
         }
 
         if (!formData.file) {
-            newErrors.file = 'PDF file is required';
+            newErrors.file = 'PDF fajl je obavezan';
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -70,7 +68,6 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
             return;
         }
 
-        // Prepare data for console output
         const outputData = {
             thesisType: formData.thesisType,
             file: formData.file,
@@ -81,11 +78,10 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
             ...(thesisContext && { selectedThesis: thesisContext }),
         };
 
-        console.log('=== Upload Thesis Form Submission ===');
+        console.log('=== Slanje forme za upload rada ===');
         console.log(outputData);
-        console.log('=====================================');
+        console.log('===================================');
 
-        // Reset form and close modal
         setFormData({
             thesisType: '',
             file: null,
@@ -97,7 +93,6 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
     };
 
     const handleClose = () => {
-        // Reset form on close
         setFormData({
             thesisType: '',
             file: null,
@@ -119,40 +114,40 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h2 className="text-2xl font-bold text-gray-800">Upload Thesis</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">Otpremi rad</h2>
                     <button
                         onClick={handleClose}
                         className="text-gray-400 hover:text-gray-600 transition-colors"
-                        aria-label="Close modal"
+                        aria-label="Zatvori modal"
                     >
                         <FaTimes size={24} />
                     </button>
                 </div>
 
-                {/* Context Info (if provided) */}
+                {/* Context Info */}
                 {thesisContext && (
                     <div className="px-6 pt-4 pb-2 bg-gray-50 border-b border-gray-200">
                         <p className="text-sm text-gray-600">
                             <span className="font-semibold">Student:</span> {thesisContext.ime} {thesisContext.prezime}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="font-semibold">Original Thesis:</span> {thesisContext.naziv}
+                            <span className="font-semibold">Originalni rad:</span> {thesisContext.naziv}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="font-semibold">Type:</span>{' '}
-                            {thesisContext.type === 'bachelors' && 'Bachelor\'s thesis'}
-                            {thesisContext.type === 'masters' && 'Master\'s thesis'}
-                            {thesisContext.type === 'specialist' && 'Specialist thesis'}
+                            <span className="font-semibold">Tip:</span>{' '}
+                            {thesisContext.type === 'bachelors' && 'Diplomski rad'}
+                            {thesisContext.type === 'masters' && 'Master rad'}
+                            {thesisContext.type === 'specialist' && 'Specijalistički rad'}
                         </p>
                     </div>
                 )}
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                    {/* Thesis Type - Required */}
+                    {/* Tip rada */}
                     <div>
                         <label htmlFor="thesisType" className="block text-sm font-semibold text-gray-700 mb-2">
-                            Thesis Type <span className="text-red-500">*</span>
+                            Tip rada <span className="text-red-500">*</span>
                         </label>
                         <select
                             id="thesisType"
@@ -164,20 +159,20 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
                             className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 text-black focus:ring-[#294a70] ${errors.thesisType ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         >
-                            <option value="" className="text-gray-500">Select thesis type...</option>
-                            <option value="bachelors" className="text-black">Bachelor's thesis</option>
-                            <option value="masters" className="text-black">Master's thesis</option>
-                            <option value="specialist" className="text-black">Specialist thesis</option>
+                            <option value="" className="text-gray-500">Odaberite tip rada...</option>
+                            <option value="bachelors" className="text-black">Diplomski rad</option>
+                            <option value="masters" className="text-black">Master rad</option>
+                            <option value="specialist" className="text-black">Specijalistički rad</option>
                         </select>
                         {errors.thesisType && (
                             <p className="mt-1 text-sm text-red-500">{errors.thesisType}</p>
                         )}
                     </div>
 
-                    {/* File Upload - Required */}
+                    {/* Upload PDF */}
                     <div>
                         <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-2">
-                            Upload PDF <span className="text-red-500">*</span>
+                            Otpremi PDF <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="fileUpload"
@@ -189,7 +184,7 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
                         />
                         {formData.file && (
                             <p className="mt-1 text-sm text-green-600">
-                                Selected: {formData.file.name} ({(formData.file.size / 1024 / 1024).toFixed(2)} MB)
+                                Odabrano: {formData.file.name} ({(formData.file.size / 1024 / 1024).toFixed(2)} MB)
                             </p>
                         )}
                         {errors.file && (
@@ -197,52 +192,52 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
                         )}
                     </div>
 
-                    {/* Thesis Title - Optional */}
+                    {/* Naslov rada - opcionalno */}
                     <div>
                         <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
-                            Thesis Title <span className="text-gray-400 text-xs">(optional)</span>
+                            Naslov rada <span className="text-gray-400 text-xs">(opciono)</span>
                         </label>
                         <input
                             id="title"
                             type="text"
                             value={formData.title}
                             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                            placeholder="Enter thesis title..."
+                            placeholder="Unesite naslov rada..."
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                         />
                     </div>
 
-                    {/* Year - Optional */}
+                    {/* Godina - opcionalno */}
                     <div>
                         <label htmlFor="year" className="block text-sm font-semibold text-gray-700 mb-2">
-                            Year <span className="text-gray-400 text-xs">(optional)</span>
+                            Godina <span className="text-gray-400 text-xs">(opciono)</span>
                         </label>
                         <input
                             id="year"
                             type="number"
                             value={formData.year}
                             onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
-                            placeholder="e.g., 2024"
+                            placeholder="npr. 2024"
                             min="1900"
                             max="2100"
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                         />
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Dugmad */}
                     <div className="flex gap-3 pt-4">
                         <button
                             type="button"
                             onClick={handleClose}
                             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
                         >
-                            Cancel
+                            Otkaži
                         </button>
                         <button
                             type="submit"
                             className="flex-1 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors font-medium"
                         >
-                            Upload
+                            Otpremi
                         </button>
                     </div>
                 </form>

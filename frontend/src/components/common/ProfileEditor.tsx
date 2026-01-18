@@ -53,15 +53,15 @@ const ProfileEditor: React.FC = () => {
       });
 
       if (response.ok) {
-        setMessage('Profile updated successfully!');
+        setMessage('Profil uspješno ažuriran');
         setIsEditing(false);
         setTimeout(() => setMessage(''), 3000);
       } else {
-        setMessage('Error updating profile');
+        setMessage('Greška pri ažuriranju profila');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      setMessage('Error updating profile');
+      console.error('Greška pri ažuriranju profila:', error);
+      setMessage('Greška pri ažuriranju profila');
     }
   };
 
@@ -69,12 +69,12 @@ const ProfileEditor: React.FC = () => {
     return (
       <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Your Profile</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Tvoj profil</h1>
           <button
             onClick={() => setIsEditing(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            Edit Profile
+            Uredi profil
           </button>
         </div>
 
@@ -86,7 +86,7 @@ const ProfileEditor: React.FC = () => {
 
         <div className="space-y-4">
           <div>
-            <label className="font-semibold text-gray-700">Name:</label>
+            <label className="font-semibold text-gray-700">Ime:</label>
             <p className="mt-1">{profile.name}</p>
           </div>
           <div>
@@ -94,12 +94,12 @@ const ProfileEditor: React.FC = () => {
             <p className="mt-1">{profile.email}</p>
           </div>
           <div>
-            <label className="font-semibold text-gray-700">Username:</label>
+            <label className="font-semibold text-gray-700">Korisničko ime:</label>
             <p className="mt-1">{profile.username}</p>
           </div>
           <div>
-            <label className="font-semibold text-gray-700">Bio:</label>
-            <p className="mt-1">{profile.bio || 'No bio provided'}</p>
+            <label className="font-semibold text-gray-700">Opis:</label>
+            <p className="mt-1">{profile.bio || 'Bez opisa'}</p>
           </div>
         </div>
       </div>
@@ -108,7 +108,7 @@ const ProfileEditor: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Edit Profile</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Uredi profil</h1>
       
       {message && (
         <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
@@ -143,7 +143,7 @@ const ProfileEditor: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Username
+            Korisničko ime
           </label>
           <input
             type="text"
@@ -155,7 +155,7 @@ const ProfileEditor: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Bio
+           Opis
           </label>
           <textarea
             value={profile.bio}
@@ -171,13 +171,13 @@ const ProfileEditor: React.FC = () => {
             onClick={() => setIsEditing(false)}
             className="px-4 py-2 text-gray-600 hover:text-gray-800"
           >
-            Cancel
+            Poništi
           </button>
           <button
             type="submit"
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
-            Save Changes
+            Sačuvaj promjene
           </button>
         </div>
       </form>

@@ -10,7 +10,7 @@ export default function PublicRoute({ children }: PublicRouteProps) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Učitavanje...</div>;
   }
 
   // If user is authenticated, redirect to home
