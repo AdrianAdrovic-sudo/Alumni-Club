@@ -208,9 +208,9 @@ export const Blog = (props: BlogProps) => {
         </div>
 
         {loading ? (
-          <p className="text-center">Učitavanje...</p>
+          <p className="text-center">Loading...</p>
         ) : blogPosts.length === 0 ? (
-          <p className="text-center">Nema blogova</p>
+          <p className="text-center">No blog posts yet.</p>
         ) : (
           <>
             <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">

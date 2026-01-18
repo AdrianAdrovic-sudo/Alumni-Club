@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import EventList from "../../pages/EventList";
+
 
 interface Post {
   id: number;
@@ -27,13 +29,12 @@ export default function ContentManagement() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const token = localStorage.getItem("token"); // prilagodi ako token čuvaš pod drugim imenom
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (activeTab === "posts") {
       loadPosts();
     }
-    // za "events" ćeš kasnije dodati logiku
   }, [activeTab]);
 
   const loadPosts = async () => {
@@ -41,7 +42,6 @@ export default function ContentManagement() {
       setLoading(true);
       setError(null);
 
-      // 🔥 DOHVATA SAMO PENDING BLOGOVE
       const res = await fetch("/api/posts/pending", {
         headers: {
           "Content-Type": "application/json",
@@ -51,8 +51,7 @@ export default function ContentManagement() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        console.error("Greška prilikom učitavanja objava:", res.status, body);
-        setError(body?.message || "Neuspješno učitavanje objava.");
+        setError(body?.message || "Neuspešno učitavanje objava.");
         return;
       }
 
@@ -81,15 +80,13 @@ export default function ContentManagement() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        console.error("Greška prilikom odobravanja objave:", res.status, body);
         alert(body?.message || "Neuspješno odobravanje objave.");
         return;
       }
 
-      // skini je sa liste pending
       setPosts((prev) => prev.filter((p) => p.id !== postId));
     } catch (error) {
-      console.error("Greška prilikom odobravanja objave:", error);
+      console.error(error);
       alert("Došlo je do greške prilikom odobravanja objave.");
     }
   };
@@ -109,14 +106,13 @@ export default function ContentManagement() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        console.error("Greška prilikom brisanja objave:", res.status, body);
         alert(body?.message || "Neuspješno brisanje objave.");
         return;
       }
 
       setPosts((prev) => prev.filter((p) => p.id !== postId));
     } catch (error) {
-      console.error("Greška prilikom brisanja objave:", error);
+      console.error(error);
       alert("Došlo je do greške prilikom brisanja objave.");
     }
   };
@@ -153,6 +149,7 @@ export default function ContentManagement() {
         </nav>
       </div>
 
+      {/* POSTS TAB */}
       {activeTab === "posts" && (
         <>
           {loading ? (
@@ -181,19 +178,20 @@ export default function ContentManagement() {
                         {new Date(post.created_at).toLocaleDateString()}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
-                        Kategorija: {post.category} • {post.read_time || "N/A"}
+                        Kategorija: {post.category} •{" "}
+                        {post.read_time || "N/A"}
                       </p>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleApprovePost(post.id)}
-                        className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition"
+                        className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
                       >
                         Approve
                       </button>
                       <button
                         onClick={() => handleDeletePost(post.id)}
-                        className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition"
+                        className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600"
                       >
                         Delete
                       </button>
@@ -206,7 +204,7 @@ export default function ContentManagement() {
                   <p className="text-gray-700 mb-2">{post.short_desc}</p>
 
                   <div
-                    className="text-gray-700 mb-3 prose max-w-none"
+                    className="text-gray-700 prose max-w-none"
                     dangerouslySetInnerHTML={{ __html: post.content }}
                   />
 
@@ -214,15 +212,8 @@ export default function ContentManagement() {
                     <img
                       src={post.image_url}
                       alt="Post"
-                      className="max-w-xs rounded-lg mb-3"
+                      className="max-w-xs rounded-lg mt-3"
                     />
-                  )}
-
-                  {post._count && (
-                    <div className="flex space-x-4 text-sm text-gray-500">
-                      <span>💬 {post._count.comments} comments</span>
-                      <span>👍 {post._count.post_likes} likes</span>
-                    </div>
                   )}
                 </div>
               ))}
@@ -231,11 +222,8 @@ export default function ContentManagement() {
         </>
       )}
 
-      {activeTab === "events" && (
-        <div className="text-center py-8 text-gray-500">
-          Upravljanje događajima uskoro...
-        </div>
-      )}
+      {/* EVENTS TAB */}
+      {activeTab === "events" && <EventList />}
     </div>
   );
 }

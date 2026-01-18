@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin } from "lucide-react";
-import PublicCalendar from "./PublicCalendar"; // ubaci tačnu putanju do tvog fajla
+import PublicCalendar from "./PublicCalendar";
 
 interface Event {
   id: number;
@@ -18,17 +18,31 @@ export default function PublicEventList() {
   const [events, setEvents] = useState<Event[]>([]);
   const [view, setView] = useState<"grid" | "calendar">("grid");
 
+  // ako postoji token → user je ulogovan
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     const load = async () => {
       try {
         const res = await fetch("/api/events");
-        const data = await res.json();
+        const data: Event[] = await res.json();
 
         setEvents(
-          data.filter(
-            (ev: Event) =>
-              ev.visibility === "Public" && ev.status === "Published"
-          )
+          data.filter((ev) => {
+            // prikazujemo samo objavljene
+            if (ev.status !== "Published") return false;
+
+            // guest → samo Public
+            if (!token) {
+              return ev.visibility === "Public";
+            }
+
+            // ulogovan user → Public + Members
+            return (
+              ev.visibility === "Public" ||
+              ev.visibility === "Members"
+            );
+          })
         );
       } catch (err) {
         console.error("Greška kod fetch-a:", err);
@@ -36,15 +50,19 @@ export default function PublicEventList() {
     };
 
     load();
-  }, []);
+  }, [token]);
 
   return (
     <div className="w-full min-h-screen bg-white">
       {/* HEADER */}
       <div className="bg-linear-to-r from-[#294a70] to-[#324D6B] text-white py-20 px-5 text-center shadow-lg">
-        <h1 className="text-5xl font-bold mb-4">Javni događaji</h1>
+        <h1 className="text-5xl font-bold mb-4">
+          {token ? "Događaji" : "Javni događaji"}
+        </h1>
         <p className="text-xl opacity-90">
-          Pregled svih javno dostupnih alumni događaja
+          {token
+            ? "Pregled dostupnih alumni događaja"
+            : "Pregled svih javno dostupnih alumni događaja"}
         </p>
       </div>
 
@@ -53,7 +71,9 @@ export default function PublicEventList() {
         <button
           onClick={() => setView("grid")}
           className={`px-3 py-1 rounded font-semibold ${
-            view === "grid" ? "bg-[#294a70] text-white" : "bg-gray-200 text-gray-700"
+            view === "grid"
+              ? "bg-[#294a70] text-white"
+              : "bg-gray-200 text-gray-700"
           }`}
         >
           Grid
@@ -61,7 +81,9 @@ export default function PublicEventList() {
         <button
           onClick={() => setView("calendar")}
           className={`px-3 py-1 rounded font-semibold ${
-            view === "calendar" ? "bg-[#294a70] text-white" : "bg-gray-200 text-gray-700"
+            view === "calendar"
+              ? "bg-[#294a70] text-white"
+              : "bg-gray-200 text-gray-700"
           }`}
         >
           Kalendar
@@ -73,7 +95,7 @@ export default function PublicEventList() {
         {view === "grid" ? (
           events.length === 0 ? (
             <p className="text-center text-gray-500 text-lg">
-              Trenutno nema javnih događaja.
+              Trenutno nema dostupnih događaja.
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -105,7 +127,7 @@ export default function PublicEventList() {
                     <span className="font-medium">{ev.location}</span>
                   </div>
 
-                  {/* KRATAK OPIS */}
+                  {/* OPIS */}
                   <p className="text-gray-600 leading-relaxed mb-6 line-clamp-3">
                     {ev.description || "Ovaj događaj nema dodatni opis."}
                   </p>
