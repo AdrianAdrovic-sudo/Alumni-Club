@@ -253,10 +253,10 @@ const AdminEventDetails: React.FC = () => {
         )}
 
         <button
-          onClick={() => navigate("/admin/events")}
+          onClick={() => navigate("/dashboard")}
           className="mt-6 px-3 py-1 bg-gray-300 text-gray-800 text-sm rounded hover:bg-gray-400"
         >
-          ← Nazad
+          ← Nazad na dashboard
         </button>
       </div>
     </div>
