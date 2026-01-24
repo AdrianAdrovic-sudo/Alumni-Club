@@ -68,9 +68,32 @@ export default function DiplomskiRadovi() {
   });
 
   return (
-    <div className="w-full min-h-screen bg-white flex flex-col">
+    <div className="w-full min-h-screen bg-white flex flex-col relative overflow-hidden">
+      {/* Background Design Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="w-full h-full" style={{
+            backgroundImage: 'linear-gradient(rgba(41, 74, 112, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(41, 74, 112, 0.1) 1px, transparent 1px)',
+            backgroundSize: '60px 60px'
+          }}></div>
+        </div>
+        
+        {/* Diagonal lines */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-5">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="diagonalLines" patternUnits="userSpaceOnUse" width="100" height="100">
+                <path d="M0,100 L100,0" stroke="#294a70" strokeWidth="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#diagonalLines)" />
+          </svg>
+        </div>
+      </div>
+
       {/* HERO */}
-      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white px-4 py-16 md:py-20 text-center">
+      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white px-4 py-16 md:py-20 text-center relative z-10">
         <h1 className="text-3xl md:text-5xl font-bold mb-4">
           Diplomski radovi
         </h1>
@@ -82,7 +105,7 @@ export default function DiplomskiRadovi() {
       </div>
 
       {/* SEARCH & FILTER */}
-      <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 px-4 md:px-16 mt-8">
+      <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 px-4 md:px-16 mt-8 relative z-10">
         {/* Filter Button */}
         <div className="relative">
           <button
@@ -175,7 +198,7 @@ export default function DiplomskiRadovi() {
       </div>
 
 
-      <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8">
+      <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8 relative z-10">
         <div className="w-full max-w-6xl shadow-md rounded-2xl overflow-hidden bg-white">
           <div className="w-full overflow-x-auto">
             <table className="w-full border-collapse table-auto">
