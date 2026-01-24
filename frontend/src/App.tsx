@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Theses from "./pages/Theses";
 import Messages from "./components/messages/Messages";
 import { AuthProvider } from "./context/AuthContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import PublicRoute from "./components/common/PublicRoute";
 import PublicProfile from "./pages/PublicProfile";
 import AdminRoute from "./components/common/AdminRoute";
@@ -28,9 +29,10 @@ import AdminEventDetails from "./pages/AdminEventDetails";
 export default function App() {
   return (
     <AuthProvider>
-      <div className="bg-[#324D6B] min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 w-full pt-16 pb-32 bg-[#324D6B]">
+      <LanguageProvider>
+        <div className="bg-[#294a70] min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1 w-full pt-16 pb-32">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/Home" element={<Home />} />
@@ -121,6 +123,7 @@ export default function App() {
         </main>
         <Footer />
       </div>
+      </LanguageProvider>
     </AuthProvider>
   );
 }
