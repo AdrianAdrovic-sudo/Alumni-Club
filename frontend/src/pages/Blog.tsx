@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 import "../css/Blog.css";
 
 type ImageProps = {
@@ -37,11 +38,7 @@ export type BlogProps = React.ComponentPropsWithoutRef<"section"> &
 const ITEMS_PER_PAGE = 3;
 
 export const Blog = (props: BlogProps) => {
-  const { tagline, heading, description, button } = {
-    ...BlogDefaults,
-    ...props,
-  };
-
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   // Modal state for blog post popup
@@ -212,11 +209,11 @@ export const Blog = (props: BlogProps) => {
         <div className="container">
           <div className="mb-12 md:mb-18 lg:mb-20">
             <div className="mx-auto w-full max-w-lg text-center">
-              <p className="mb-3 font-semibold md:mb-4">{tagline}</p>
+              <p className="mb-3 font-semibold md:mb-4">{t('blog.tagline')}</p>
               <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
-                {heading}
+                {t('blog.heading')}
               </h2>
-              <p className="md:text-md">{description}</p>
+              <p className="md:text-md">{t('blog.description')}</p>
             </div>
           </div>
 
@@ -225,14 +222,14 @@ export const Blog = (props: BlogProps) => {
               onClick={() => navigate("/AddBlog")}
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border-[3px] border-white"
             >
-              Add Blog
+              {t('blog.addBlog')}
             </button>
           </div>
 
           {loading ? (
-            <p className="text-center">Loading...</p>
+            <p className="text-center">{t('blog.loading')}</p>
           ) : blogPosts.length === 0 ? (
-            <p className="text-center">No blog posts yet.</p>
+            <p className="text-center">{t('blog.noPosts')}</p>
           ) : (
             <>
               <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
@@ -246,14 +243,10 @@ export const Blog = (props: BlogProps) => {
               {hasMorePosts && (
                 <div className="flex items-center justify-center">
                   <button
-                    className={`default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white ${
-                      button.variant === "secondary"
-                        ? "default-blog-btn-secondary"
-                        : ""
-                    }`}
+                    className="default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white default-blog-btn-secondary"
                     onClick={() => setShowAll(!showAll)}
                   >
-                    {showAll ? "Show less" : button.title}
+                    {showAll ? t('blog.showLess') : t('blog.viewAll')}
                   </button>
                 </div>
               )}
@@ -275,7 +268,7 @@ export const Blog = (props: BlogProps) => {
               {/* Modal Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-2xl font-bold text-gray-900">
-                  Blog Post
+                  {t('blog.modal.title')}
                 </h3>
                 <button
                   onClick={closeModal}
@@ -328,7 +321,7 @@ export const Blog = (props: BlogProps) => {
                       {selectedPost.description}
                     </p>
                     <p className="text-gray-500 italic">
-                      This is a preview of the blog post. The full content would be loaded from the backend.
+                      {t('blog.modal.preview')}
                     </p>
                   </div>
                 </div>
@@ -341,7 +334,7 @@ export const Blog = (props: BlogProps) => {
                     onClick={closeModal}
                     className="px-6 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3854] transition-colors"
                   >
-                    Close
+                    {t('blog.modal.close')}
                   </button>
                 </div>
               </div>

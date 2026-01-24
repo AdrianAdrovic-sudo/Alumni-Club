@@ -3,7 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import img1 from '../assets/img1.jpg';
 import img2 from '../assets/img2.jpg';
 import img3 from '../assets/img3.jpg';
-import laptop from '../assets/laptop.jpg';
+import konsultacija from '../assets/konsultacija.png';
 import projekat from '../assets/projekat.png';
 import event from '../assets/event.png';
 
@@ -104,11 +104,11 @@ function AboutUs() {
           </div>
           
           {/* Projekat image */}
-          <div className="flex justify-center">
+          <div>
             <img 
               src={projekat} 
               alt="Alumni FIT projekat" 
-              className="rounded-lg shadow-lg max-w-full h-auto hover:shadow-xl transition-shadow duration-300"
+              className="rounded-lg shadow-lg w-full h-64 object-cover hover:shadow-xl transition-shadow duration-300"
             />
           </div>
         </div>
@@ -118,8 +118,8 @@ function AboutUs() {
           {/* Image section */}
           <div className="lg:[direction:ltr]">
             <img 
-              src={laptop} 
-              alt="Studenti rade na projektima" 
+              src={konsultacija} 
+              alt="Konsultacije i mentorstvo" 
               className="rounded-lg shadow-lg w-full h-64 object-cover hover:shadow-xl transition-shadow duration-300"
             />
           </div>

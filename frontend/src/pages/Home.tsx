@@ -3,6 +3,7 @@ import img1 from '../assets/img1.jpg';
 import img2 from '../assets/img2.jpg';
 import img3 from '../assets/img3.jpg';
 import { RxChevronRight } from 'react-icons/rx';
+import { useLanguage } from '../context/LanguageContext';
 import '../css/Home.css';
 
 type ImageProps = {
@@ -70,10 +71,34 @@ const defaultProps: Props = {
 };
 
 const Home: React.FC<Partial<Props>> = (props) => {
-  const { tagline, heading, description, sections, buttons } = {
-    ...defaultProps,
-    ...props,
-  };
+  const { t } = useLanguage();
+  
+  const sections = [
+    {
+      image: {
+        src: img1,
+        alt: "Networking image",
+      },
+      heading: t('home.section1.heading'),
+      description: t('home.section1.description'),
+    },
+    {
+      image: {
+        src: img2,
+        alt: "Mentorship image",
+      },
+      heading: t('home.section2.heading'),
+      description: t('home.section2.description'),
+    },
+    {
+      image: {
+        src: img3,
+        alt: "Career development image",
+      },
+      heading: t('home.section3.heading'),
+      description: t('home.section3.description'),
+    },
+  ];
 
   return (
     <div className="home-main-content">
@@ -82,11 +107,11 @@ const Home: React.FC<Partial<Props>> = (props) => {
           <div className="flex flex-col items-center">
             <div className="rb-12 mb-12 text-center md:mb-18 lg:mb-20">
               <div className="w-full max-w-lg">
-                <p className="mb-3 font-semibold md:mb-4">{tagline}</p>
+                <p className="mb-3 font-semibold md:mb-4">{t('home.tagline')}</p>
                 <h2 className="mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
-                  {heading}
+                  {t('home.heading')}
                 </h2>
-                <p className="md:text-md">{description}</p>
+                <p className="md:text-md">{t('home.description')}</p>
               </div>
             </div>
             <div className="grid grid-cols-1 items-start justify-center gap-y-12 md:grid-cols-3 md:gap-x-8 md:gap-y-16 lg:gap-x-12">
@@ -110,7 +135,7 @@ const Home: React.FC<Partial<Props>> = (props) => {
       </section>
       <button className="btn-31">
         <span className="text-container">
-          <span className="text">Read more...</span>
+          <span className="text">{t('home.readMore')}</span>
         </span>
       </button>
     </div>

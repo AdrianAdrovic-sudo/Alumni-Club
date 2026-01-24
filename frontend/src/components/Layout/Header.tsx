@@ -57,7 +57,7 @@ function Header() {
           </nav>
 
           {/* DESKTOP USER / GUEST */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-3 ml-auto text-[#294a70]">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3 ml-auto mr-4 text-[#294a70]">
             {user ? (
               <div className="flex items-center gap-2 xl:gap-3">
                 <span className="text-sm xl:text-base font-semibold whitespace-nowrap">
@@ -77,6 +77,7 @@ function Header() {
                   <Link to="/Dashboard" className={buttonStyle}>{t('header.dashboard')}</Link>
                 )}
 
+                 <button className={buttonStyle}>{t('header.dashboard')}</button>
                 <span
                   onClick={handleLogout}
                   className={authButton + " cursor-pointer"}
@@ -84,36 +85,38 @@ function Header() {
                   {t('header.logout')}
                 </span>
 
-                {/* Language Dropdown */}
+                {/* Language Dropdown Menu */}
                 <div className="relative">
                   <button
                     onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
-                    className={`${buttonStyle} flex items-center gap-1`}
+                    className="px-2 py-1.5 rounded-lg bg-gray-100 text-[#294a70] hover:bg-gray-200 transition-colors text-xs font-medium flex items-center gap-1"
                   >
-                    <Globe size={16} />
-                    <span className="uppercase font-medium">{language}</span>
-                    <ChevronDown size={14} />
+                    <Globe size={14} />
+                    <span className="uppercase">{language}</span>
+                    <ChevronDown size={12} className="transition-transform duration-200" style={{
+                      transform: languageDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                    }} />
                   </button>
 
                   {languageDropdownOpen && (
-                    <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[100px] z-50">
+                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[120px] z-50">
                       <button
                         onClick={() => {
-                          setLanguage('sr');
+                          setLanguage('me');
                           setLanguageDropdownOpen(false);
                         }}
-                        className={`w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors ${
-                          language === 'sr' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
+                        className={`w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors text-sm ${
+                          language === 'me' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
                         }`}
                       >
-                        🇷🇸 Srpski
+                        🇲🇪 Crnogorski
                       </button>
                       <button
                         onClick={() => {
                           setLanguage('en');
                           setLanguageDropdownOpen(false);
                         }}
-                        className={`w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors ${
+                        className={`w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors text-sm ${
                           language === 'en' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
                         }`}
                       >
@@ -132,36 +135,38 @@ function Header() {
                   {t('header.login')}
                 </Link>
 
-                {/* Language Dropdown for guests */}
+                {/* Language Dropdown Menu for guests */}
                 <div className="relative">
                   <button
                     onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
-                    className={`${buttonStyle} flex items-center gap-1`}
+                    className="px-2 py-1.5 rounded-lg bg-gray-100 text-[#294a70] hover:bg-gray-200 transition-colors text-xs font-medium flex items-center gap-1"
                   >
-                    <Globe size={16} />
-                    <span className="uppercase font-medium">{language}</span>
-                    <ChevronDown size={14} />
+                    <Globe size={14} />
+                    <span className="uppercase">{language}</span>
+                    <ChevronDown size={12} className="transition-transform duration-200" style={{
+                      transform: languageDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                    }} />
                   </button>
 
                   {languageDropdownOpen && (
-                    <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[100px] z-50">
+                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[120px] z-50">
                       <button
                         onClick={() => {
-                          setLanguage('sr');
+                          setLanguage('me');
                           setLanguageDropdownOpen(false);
                         }}
-                        className={`w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors ${
-                          language === 'sr' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
+                        className={`w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors text-sm ${
+                          language === 'me' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
                         }`}
                       >
-                        🇷🇸 Srpski
+                        🇲🇪 Crnogorski
                       </button>
                       <button
                         onClick={() => {
                           setLanguage('en');
                           setLanguageDropdownOpen(false);
                         }}
-                        className={`w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors ${
+                        className={`w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors text-sm ${
                           language === 'en' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
                         }`}
                       >
@@ -220,17 +225,17 @@ function Header() {
                     {t('header.logout')}
                   </button>
 
-                  {/* Mobile Language Switcher */}
+                  {/* Mobile Language Buttons */}
                   <div className="flex gap-2 mt-2">
                     <button
-                      onClick={() => setLanguage('sr')}
+                      onClick={() => setLanguage('me')}
                       className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                        language === 'sr' 
+                        language === 'me' 
                           ? 'bg-[#294a70] text-white' 
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      🇷🇸 Srpski
+                      🇲🇪 Crnogorski
                     </button>
                     <button
                       onClick={() => setLanguage('en')}
@@ -262,17 +267,17 @@ function Header() {
                     {t('header.login')}
                   </Link>
 
-                  {/* Mobile Language Switcher for guests */}
+                  {/* Mobile Language Buttons for guests */}
                   <div className="flex gap-2 mt-2">
                     <button
-                      onClick={() => setLanguage('sr')}
+                      onClick={() => setLanguage('me')}
                       className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                        language === 'sr' 
+                        language === 'me' 
                           ? 'bg-[#294a70] text-white' 
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      🇷🇸 Srpski
+                      🇲🇪 Crnogorski
                     </button>
                     <button
                       onClick={() => setLanguage('en')}
