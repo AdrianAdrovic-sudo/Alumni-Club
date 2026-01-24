@@ -44,10 +44,25 @@ export const Blog = (props: BlogProps) => {
 
   const navigate = useNavigate();
 
+  // Modal state for blog post popup
+  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Function to open blog post in modal
+  const openBlogModal = (post: BlogPost) => {
+    setSelectedPost(post);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedPost(null);
+  };
+
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 UZIMAMO BLOGOVE SA BACKENDA
+  // UZIMAMO BLOGOVE SA BACKENDA
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -144,25 +159,31 @@ export const Blog = (props: BlogProps) => {
             : {}
         }
       >
-        <a href={post.url} className="mb-6 inline-block w-full max-w-full">
+        <div 
+          onClick={() => openBlogModal(post)}
+          className="mb-6 inline-block w-full max-w-full cursor-pointer"
+        >
           <div className="w-full overflow-hidden">
             <img
               src={post.image.src}
               alt={post.image.alt}
-              className="aspect-[3/2] size-full object-cover"
+              className="aspect-[3/2] size-full object-cover hover:scale-105 transition-transform duration-300"
             />
           </div>
-        </a>
-        <a
-          href={post.url}
-          className="mb-2 mr-4 inline-block max-w-full text-sm font-semibold"
+        </div>
+        <button
+          onClick={() => openBlogModal(post)}
+          className="mb-2 mr-4 inline-block max-w-full text-sm font-semibold hover:text-[#294a70] transition-colors cursor-pointer"
         >
           {post.category}
-        </a>
+        </button>
 
-        <a href={post.url} className="mb-2 block max-w-full">
-          <h5 className="text-xl font-bold md:text-2xl">{post.title}</h5>
-        </a>
+        <div 
+          onClick={() => openBlogModal(post)}
+          className="mb-2 block max-w-full cursor-pointer"
+        >
+          <h5 className="text-xl font-bold md:text-2xl hover:text-[#294a70] transition-colors">{post.title}</h5>
+        </div>
         <p>{post.description}</p>
         <div className="mt-6 flex items-center">
           <div className="mr-4 shrink-0">
@@ -186,59 +207,149 @@ export const Blog = (props: BlogProps) => {
   };
 
   return (
-    <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
-      <div className="container">
-        <div className="mb-12 md:mb-18 lg:mb-20">
-          <div className="mx-auto w-full max-w-lg text-center">
-            <p className="mb-3 font-semibold md:mb-4">{tagline}</p>
-            <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
-              {heading}
-            </h2>
-            <p className="md:text-md">{description}</p>
-          </div>
-        </div>
-
-        <div className="mb-8 flex justify-end">
-          <button
-            onClick={() => navigate("/AddBlog")}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border-[3px] border-white"
-          >
-            Add Blog
-          </button>
-        </div>
-
-        {loading ? (
-          <p className="text-center">Loading...</p>
-        ) : blogPosts.length === 0 ? (
-          <p className="text-center">No blog posts yet.</p>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
-              {visiblePosts.map((post, index) =>
-                renderCard(post, index, false)
-              )}
-              {showAll &&
-                hiddenPosts.map((post, index) => renderCard(post, index, true))}
+    <>
+      <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
+        <div className="container">
+          <div className="mb-12 md:mb-18 lg:mb-20">
+            <div className="mx-auto w-full max-w-lg text-center">
+              <p className="mb-3 font-semibold md:mb-4">{tagline}</p>
+              <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
+                {heading}
+              </h2>
+              <p className="md:text-md">{description}</p>
             </div>
+          </div>
 
-            {hasMorePosts && (
-              <div className="flex items-center justify-center">
+          <div className="mb-8 flex justify-end">
+            <button
+              onClick={() => navigate("/AddBlog")}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border-[3px] border-white"
+            >
+              Add Blog
+            </button>
+          </div>
+
+          {loading ? (
+            <p className="text-center">Loading...</p>
+          ) : blogPosts.length === 0 ? (
+            <p className="text-center">No blog posts yet.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
+                {visiblePosts.map((post, index) =>
+                  renderCard(post, index, false)
+                )}
+                {showAll &&
+                  hiddenPosts.map((post, index) => renderCard(post, index, true))}
+              </div>
+
+              {hasMorePosts && (
+                <div className="flex items-center justify-center">
+                  <button
+                    className={`default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white ${
+                      button.variant === "secondary"
+                        ? "default-blog-btn-secondary"
+                        : ""
+                    }`}
+                    onClick={() => setShowAll(!showAll)}
+                  >
+                    {showAll ? "Show less" : button.title}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Blog Post Modal */}
+      {isModalOpen && selectedPost && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={closeModal}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200 overflow-hidden">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Blog Post
+                </h3>
                 <button
-                  className={`default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white ${
-                    button.variant === "secondary"
-                      ? "default-blog-btn-secondary"
-                      : ""
-                  }`}
-                  onClick={() => setShowAll(!showAll)}
+                  onClick={closeModal}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  {showAll ? "Show less" : button.title}
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
-            )}
-          </>
-        )}
-      </div>
-    </section>
+
+              {/* Modal Content */}
+              <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="p-6">
+                  {/* Blog Image */}
+                  <img
+                    src={selectedPost.image.src}
+                    alt={selectedPost.image.alt}
+                    className="w-full h-64 object-cover rounded-lg mb-6"
+                  />
+
+                  {/* Category Badge */}
+                  <div className="inline-block bg-[#294a70] text-white px-3 py-1 rounded-full text-sm font-semibold mb-4">
+                    {selectedPost.category}
+                  </div>
+
+                  {/* Title */}
+                  <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
+                    {selectedPost.title}
+                  </h1>
+
+                  {/* Author Info */}
+                  <div className="flex items-center mb-6 pb-6 border-b border-gray-200">
+                    <img
+                      src={selectedPost.avatar.src}
+                      alt={selectedPost.avatar.alt}
+                      className="w-12 h-12 rounded-full object-cover mr-4"
+                    />
+                    <div>
+                      <div className="font-semibold text-gray-900">{selectedPost.fullName}</div>
+                      <div className="text-gray-600 text-sm">
+                        {selectedPost.date} • {selectedPost.readTime}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="prose prose-lg max-w-none">
+                    <p className="text-gray-700 leading-relaxed mb-4">
+                      {selectedPost.description}
+                    </p>
+                    <p className="text-gray-500 italic">
+                      This is a preview of the blog post. The full content would be loaded from the backend.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-gray-200 bg-gray-50">
+                <div className="flex justify-end">
+                  <button
+                    onClick={closeModal}
+                    className="px-6 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3854] transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 };
 

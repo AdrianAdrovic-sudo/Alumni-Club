@@ -76,7 +76,7 @@ const Home: React.FC<Partial<Props>> = (props) => {
   };
 
   return (
-    <main className="home-main-content">
+    <div className="home-main-content">
       <section className="layout239-section px-[5%] py-16 md:py-24 lg:py-28">
         <div className="container">
           <div className="flex flex-col items-center">
@@ -113,7 +113,7 @@ const Home: React.FC<Partial<Props>> = (props) => {
           <span className="text">Read more...</span>
         </span>
       </button>
-    </main>
+    </div>
   );
 };
 
