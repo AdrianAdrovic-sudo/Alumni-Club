@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Menu, X } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
+import { Menu, X, Globe, ChevronDown } from "lucide-react";
 
 function Header() {
   const { user, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
 
   function handleLogout() {
     logout();
@@ -46,11 +49,11 @@ function Header() {
 
           {/* DESKTOP NAV */}
           <nav className="hidden lg:flex gap-6 xl:gap-8 font-medium">
-            <Link className={navLink} to="/AboutUs">O nama</Link>
-            <Link className={navLink} to="/AlumniDirectory">Alumnisti</Link>
-            <Link className={navLink} to="/Blog">Blog</Link>
-            <Link className={navLink} to="/Contact">Kontakt</Link>
-            <Link className={navLink} to="/Theses">Diplomski radovi</Link>
+            <Link className={navLink} to="/AboutUs">{t('header.about')}</Link>
+            <Link className={navLink} to="/AlumniDirectory">{t('header.alumni')}</Link>
+            <Link className={navLink} to="/Blog">{t('header.blog')}</Link>
+            <Link className={navLink} to="/Contact">{t('header.contact')}</Link>
+            <Link className={navLink} to="/Theses">{t('header.theses')}</Link>
           </nav>
 
           {/* DESKTOP USER / GUEST */}
@@ -58,37 +61,115 @@ function Header() {
             {user ? (
               <div className="flex items-center gap-2 xl:gap-3">
                 <span className="text-sm xl:text-base font-semibold whitespace-nowrap">
-                  Dobrodošao/la, <span className="font-bold">{user.username}</span>!
+                  {t('header.welcome')}, <span className="font-bold">{user.username}</span>!
                 </span>
 
-                <Link to="/messages" className={buttonStyle}>Inbox</Link>
+                <Link to="/messages" className={buttonStyle}>{t('header.inbox')}</Link>
 
                 {isRegularUser && (
                   <>
-                    <Link to="/MyProfile" className={buttonStyle}>Profil</Link>
-                    <Link to="/events" className={buttonStyle}>Događaji</Link>
+                    <Link to="/MyProfile" className={buttonStyle}>{t('header.profile')}</Link>
+                    <Link to="/events" className={buttonStyle}>{t('header.events')}</Link>
                   </>
                 )}
 
                 {isAdmin && (
-                  <Link to="/Dashboard" className={buttonStyle}>Dashboard</Link>
+                  <Link to="/Dashboard" className={buttonStyle}>{t('header.dashboard')}</Link>
                 )}
 
                 <span
                   onClick={handleLogout}
                   className={authButton + " cursor-pointer"}
                 >
-                  Odjavi se
+                  {t('header.logout')}
                 </span>
+
+                {/* Language Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
+                    className={`${buttonStyle} flex items-center gap-1`}
+                  >
+                    <Globe size={16} />
+                    <span className="uppercase font-medium">{language}</span>
+                    <ChevronDown size={14} />
+                  </button>
+
+                  {languageDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[100px] z-50">
+                      <button
+                        onClick={() => {
+                          setLanguage('sr');
+                          setLanguageDropdownOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors ${
+                          language === 'sr' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
+                        }`}
+                      >
+                        🇷🇸 Srpski
+                      </button>
+                      <button
+                        onClick={() => {
+                          setLanguage('en');
+                          setLanguageDropdownOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors ${
+                          language === 'en' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
+                        }`}
+                      >
+                        🇬🇧 English
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <>
                 <Link to="/events" className={buttonStyle}>
-                  Događaji
+                  {t('header.events')}
                 </Link>
                 <Link to="/login" className={authButton}>
-                  Prijavi se
+                  {t('header.login')}
                 </Link>
+
+                {/* Language Dropdown for guests */}
+                <div className="relative">
+                  <button
+                    onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
+                    className={`${buttonStyle} flex items-center gap-1`}
+                  >
+                    <Globe size={16} />
+                    <span className="uppercase font-medium">{language}</span>
+                    <ChevronDown size={14} />
+                  </button>
+
+                  {languageDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[100px] z-50">
+                      <button
+                        onClick={() => {
+                          setLanguage('sr');
+                          setLanguageDropdownOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors ${
+                          language === 'sr' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
+                        }`}
+                      >
+                        🇷🇸 Srpski
+                      </button>
+                      <button
+                        onClick={() => {
+                          setLanguage('en');
+                          setLanguageDropdownOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors ${
+                          language === 'en' ? 'bg-[#eef2ff] text-[#294a70] font-medium' : 'text-gray-700'
+                        }`}
+                      >
+                        🇬🇧 English
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>
@@ -109,11 +190,11 @@ function Header() {
         <div className="lg:hidden bg-white shadow-xl border-t border-gray-200 animate-slideDown">
           <nav className="flex flex-col p-4 gap-2 text-[#294a70] font-medium">
 
-            <Link onClick={() => setOpen(false)} to="/Blog" className="py-3 px-2 hover:bg-gray-50 rounded-lg">Blog</Link>
-            <Link onClick={() => setOpen(false)} to="/AlumniDirectory" className="py-3 px-2 hover:bg-gray-50 rounded-lg">Alumnisti</Link>
-            <Link onClick={() => setOpen(false)} to="/AboutUs" className="py-3 px-2 hover:bg-gray-50 rounded-lg">O nama</Link>
-            <Link onClick={() => setOpen(false)} to="/Contact" className="py-3 px-2 hover:bg-gray-50 rounded-lg">Kontakt</Link>
-            <Link onClick={() => setOpen(false)} to="/Theses" className="py-3 px-2 hover:bg-gray-50 rounded-lg">Diplomski radovi</Link>
+            <Link onClick={() => setOpen(false)} to="/Blog" className="py-3 px-2 hover:bg-gray-50 rounded-lg">{t('header.blog')}</Link>
+            <Link onClick={() => setOpen(false)} to="/AlumniDirectory" className="py-3 px-2 hover:bg-gray-50 rounded-lg">{t('header.alumni')}</Link>
+            <Link onClick={() => setOpen(false)} to="/AboutUs" className="py-3 px-2 hover:bg-gray-50 rounded-lg">{t('header.about')}</Link>
+            <Link onClick={() => setOpen(false)} to="/Contact" className="py-3 px-2 hover:bg-gray-50 rounded-lg">{t('header.contact')}</Link>
+            <Link onClick={() => setOpen(false)} to="/Theses" className="py-3 px-2 hover:bg-gray-50 rounded-lg">{t('header.theses')}</Link>
 
             <div className="mt-4 pt-4 border-t border-gray-200 flex flex-col gap-3">
               {user ? (
@@ -122,22 +203,46 @@ function Header() {
                     {user.username}
                   </div>
 
-                  <Link onClick={() => setOpen(false)} to="/messages" className={buttonStyle}>Inbox</Link>
+                  <Link onClick={() => setOpen(false)} to="/messages" className={buttonStyle}>{t('header.inbox')}</Link>
 
                   {isRegularUser && (
                     <>
-                      <Link onClick={() => setOpen(false)} to="/MyProfile" className={buttonStyle}>Moj profil</Link>
-                      <Link onClick={() => setOpen(false)} to="/events" className={buttonStyle}>Događaji</Link>
+                      <Link onClick={() => setOpen(false)} to="/MyProfile" className={buttonStyle}>{t('header.myProfile')}</Link>
+                      <Link onClick={() => setOpen(false)} to="/events" className={buttonStyle}>{t('header.events')}</Link>
                     </>
                   )}
 
                   {isAdmin && (
-                    <Link onClick={() => setOpen(false)} to="/Dashboard" className={buttonStyle}>Dashboard</Link>
+                    <Link onClick={() => setOpen(false)} to="/Dashboard" className={buttonStyle}>{t('header.dashboard')}</Link>
                   )}
 
                   <button onClick={handleLogout} className={authButton}>
-                    Odjavi se
+                    {t('header.logout')}
                   </button>
+
+                  {/* Mobile Language Switcher */}
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => setLanguage('sr')}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                        language === 'sr' 
+                          ? 'bg-[#294a70] text-white' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🇷🇸 Srpski
+                    </button>
+                    <button
+                      onClick={() => setLanguage('en')}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                        language === 'en' 
+                          ? 'bg-[#294a70] text-white' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🇬🇧 English
+                    </button>
+                  </div>
                 </>
               ) : (
                 <>
@@ -146,7 +251,7 @@ function Header() {
                     to="/events"
                     className="w-full text-center py-2.5 px-4 border-2 border-[#294a70] rounded-full hover:bg-[#eef2ff] transition"
                   >
-                    Događaji
+                    {t('header.events')}
                   </Link>
 
                   <Link
@@ -154,8 +259,32 @@ function Header() {
                     to="/login"
                     className={authButton}
                   >
-                    Prijavi se
+                    {t('header.login')}
                   </Link>
+
+                  {/* Mobile Language Switcher for guests */}
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => setLanguage('sr')}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                        language === 'sr' 
+                          ? 'bg-[#294a70] text-white' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🇷🇸 Srpski
+                    </button>
+                    <button
+                      onClick={() => setLanguage('en')}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                        language === 'en' 
+                          ? 'bg-[#294a70] text-white' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      🇬🇧 English
+                    </button>
+                  </div>
                 </>
               )}
             </div>
