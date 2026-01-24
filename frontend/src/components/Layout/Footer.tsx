@@ -69,7 +69,7 @@ function Footer() {
               {[
                 { icon: FaPhone, label: 'Telefon', value: '+382 20 409 204' },
                 { icon: FaFax, label: 'Fax', value: '+382 20 409 232' },
-                { icon: FaEnvelope, label: 'E-mail', value: 'info@email.com' }
+                { icon: FaEnvelope, label: 'E-mail', value: 'info@alumni-fit.com' }
               ].map((item, index) => (
                 <div key={index} className="group relative">
                   <div className="relative bg-white/5 backdrop-blur-xl rounded-xl p-5 border border-white/20 hover:border-[#ffab1f] transition-all duration-300">
@@ -91,11 +91,11 @@ function Footer() {
               <div className="text-xs font-semibold text-white/80 mb-4 uppercase tracking-wider">Društvene mreže</div>
               <div className="flex gap-3">
                 {[
-                  { icon: FaFacebook, color: '#1877f2' },
-                  { icon: FaInstagram, color: '#e4405f' },
-                  { icon: FaYoutube, color: '#ff0000' }
+                  { icon: FaFacebook, color: '#1877f2', url: 'https://www.facebook.com/UniverzitetMediteranPodgorica/' },
+                  { icon: FaInstagram, color: '#e4405f', url: 'https://www.instagram.com/usfitum/' },
+                  { icon: FaYoutube, color: '#ff0000', url: '#' }
                 ].map((social, index) => (
-                  <a key={index} href="#" className="group relative">
+                  <a key={index} href={social.url} target="_blank" rel="noopener noreferrer" className="group relative">
                     <div 
                       className="relative w-12 h-12 rounded-xl flex items-center justify-center transform group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 shadow-lg"
                       style={{ backgroundColor: social.color }}
@@ -110,12 +110,11 @@ function Footer() {
 
         </div>
 
-        <div className="pt-8 border-t border-white/20">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-white/70">
+        <div className="pt-8 border-t border-gray-200">
+          <div className="flex justify-center items-center">
+            <div className="text-sm text-white">
               © 2025 Alumni FIT. Zajedno gradimo budućnost.
             </div>
-            
           </div>
         </div>
       </div>
