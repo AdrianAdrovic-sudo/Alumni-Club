@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { Editor } from "@tinymce/tinymce-react";
+import { X, Plus } from "lucide-react";
 
 type ImageProps = {
   src: string;
@@ -43,6 +45,19 @@ export const Blog = (props: BlogProps) => {
   // Modal state for blog post popup
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Add Blog Modal state
+  const [isAddBlogModalOpen, setIsAddBlogModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    category: "",
+    description: "",
+    content: "",
+    image: "",
+    readTime: "",
+  });
+
+  const TINYMCE_KEY = import.meta.env.VITE_TINYMCE_API_KEY || "";
 
   // Function to open blog post in modal
   const openBlogModal = (post: BlogPost) => {
@@ -55,59 +70,142 @@ export const Blog = (props: BlogProps) => {
     setSelectedPost(null);
   };
 
+  // Add Blog Modal functions
+  const openAddBlogModal = () => {
+    setIsAddBlogModalOpen(true);
+  };
+
+  const closeAddBlogModal = () => {
+    setIsAddBlogModalOpen(false);
+    setFormData({
+      title: "",
+      category: "",
+      description: "",
+      content: "",
+      image: "",
+      readTime: "",
+    });
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleEditorChange = (content: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      content,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      title: formData.title,
+      category: formData.category,
+      imageUrl: formData.image,
+      readTime: formData.readTime,
+      shortDesc: formData.description,
+      content: formData.content,
+    };
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        let errBody: any = null;
+        try {
+          errBody = await res.json();
+        } catch (_) {}
+
+        console.error("Greška pri kreiranju bloga:", res.status, errBody);
+        alert(errBody?.message || "Neuspješno kreiranje blog posta.");
+        return;
+      }
+
+      const created = await res.json();
+      console.log("Kreirani post:", created);
+
+      // Refresh posts and close modal
+      fetchPosts();
+      closeAddBlogModal();
+    } catch (err) {
+      console.error("Network/JS greška pri kreiranju bloga:", err);
+      alert("Došlo je do greške prilikom slanja bloga.");
+    }
+  };
+
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   // UZIMAMO BLOGOVE SA BACKENDA
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await fetch("/api/posts"); // ako backend radi na drugom prefixu, ovdje promijeni
-        if (!res.ok) {
-          console.error("Neuspješno dohvatanje objava:", res.status);
-          setLoading(false);
-          return;
-        }
-
-        const data = await res.json();
-
-        const mapped: BlogPost[] = data.map((post: any) => ({
-          id: post.id,
-          url: `/blog/${post.id}`, // ili kako god ćete raditi detaljni prikaz
-          image: {
-            src:
-              post.image_url ||
-              "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
-            alt: post.title,
-          },
-          category: post.category,
-          readTime: post.read_time || "5 min čitanja",
-          title: post.title,
-          description: post.short_desc,
-          avatar: {
-            src:
-              post.users?.profile_picture ||
-              "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-            alt: post.users
-              ? `${post.users.first_name} ${post.users.last_name}`
-              : "Autor",
-          },
-          fullName: post.users
-            ? `${post.users.first_name} ${post.users.last_name}`
-            : "Nepoznat autor",
-          date: post.created_at
-            ? new Date(post.created_at).toLocaleDateString()
-            : "",
-        }));
-
-        setPosts(mapped);
-      } catch (err) {
-        console.error("Greška pri dohvatanju objava:", err);
-      } finally {
+  const fetchPosts = async () => {
+    try {
+      const res = await fetch("/api/posts");
+      if (!res.ok) {
+        console.error("Neuspješno dohvatanje objava:", res.status);
         setLoading(false);
+        return;
       }
-    };
 
+      const data = await res.json();
+
+      const mapped: BlogPost[] = data.map((post: any) => ({
+        id: post.id,
+        url: `/blog/${post.id}`,
+        image: {
+          src:
+            post.image_url ||
+            "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
+          alt: post.title,
+        },
+        category: post.category,
+        readTime: post.read_time || "5 min čitanja",
+        title: post.title,
+        description: post.short_desc,
+        avatar: {
+          src:
+            post.users?.profile_picture ||
+            "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+          alt: post.users
+            ? `${post.users.first_name} ${post.users.last_name}`
+            : "Autor",
+        },
+        fullName: post.users
+          ? `${post.users.first_name} ${post.users.last_name}`
+          : "Nepoznat autor",
+        date: post.created_at
+          ? new Date(post.created_at).toLocaleDateString()
+          : "",
+      }));
+
+      setPosts(mapped);
+    } catch (err) {
+      console.error("Greška pri dohvatanju objava:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPosts();
   }, []);
 
@@ -218,13 +316,14 @@ export const Blog = (props: BlogProps) => {
 
           <div className="mb-8 flex justify-center">
             <button
-              onClick={() => navigate("/AddBlog")}
-              className="px-6 py-3 rounded-lg text-white font-semibold text-lg
+              onClick={openAddBlogModal}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold text-lg
                          bg-gradient-to-br from-[#294a70] to-[#324D6B]
                          hover:from-[#ffab1f] hover:to-[#ff9500]
                          transform transition hover:-translate-y-1
                          shadow-md hover:shadow-xl"
             >
+              <Plus className="w-5 h-5" />
               {t('blog.addBlog')}
             </button>
           </div>
@@ -257,6 +356,185 @@ export const Blog = (props: BlogProps) => {
           )}
         </div>
       </section>
+
+      {/* Add Blog Modal */}
+      {isAddBlogModalOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={closeAddBlogModal}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200 overflow-hidden">
+              
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-[#294a70] to-[#324D6B]">
+                <h3 className="text-2xl font-bold text-white">
+                  Kreiraj novi blog post
+                </h3>
+                <button
+                  onClick={closeAddBlogModal}
+                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
+                <div className="p-6">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    
+                    {/* Title */}
+                    <div>
+                      <label htmlFor="title" className="block text-gray-700 font-semibold mb-2">
+                        Naslov bloga <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
+                        placeholder="Unesite naslov bloga"
+                      />
+                    </div>
+
+                    {/* Category */}
+                    <div>
+                      <label htmlFor="category" className="block text-gray-700 font-semibold mb-2">
+                        Kategorija <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        id="category"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
+                      >
+                        <option value="">Izaberite kategoriju</option>
+                        <option value="Technology">Tehnologija</option>
+                        <option value="Business">Biznis</option>
+                        <option value="Lifestyle">Životni stil</option>
+                        <option value="Education">Obrazovanje</option>
+                        <option value="Career">Karijera</option>
+                        <option value="Other">Ostalo</option>
+                      </select>
+                    </div>
+
+                    {/* Image URL */}
+                    <div>
+                      <label htmlFor="image" className="block text-gray-700 font-semibold mb-2">
+                        URL slike <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="url"
+                        id="image"
+                        name="image"
+                        value={formData.image}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
+
+                    {/* Read Time */}
+                    <div>
+                      <label htmlFor="readTime" className="block text-gray-700 font-semibold mb-2">
+                        Vrijeme čitanja <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="readTime"
+                        name="readTime"
+                        value={formData.readTime}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
+                        placeholder="npr. 5 min čitanja"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">
+                        Kratki opis <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        required
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent resize-none"
+                        placeholder="Kratki opis blog posta"
+                      />
+                    </div>
+
+                    {/* Content Editor */}
+                    <div>
+                      <label htmlFor="content" className="block text-gray-700 font-semibold mb-2">
+                        Sadržaj bloga <span className="text-red-500">*</span>
+                      </label>
+                      <Editor
+                        apiKey={TINYMCE_KEY || "no-api-key"}
+                        value={formData.content}
+                        onEditorChange={handleEditorChange}
+                        init={{
+                          height: 400,
+                          menubar: false,
+                          plugins: [
+                            "lists",
+                            "link",
+                            "image",
+                            "code",
+                            "table",
+                            "wordcount",
+                          ],
+                          toolbar:
+                            "undo redo | formatselect | bold italic underline | " +
+                            "alignleft aligncenter alignright alignjustify | " +
+                            "bullist numlist outdent indent | link image | code | removeformat",
+                          content_style:
+                            'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px }',
+                          placeholder: "Napišite sadržaj vašeg bloga ovdje...",
+                        }}
+                      />
+                      {!TINYMCE_KEY && (
+                        <p className="mt-2 text-sm text-red-600">
+                          Nedostaje VITE_TINYMCE_API_KEY u frontend/.env. TinyMCE će prikazati
+                          setup ekran dok ne dodate ključ.
+                        </p>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="sticky bottom-0 p-6 border-t border-gray-200 bg-gray-50 z-10">
+                <button
+                  onClick={handleSubmit}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-lg text-white font-semibold
+                             bg-gradient-to-br from-[#294a70] to-[#324D6B]
+                             hover:from-[#ffab1f] hover:to-[#ff9500]
+                             transform transition hover:-translate-y-1
+                             shadow-md hover:shadow-xl"
+                >
+                  <Plus className="w-5 h-5" />
+                  Objavi blog
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Blog Post Modal */}
       {isModalOpen && selectedPost && (
