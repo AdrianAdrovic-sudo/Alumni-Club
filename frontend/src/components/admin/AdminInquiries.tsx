@@ -19,7 +19,7 @@ export default function AdminInquiries() {
       const list = await AdminService.getInquiries();
       setItems(list);
     } catch (e: any) {
-      setError(e.message || "Failed to load inquiries");
+      setError(e.message || "Neuspješno učitavanje upita");
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ export default function AdminInquiries() {
       const updated = await AdminService.markInquiryRead(id);
       setItems((prev) => prev.map((x) => (x.id === id ? updated : x)));
     } catch (e: any) {
-      alert(e.message || "Failed to mark as read");
+      alert(e.message || "Neuspješno označavanje kao pročitano");
     }
   };
 
@@ -44,24 +44,25 @@ export default function AdminInquiries() {
       await AdminService.deleteInquiry(id);
       setItems((prev) => prev.filter((x) => x.id !== id));
     } catch (e: any) {
-      alert(e.message || "Failed to delete");
+      alert(e.message || "Neuspješno brisanje");
     }
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-800">Inquiries</h2>
+        <h2 className="text-2xl font-semibold text-gray-800">Upiti</h2>
         <button
           onClick={load}
-          className="px-4 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-100 transition"
+         className="px-4 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-100 transition text-gray-600"
+
         >
-          Refresh
+          Osvježi
         </button>
       </div>
 
       {loading && (
-        <div className="text-center py-10 text-gray-600">Loading...</div>
+        <div className="text-center py-10 text-gray-600">Učitavanje...</div>
       )}
 
       {error && (
@@ -72,7 +73,7 @@ export default function AdminInquiries() {
 
       {!loading && items.length === 0 && (
         <div className="text-center py-10 text-gray-600">
-          No inquiries yet.
+          Nema upita još uvijek.
         </div>
       )}
 
@@ -126,7 +127,7 @@ export default function AdminInquiries() {
                     onClick={() => remove(x.id)}
                     className="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition"
                   >
-                    Delete
+                    Obriši
                   </button>
                 </div>
               </div>

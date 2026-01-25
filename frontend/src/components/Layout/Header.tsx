@@ -77,7 +77,6 @@ function Header() {
                   <Link to="/Dashboard" className={buttonStyle}>{t('header.dashboard')}</Link>
                 )}
 
-                 <button className={buttonStyle}>{t('header.dashboard')}</button>
                 <span
                   onClick={handleLogout}
                   className={authButton + " cursor-pointer"}
