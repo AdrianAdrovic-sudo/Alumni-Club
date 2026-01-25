@@ -1,4 +1,3 @@
-import "../css/Login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -115,18 +114,20 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="login-container">
-      <div className="login">
-        <h2>Reset šifre</h2>
-        <h4>
+    <div className="min-h-screen flex justify-center items-center p-5">
+      <div className="w-full max-w-md p-10 bg-gray-50 rounded-2xl shadow-lg flex flex-col items-center text-center">
+        <h2 className="text-4xl text-[#294a70] mb-3 font-bold">Reset šifre</h2>
+        <h4 className="text-base text-gray-600 mb-8 font-normal">
           {step === 1
             ? "Unesite korisničko ime i email naloga."
             : "Unesite kod sa emaila i novu šifru."}
         </h4>
 
         {step === 1 && (
-          <form onSubmit={handleCheck}>
-            <label htmlFor="username">Korisničko ime:</label>
+          <form onSubmit={handleCheck} className="w-full flex flex-col">
+            <label htmlFor="username" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Korisničko ime:
+            </label>
             <input
               id="username"
               type="text"
@@ -134,9 +135,12 @@ export default function ResetPassword() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
             />
 
-            <label htmlFor="email">Email:</label>
+            <label htmlFor="email" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Email:
+            </label>
             <input
               id="email"
               type="email"
@@ -144,17 +148,24 @@ export default function ResetPassword() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
             />
 
-            <button type="submit" disabled={loading}>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="mt-6 px-8 py-3.5 bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white border-none rounded-lg cursor-pointer text-base font-semibold w-full transition-all duration-300 hover:bg-gradient-to-br hover:from-[#ffab1f] hover:to-[#ff9500] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#ffab1f]/30"
+            >
               {loading ? "Provjeravam..." : "Dalje"}
             </button>
           </form>
         )}
 
         {step === 2 && (
-          <form onSubmit={handleConfirm}>
-            <label htmlFor="code">Kod sa emaila:</label>
+          <form onSubmit={handleConfirm} className="w-full flex flex-col">
+            <label htmlFor="code" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Kod sa emaila:
+            </label>
             <input
               id="code"
               type="text"
@@ -162,9 +173,12 @@ export default function ResetPassword() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
             />
 
-            <label htmlFor="newPassword">Nova šifra:</label>
+            <label htmlFor="newPassword" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Nova šifra:
+            </label>
             <input
               id="newPassword"
               type="password"
@@ -172,9 +186,12 @@ export default function ResetPassword() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
             />
 
-            <label htmlFor="confirmPassword">Ponovite novu šifru:</label>
+            <label htmlFor="confirmPassword" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Ponovite novu šifru:
+            </label>
             <input
               id="confirmPassword"
               type="password"
@@ -182,21 +199,34 @@ export default function ResetPassword() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
             />
 
-            <button type="submit" disabled={loading}>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="mt-6 px-8 py-3.5 bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white border-none rounded-lg cursor-pointer text-base font-semibold w-full transition-all duration-300 hover:bg-gradient-to-br hover:from-[#ffab1f] hover:to-[#ff9500] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#ffab1f]/30"
+            >
               {loading ? "Snimam..." : "Sačuvaj šifru"}
             </button>
           </form>
         )}
 
-        {msg && <div className="message success">{msg}</div>}
-        {error && <div className="message error">{error}</div>}
+        {msg && (
+          <div className="p-3 rounded-md mt-4 text-center font-medium bg-green-100 text-green-800 border border-green-200">
+            {msg}
+          </div>
+        )}
+        {error && (
+          <div className="p-3 rounded-md mt-4 text-center font-medium bg-red-100 text-red-800 border border-red-200">
+            {error}
+          </div>
+        )}
 
         <button
           type="button"
-          style={{ marginTop: "12px" }}
           onClick={() => navigate("/login")}
+          className="mt-3 px-8 py-3.5 bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white border-none rounded-lg cursor-pointer text-base font-semibold w-full transition-all duration-300 hover:bg-gradient-to-br hover:from-[#ffab1f] hover:to-[#ff9500] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#ffab1f]/30"
         >
           Vrati se na prijavu
         </button>

@@ -187,13 +187,13 @@ export default function ContentManagement() {
                         onClick={() => handleApprovePost(post.id)}
                         className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
                       >
-                        Approve
+                        Odobri
                       </button>
                       <button
                         onClick={() => handleDeletePost(post.id)}
                         className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600"
                       >
-                        Delete
+                        Obriši
                       </button>
                     </div>
                   </div>

@@ -70,7 +70,7 @@ class AuthService {
             throw new Error(
                 axiosError.response?.data?.error ||
                 axiosError.response?.data?.message ||
-                'Registration failed'
+                'Registracija nije uspjela'
             );
         }
     }
@@ -94,7 +94,7 @@ class AuthService {
             throw new Error(
                 axiosError.response?.data?.error ||
                 axiosError.response?.data?.message ||
-                'Login failed'
+                'Prijava nije uspjela'
             );
         }
     }
@@ -147,7 +147,7 @@ class AuthService {
             throw new Error(
                 axiosError.response?.data?.error ||
                 axiosError.response?.data?.message ||
-                'Profile update failed'
+                'Ažuriranje profila nije uspjelo'
             );
         }
     }

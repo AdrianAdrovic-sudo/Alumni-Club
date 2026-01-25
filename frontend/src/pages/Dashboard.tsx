@@ -44,8 +44,8 @@ export default function Dashboard() {
       const statsData = await AdminService.getStats();
       setStats(statsData);
     } catch (error) {
-      console.error("Error loading stats:", error);
-      alert("Error loading dashboard statistics");
+      console.error("Greška pri učitavanju statistika:", error);
+      alert("Greška pri učitavanju statistika dashboard-a");
     } finally {
       setStatsLoading(false);
     }
@@ -56,7 +56,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Proveravam autentifikaciju...</p>
+          <p className="mt-4 text-gray-600">Provjeravam autentifikaciju...</p>
         </div>
       </div>
     );
@@ -69,17 +69,17 @@ export default function Dashboard() {
   const isAdmin = user.role === "admin";
 
   return (
-    <div className="min-h-screen bg-white py-8">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="bg-white">
+      <div className="max-w-7xl mx-auto px-4 pt-16 pb-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            {isAdmin ? "Admin Dashboard" : "User Dashboard"}
+            {isAdmin ? "Admin Dashboard" : "Korisnički Dashboard"}
           </h1>
           <p className="text-lg text-gray-600">
             {isAdmin
-              ? "Welcome to your administration panel"
-              : "Welcome to your personal dashboard"}
+              ? "Dobrodošli u vaš administratorski panel"
+              : "Dobrodošli u vaš lični dashboard"}
           </p>
         </div>
 
@@ -95,7 +95,7 @@ export default function Dashboard() {
                     : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                 }`}
               >
-                Overview
+                Pregled
               </button>
               <button
                 onClick={() => setActiveTab("users")}
@@ -105,7 +105,7 @@ export default function Dashboard() {
                     : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                 }`}
               >
-                User Management
+                Upravljanje korisnicima
               </button>
               <button
                 onClick={() => setActiveTab("content")}
@@ -115,7 +115,7 @@ export default function Dashboard() {
                     : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                 }`}
               >
-                Content Management
+                Upravljanje sadržajem
               </button>
 
               <button
@@ -126,7 +126,7 @@ export default function Dashboard() {
                     : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
                 }`}
               >
-                Inquiries
+                Upiti
               </button>
             </nav>
           </div>
@@ -140,7 +140,7 @@ export default function Dashboard() {
                 {statsLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading statistics...</p>
+                    <p className="mt-4 text-gray-600">Učitavanje statistika...</p>
                   </div>
                 ) : stats ? (
                   <StatsCards stats={stats} />
@@ -157,11 +157,11 @@ export default function Dashboard() {
         {/* User Profile */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-            Your Profile
+            Vaš profil
           </h2>
           <div className="space-y-3 text-gray-700">
             <div className="flex justify-between">
-              <span className="font-medium">Username:</span>
+              <span className="font-medium">Korisničko ime:</span>
               <span>{user.username}</span>
             </div>
             <div className="flex justify-between">
@@ -169,21 +169,21 @@ export default function Dashboard() {
               <span>{user.email}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Full Name:</span>
+              <span className="font-medium">Puno ime:</span>
               <span>
                 {user.first_name} {user.last_name}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Enrollment Year:</span>
+              <span className="font-medium">Godina upisa:</span>
               <span>{user.enrollment_year}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Occupation:</span>
-              <span>{user.occupation || "Not specified"}</span>
+              <span className="font-medium">Zanimanje:</span>
+              <span>{user.occupation || "Nije specificirano"}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="font-medium">Role:</span>
+              <span className="font-medium">Uloga:</span>
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
                   user.role === "admin"

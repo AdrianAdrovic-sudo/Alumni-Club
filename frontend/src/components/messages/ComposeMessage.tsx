@@ -130,7 +130,7 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* TO */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Kome šaljete?</label>
 
           {/* chips */}
           {selected.length > 0 && (
@@ -145,7 +145,7 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
                     type="button"
                     onClick={() => removeSelected(u.username)}
                     className="text-blue-700 hover:text-blue-900"
-                    title="Remove"
+                    title="Ukloni"
                   >
                     ×
                   </button>
@@ -162,7 +162,7 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
                 if (suggestions.length > 0) setShowSuggestions(true);
               }}
               placeholder="Kucajte korisničko ime ili ime..."
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-200"
             />
 
             {showSuggestions && (
@@ -197,22 +197,22 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
 
         {/* SUBJECT */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Naslov</label>
           <input
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-200"
             placeholder="Naslov poruke"
           />
         </div>
 
         {/* CONTENT */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Poruka</label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full min-h-[140px] rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full min-h-[140px] rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-200"
             placeholder="Napišite poruku..."
           />
         </div>
@@ -223,7 +223,7 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
             onClick={onCancel}
             className="rounded-lg px-4 py-2 text-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
           >
-            Cancel
+            Otkaži
           </button>
 
           <button

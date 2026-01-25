@@ -1,4 +1,3 @@
-import "../css/Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -60,13 +59,15 @@ export default function Login() {
   }
 
   return (
-    <div className="login-container">
-      <div className="login">
-        <h2>Prijava</h2>
-        <h4>Unesite svoje podatke kako biste nastavili.</h4>
+    <div className="min-h-screen flex justify-center items-center p-5">
+      <div className="w-full max-w-md p-10 bg-gray-50 rounded-2xl shadow-lg flex flex-col items-center text-center">
+        <h2 className="text-4xl text-[#294a70] mb-3 font-bold">Prijava</h2>
+        <h4 className="text-base text-gray-600 mb-8 font-normal">Unesite svoje podatke kako biste nastavili.</h4>
 
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="username">Korisničko ime:</label>
+        <form onSubmit={handleSubmit} className="w-full flex flex-col">
+          <label htmlFor="username" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+            Korisničko ime:
+          </label>
           <input
             type="text"
             placeholder="Korisničko ime"
@@ -74,10 +75,13 @@ export default function Login() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
           />
 
-          <label htmlFor="password">Šifra:</label>
-          <div className="passwordContainer">
+          <label htmlFor="password" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+            Šifra:
+          </label>
+          <div className="relative w-full mt-2">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Šifra"
@@ -85,27 +89,38 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="w-full pr-12 px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
             />
-            <span onClick={togglePassword} className="toggleEye">
+            <span 
+              onClick={togglePassword} 
+              className="absolute top-1/2 right-4 transform -translate-y-1/2 cursor-pointer text-gray-600 text-xl transition-colors duration-300 hover:text-[#ffab1f]"
+            >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
 
-          <button type="submit" disabled={loading}>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="mt-6 px-8 py-3.5 bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white border-none rounded-lg cursor-pointer text-base font-semibold w-full transition-all duration-300 hover:bg-gradient-to-br hover:from-[#ffab1f] hover:to-[#ff9500] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#ffab1f]/30"
+          >
             {loading ? "Prijavljujem..." : "Prijavi se"}
           </button>
 
           <p
-          className="forgot-password"
-           onClick={() => navigate("/reset-password")}
-            > 
-              Zaboravili ste šifru?
-            </p>
-
+            className="mt-4 text-sm text-gray-600 cursor-pointer transition-colors duration-300 hover:text-[#ffab1f] hover:underline text-center"
+            onClick={() => navigate("/reset-password")}
+          > 
+            Zaboravili ste šifru?
+          </p>
         </form>
 
         {msg && (
-          <div className={`message ${msg.includes("Dobrodošao") ? "success" : "error"}`}>
+          <div className={`p-3 rounded-md mt-4 text-center font-medium ${
+            msg.includes("Dobrodošao") 
+              ? "bg-green-100 text-green-800 border border-green-200" 
+              : "bg-red-100 text-red-800 border border-red-200"
+          }`}>
             {msg}
           </div>
         )}

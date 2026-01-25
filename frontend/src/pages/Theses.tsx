@@ -53,9 +53,9 @@ export default function DiplomskiRadovi() {
   const sortirani = [...filtrirani].sort((a, b) => {
     switch (sortBy) {
       case "datum-asc":
-        return new Date(a.datum.split('.').reverse().join('-')) - new Date(b.datum.split('.').reverse().join('-'));
+        return new Date(a.datum.split('.').reverse().join('-')).getTime() - new Date(b.datum.split('.').reverse().join('-')).getTime();
       case "datum-desc":
-        return new Date(b.datum.split('.').reverse().join('-')) - new Date(a.datum.split('.').reverse().join('-'));
+        return new Date(b.datum.split('.').reverse().join('-')).getTime() - new Date(a.datum.split('.').reverse().join('-')).getTime();
       case "ime-asc":
         return a.ime.localeCompare(b.ime);
       case "prezime-asc":
@@ -82,19 +82,19 @@ export default function DiplomskiRadovi() {
       </div>
 
       {/* SEARCH & FILTER */}
-      <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 px-4 md:px-16 mt-8">
+      <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-4 md:px-16 mt-8">
         {/* Filter Button */}
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
           <button
             onClick={() => setShowFilter(!showFilter)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors w-full sm:w-auto justify-center sm:justify-start"
           >
             <FaFilter />
             <span>Sortiraj</span>
           </button>
 
           {showFilter && (
-            <div className="absolute top-full left-0 mt-2 w-56 bg-[#294a70] rounded-lg shadow-xl overflow-hidden z-10">
+            <div className="absolute top-full left-0 mt-2 w-full sm:w-56 bg-[#294a70] rounded-lg shadow-xl overflow-hidden z-50">
               {/* Sort Options */}
               <div className="border-b border-[#1f3a5a] pb-2">
                 <div className="px-4 py-2 text-xs text-gray-300 font-semibold uppercase">Sortiraj</div>
@@ -163,84 +163,95 @@ export default function DiplomskiRadovi() {
         </div>
 
         <div className="flex items-center w-full sm:w-96">
-
-          <input
-            type="text"
-            placeholder="Pretraga..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 h-[45px] border border-gray-300 border-l-0 rounded-r-md text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#ffab1f] focus:border-[#ffab1f]"
-          />
+          <div className="relative w-full">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Pretraga po imenu, prezimenu ili nazivu rada..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#ffab1f] focus:border-[#ffab1f] shadow-sm"
+            />
+          </div>
         </div>
       </div>
 
-
       <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8">
-        <div className="w-full max-w-6xl shadow-md rounded-2xl overflow-hidden bg-white">
-          <div className="w-full overflow-x-auto">
-            <table className="w-full border-collapse table-auto">
-              <thead className="bg-[#294a70] text-white">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold">
-                    Ime
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold">
-                    Prezime
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold">
-                    Naziv diplomskog rada
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold">
-                    Datum diplomiranja
-                  </th>
-                  {isAdmin && (
-                    <th className="px-4 py-3 text-left text-sm font-semibold">
-                      Actions
+        <div className="w-full max-w-6xl">
+          {/* Info text - moved here above table */}
+          <div className="mb-4">
+            <p className="text-sm sm:text-base text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+              💡 <strong>Savjet:</strong> Kliknite na naziv diplomskog rada da ga preuzmete na svoj uređaj.
+            </p>
+          </div>
+          
+          <div className="shadow-md rounded-2xl overflow-hidden bg-white">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full border-collapse table-auto min-w-[600px]">
+                <thead className="bg-[#294a70] text-white">
+                  <tr>
+                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
+                      Ime
                     </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {sortirani.map((p, idx) => (
-                  <tr
-                    key={idx}
-                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                  >
-                    <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
-                      {p.ime}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
-                      {p.prezime}
-                    </td>
-                    <td className="px-4 py-3 pb-[28px] text-sm text-gray-800 border-b border-gray-200">
-                      <button
-                        onClick={() => handleDownload(p.fileUrl, `${p.prezime}-${p.ime}.pdf`)}
-                        className="text-gray-800 hover:text-[#294a70] cursor-pointer text-left bg-transparent border-none p-0 m-0 font-normal transition-colors"
-                      >
-                        {p.naziv}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-800 border-b border-gray-200">
-                      {p.datum}
-                    </td>
+                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
+                      Prezime
+                    </th>
+                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
+                      Naziv diplomskog rada
+                    </th>
+                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold hidden sm:table-cell">
+                      Datum diplomiranja
+                    </th>
                     {isAdmin && (
-                      <td className="px-4 py-3 text-sm border-b border-gray-200">
-                        <button
-                          onClick={() => {
-                            setSelectedThesis(p);
-                            setShowUploadModal(true);
-                          }}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors text-sm font-medium"
-                        >
-                          <FaUpload size={14} />
-                          Upload
-                        </button>
-                      </td>
+                      <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
+                        Akcije
+                      </th>
                     )}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {sortirani.map((p, idx) => (
+                    <tr
+                      key={idx}
+                      className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                    >
+                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
+                        {p.ime}
+                      </td>
+                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
+                        {p.prezime}
+                      </td>
+                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
+                        <button
+                          onClick={() => handleDownload(p.fileUrl, `${p.prezime}-${p.ime}.pdf`)}
+                          className="text-gray-800 hover:text-[#294a70] cursor-pointer text-left bg-transparent border-none p-0 m-0 font-medium transition-colors hover:underline"
+                          title="Kliknite da preuzmete rad"
+                        >
+                          {p.naziv}
+                        </button>
+                      </td>
+                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200 hidden sm:table-cell">
+                        {p.datum}
+                      </td>
+                      {isAdmin && (
+                        <td className="px-2 sm:px-4 py-3 text-sm sm:text-base border-b border-gray-200">
+                          <button
+                            onClick={() => {
+                              setSelectedThesis(p);
+                              setShowUploadModal(true);
+                            }}
+                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors text-sm font-medium"
+                          >
+                            <FaUpload size={12} />
+                            <span className="hidden sm:inline">Otpremi</span>
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

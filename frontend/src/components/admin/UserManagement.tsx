@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import AdminService from '../../services/adminService';
 import { generateUsername } from '../utils/UsernameGenerator';
 
-interface User {
+// Extended User interface for the component (different from AdminService User)
+interface ExtendedUser {
   id: number;
   first_name: string;
   last_name: string;
@@ -32,7 +33,7 @@ interface CreateUserData {
 }
 
 export default function UserManagement() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<ExtendedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     role: '',
@@ -76,16 +77,16 @@ export default function UserManagement() {
       };
       
       const data = await AdminService.getUsers(backendFilters, pagination.page, pagination.limit);
-      setUsers(data.users || []);
-      setPagination(data.pagination || {
-        page: 1,
-        limit: 20,
-        total: 0,
-        pages: 0
+      setUsers((data.data as unknown as ExtendedUser[]) || []);
+      setPagination({
+        page: data.page,
+        limit: data.limit,
+        total: data.total,
+        pages: data.totalPages
       });
     } catch (error) {
       console.error('Greška prilikom učitavanja korisnika:', error);
-      alert('Neuspješno učitavanje korisnika. Provjerite konzolu..');
+      alert('Neuspješno učitavanje korisnika. Provjerite konzolu.');
       setUsers([]);
     } finally {
       setLoading(false);
@@ -117,7 +118,7 @@ export default function UserManagement() {
   };
 
   const handleDelete = async (userId: number) => {
-    if (window.confirm('Da li ste sigurni da želite obrisati korisika? Ovaj postupak se ne može povratiti.')) {
+    if (window.confirm('Da li ste sigurni da želite obrisati korisnika? Ovaj postupak se ne može povratiti.')) {
       try {
         await AdminService.deleteUser(userId);
         loadUsers();
@@ -146,9 +147,9 @@ export default function UserManagement() {
         occupation: ''
       });
       loadUsers();
-      alert('Korisinik uspješno kreiran');
+      alert('Korisnik uspješno kreiran');
     } catch (error: any) {
-      console.error('Greška prilikom kreiranja korinsika:', error);
+      console.error('Greška prilikom kreiranja korisnika:', error);
       alert(`Neuspješno kreiranje korisnika: ${error.response?.data?.message || error.message}`);
     } finally {
       setCreateLoading(false);
@@ -167,7 +168,7 @@ export default function UserManagement() {
     console.log('Rezultati pretrage:', rows.length);
     
     if (rows.length < 2) {
-      alert('CSV fajl ne sadrži podatke. Proverite ispravnost formata.');
+      alert('CSV fajl ne sadrži podatke. Provjerite ispravnost formata.');
       return;
     }
 
@@ -186,7 +187,7 @@ export default function UserManagement() {
       console.log(`Obrada reda ${i}:`, row);
       
       if (row.length < 3) {
-        console.warn(`Preskakanje reda ${i} - not enough columns`);
+        console.warn(`Preskačem red ${i} - nema dovoljno kolona`);
         continue;
       }
 
@@ -223,14 +224,14 @@ export default function UserManagement() {
         
         console.log(`Dodat korisnik: ${firstName} ${lastName}`);
       } else {
-        console.warn(`Preskakanje reda ${i} - nedostaju obavezna polja:`, { firstName, lastName, email });
+        console.warn(`Preskačem red ${i} - nedostaju obavezna polja:`, { firstName, lastName, email });
       }
     }
 
     console.log('Novi korisnici:', usersToCreate);
 
     if (usersToCreate.length === 0) {
-      alert('Nisu pronađeni važeći korisnici. Proverite format CSV fajla.\n\nObavezne kolone: Ime, Prezime, Email');
+      alert('Nisu pronađeni važeći korisnici. Provjerite format CSV fajla.\n\nObavezne kolone: Ime, Prezime, Email');
       return;
     }
 
