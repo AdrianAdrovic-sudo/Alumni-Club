@@ -71,6 +71,26 @@ type TranslationKeys = {
   'home.section3.heading': string;
   'home.section3.description': string;
   'home.readMore': string;
+  'home.alumniDay.title': string;
+  'home.alumniDay.description': string;
+  'home.alumniDay.date': string;
+  'home.alumniDay.location': string;
+  'home.alumniDay.locationDesc': string;
+  'home.alumniDay.networking': string;
+  'home.alumniDay.networkingDesc': string;
+  'home.alumniDay.workshops': string;
+  'home.alumniDay.workshopsDesc': string;
+  'home.alumniDay.welcomeTitle': string;
+  'home.alumniDay.welcomeText': string;
+  'home.alumniDay.quote': string;
+  'home.alumniDay.students': string;
+  'home.alumniDay.graduates': string;
+  'home.alumniDay.professors': string;
+  'home.alumniDay.guests': string;
+  'home.alumniDay.days': string;
+  'home.alumniDay.hours': string;
+  'home.alumniDay.minutes': string;
+  'home.alumniDay.seconds': string;
   
   // Blog page translations
   'blog.tagline': string;
@@ -165,6 +185,26 @@ const translations: Record<Language, TranslationKeys> = {
     'home.section3.heading': 'Karijerni razvoj',
     'home.section3.description': 'Pristupite ekskluzivnim job oglasima, radionicama i događajima koji će vam pomoći u napredovanju karijere.',
     'home.readMore': 'Pročitaj više...',
+    'home.alumniDay.title': 'Dan Alumnista 2026',
+    'home.alumniDay.description': 'Pridružite se najvećem okupljanju naših alumnista! Zajedno slavimo uspjehe, dijelimo iskustva i oblikujemo budućnost.',
+    'home.alumniDay.date': '15. Maj 2026',
+    'home.alumniDay.location': 'Lokacija',
+    'home.alumniDay.locationDesc': 'Univerzitet Mediteran\nPodgorica',
+    'home.alumniDay.networking': 'Networking',
+    'home.alumniDay.networkingDesc': 'Povezivanje sa\nkolegama i mentorima',
+    'home.alumniDay.workshops': 'Radionice',
+    'home.alumniDay.workshopsDesc': 'Edukativni sadržaji\ni stručno usavršavanje',
+    'home.alumniDay.welcomeTitle': 'Svi su Dobrodošli!',
+    'home.alumniDay.welcomeText': 'Dan alumnista je prilika za sve nas da se okupimo, podijelimo uspjehe i iskustva, te gradimo još jače veze u našoj zajednici. Bez obzira na godinu diplomiranja ili trenutnu poziciju - svaki alumni je dragocjen dio naše velike porodice.',
+    'home.alumniDay.quote': '"Zajedno smo jači - svaki glas, svako iskustvo, svaki uspjeh čini našu zajednicu bogatijom."',
+    'home.alumniDay.students': 'Studenti',
+    'home.alumniDay.graduates': 'Diplomci',
+    'home.alumniDay.professors': 'Profesori',
+    'home.alumniDay.guests': 'Gosti',
+    'home.alumniDay.days': 'Dana',
+    'home.alumniDay.hours': 'Sati',
+    'home.alumniDay.minutes': 'Minuta',
+    'home.alumniDay.seconds': 'Sekundi',
     
     // Blog page translations
     'blog.tagline': 'Blog',
@@ -248,6 +288,26 @@ const translations: Record<Language, TranslationKeys> = {
     'home.section3.heading': 'Career development',
     'home.section3.description': 'Access exclusive job postings, workshops and events that will help you advance your career.',
     'home.readMore': 'Read more...',
+    'home.alumniDay.title': 'Alumni Day 2026',
+    'home.alumniDay.description': 'Join the biggest gathering of our alumni! Together we celebrate successes, share experiences and shape the future.',
+    'home.alumniDay.date': 'May 15, 2026',
+    'home.alumniDay.location': 'Location',
+    'home.alumniDay.locationDesc': 'University Mediteran\nPodgorica',
+    'home.alumniDay.networking': 'Networking',
+    'home.alumniDay.networkingDesc': 'Connecting with\ncolleagues and mentors',
+    'home.alumniDay.workshops': 'Workshops',
+    'home.alumniDay.workshopsDesc': 'Educational content\nand professional development',
+    'home.alumniDay.welcomeTitle': 'Everyone is Welcome!',
+    'home.alumniDay.welcomeText': 'Alumni Day is an opportunity for all of us to gather, share successes and experiences, and build even stronger bonds in our community. Regardless of graduation year or current position - every alumni is a precious part of our big family.',
+    'home.alumniDay.quote': '"Together we are stronger - every voice, every experience, every success makes our community richer."',
+    'home.alumniDay.students': 'Students',
+    'home.alumniDay.graduates': 'Graduates',
+    'home.alumniDay.professors': 'Professors',
+    'home.alumniDay.guests': 'Guests',
+    'home.alumniDay.days': 'Days',
+    'home.alumniDay.hours': 'Hours',
+    'home.alumniDay.minutes': 'Minutes',
+    'home.alumniDay.seconds': 'Seconds',
     
     // Blog page translations
     'blog.tagline': 'Blog',

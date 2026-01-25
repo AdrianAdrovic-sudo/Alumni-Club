@@ -176,13 +176,13 @@ const Home: React.FC = () => {
                 </svg>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold text-[#294a70] mb-4">
-                Dan Alumnista 2026
+                {t('home.alumniDay.title')}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-                Pridružite se najvećem okupljanju naših alumnista! Zajedno slavimo uspjehe, dijelimo iskustva i oblikujemo budućnost.
+                {t('home.alumniDay.description')}
               </p>
               <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white rounded-full text-base font-semibold shadow-lg">
-                15. Maj 2026
+                {t('home.alumniDay.date')}
               </div>
             </div>
 
@@ -190,10 +190,10 @@ const Home: React.FC = () => {
             <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-100">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
                 {[
-                  { value: timeLeft.days, label: 'Dana' },
-                  { value: timeLeft.hours, label: 'Sati' },
-                  { value: timeLeft.minutes, label: 'Minuta' },
-                  { value: timeLeft.seconds, label: 'Sekundi' }
+                  { value: timeLeft.days, label: t('home.alumniDay.days') },
+                  { value: timeLeft.hours, label: t('home.alumniDay.hours') },
+                  { value: timeLeft.minutes, label: t('home.alumniDay.minutes') },
+                  { value: timeLeft.seconds, label: t('home.alumniDay.seconds') }
                 ].map((item, index) => (
                   <div key={index} className="text-center">
                     <div className="bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl p-6 md:p-8 shadow-lg">
@@ -217,8 +217,10 @@ const Home: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-[#294a70] mb-2">Lokacija</h3>
-                  <p className="text-gray-600">Univerzitet Mediteran<br />Podgorica</p>
+                  <h3 className="text-xl font-bold text-[#294a70] mb-2">{t('home.alumniDay.location')}</h3>
+                  <p className="text-gray-600">{t('home.alumniDay.locationDesc').split('\n').map((line, i) => (
+                    <span key={i}>{line}{i === 0 && <br />}</span>
+                  ))}</p>
                 </div>
 
                 <div className="text-center p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow">
@@ -227,8 +229,10 @@ const Home: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-[#294a70] mb-2">Networking</h3>
-                  <p className="text-gray-600">Povezivanje sa<br />kolegama i mentorima</p>
+                  <h3 className="text-xl font-bold text-[#294a70] mb-2">{t('home.alumniDay.networking')}</h3>
+                  <p className="text-gray-600">{t('home.alumniDay.networkingDesc').split('\n').map((line, i) => (
+                    <span key={i}>{line}{i === 0 && <br />}</span>
+                  ))}</p>
                 </div>
 
                 <div className="text-center p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow">
@@ -237,8 +241,10 @@ const Home: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-[#294a70] mb-2">Radionice</h3>
-                  <p className="text-gray-600">Edukativni sadržaji<br />i stručno usavršavanje</p>
+                  <h3 className="text-xl font-bold text-[#294a70] mb-2">{t('home.alumniDay.workshops')}</h3>
+                  <p className="text-gray-600">{t('home.alumniDay.workshopsDesc').split('\n').map((line, i) => (
+                    <span key={i}>{line}{i === 0 && <br />}</span>
+                  ))}</p>
                 </div>
               </div>
 
@@ -246,33 +252,31 @@ const Home: React.FC = () => {
               <div className="text-center mt-12">
                 <div className="max-w-2xl mx-auto">
                   <h3 className="text-2xl md:text-3xl font-bold text-[#294a70] mb-4">
-                    Svi su Dobrodošli!
+                    {t('home.alumniDay.welcomeTitle')}
                   </h3>
                   <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                    Dan alumnista je prilika za sve nas da se okupimo, podijelimo uspjehe i iskustva, 
-                    te gradimo još jače veze u našoj zajednici. Bez obzira na godinu diplomiranja ili 
-                    trenutnu poziciju - svaki alumni je dragocjen dio naše velike porodice.
+                    {t('home.alumniDay.welcomeText')}
                   </p>
                   <div className="flex flex-wrap justify-center gap-4 text-sm">
                     <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full">
                       <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      Studenti
+                      {t('home.alumniDay.students')}
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      Diplomci
+                      {t('home.alumniDay.graduates')}
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 rounded-full">
                       <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                      Profesori
+                      {t('home.alumniDay.professors')}
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-700 rounded-full">
                       <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                      Gosti
+                      {t('home.alumniDay.guests')}
                     </div>
                   </div>
                   <p className="text-sm text-gray-500 mt-6 italic">
-                    "Zajedno smo jači - svaki glas, svako iskustvo, svaki uspjeh čini našu zajednicu bogatijom."
+                    {t('home.alumniDay.quote')}
                   </p>
                 </div>
               </div>

@@ -261,7 +261,7 @@ function Header() {
                   <Link
                     onClick={() => setOpen(false)}
                     to="/login"
-                    className={authButton}
+                    className={authButton + " w-full text-center"}
                   >
                     {t('header.login')}
                   </Link>
