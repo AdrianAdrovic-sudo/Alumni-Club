@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
-import type { ChangeEvent, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import type { ChangeEvent } from "react";
 import {
-  Camera,
   Save,
   Eye,
   EyeOff,
-  Upload,
   X,
   Mail,
   Briefcase,
@@ -18,7 +15,6 @@ import {
   Settings,
   Shield,
   Image,
-  Download,
 } from "lucide-react";
 
 type ProfileData = {
@@ -35,8 +31,6 @@ type ProfileData = {
 };
 
 export default function MyProfile() {
-  const navigate = useNavigate();
-
   const [profileData, setProfileData] = useState<ProfileData>({
     ime: "",
     prezime: "",
@@ -51,7 +45,6 @@ export default function MyProfile() {
   });
 
   const [profilnaSlika, setProfilnaSlika] = useState<string | null>(null);
-  const [cvFile, setCvFile] = useState<File | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState<ProfileData & {
     profilnaSlikaFile: File | null;
@@ -189,25 +182,38 @@ export default function MyProfile() {
       const token = localStorage.getItem("token");
       if (!token) return;
 
+      const payload = {
+        ime: editFormData.ime,
+        prezime: editFormData.prezime,
+        pozicija: editFormData.pozicija,
+        nivoStudija: editFormData.nivoStudija,
+        smjer: editFormData.smjer,
+        godinaZavrsetka: editFormData.godinaZavrsetka,
+        mjestoRada: editFormData.mjestoRada,
+        firma: editFormData.firma,
+        javniProfil: editFormData.javniProfil,
+      };
+
+      console.log("Šaljem podatke na backend:", payload);
+
       // Update main profile info
-      await fetch("http://localhost:4000/api/users/me", {
+      const response = await fetch("http://localhost:4000/api/users/me", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          first_name: editFormData.ime,
-          last_name: editFormData.prezime,
-          position: editFormData.pozicija,
-          study_level: editFormData.nivoStudija,
-          study_direction: editFormData.smjer,
-          enrollment_year: editFormData.godinaZavrsetka,
-          work_location: editFormData.mjestoRada,
-          occupation: editFormData.firma,
-          is_public: editFormData.javniProfil,
-        }),
+        body: JSON.stringify(payload),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Backend greška:", errorData);
+        return;
+      }
+
+      const updatedData = await response.json();
+      console.log("Backend odgovor:", updatedData);
 
       // Upload avatar
       if (editFormData.profilnaSlikaFile) {

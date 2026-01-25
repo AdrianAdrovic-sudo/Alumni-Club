@@ -17,8 +17,6 @@ import PublicRoute from "./components/common/PublicRoute";
 import PublicProfile from "./pages/PublicProfile";
 import AdminRoute from "./components/common/AdminRoute";
 import MyProfile from "./pages/MyProfile";
-import MyProfileEdit from "./pages/MyProfileEdit";
-import AddBlog from "./pages/AddBlog";
 import ResetPassword from "./pages/ResetPassword";
 import EventList from "./pages/EventList";
 import EventForm from "./pages/EventForm";
@@ -38,7 +36,6 @@ export default function App() {
             <Route path="/Home" element={<Home />} />
             <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
             <Route path="/Blog" element={<Blog />} />
-            <Route path="/AddBlog" element={<AddBlog />} />
 
             {/* Public login */}
             <Route
@@ -64,7 +61,6 @@ export default function App() {
             <Route path="/Contact" element={<Contact />} />
             <Route path="/Theses" element={<Theses />} />
             <Route path="/MyProfile" element={<MyProfile />} />
-            <Route path="/MyProfileEdit" element={<MyProfileEdit />} />
 
             {/* MESSAGES */}
             <Route path="/messages" element={<Messages />} />
