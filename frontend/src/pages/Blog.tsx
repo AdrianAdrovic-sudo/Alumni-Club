@@ -216,10 +216,14 @@ export const Blog = (props: BlogProps) => {
             </div>
           </div>
 
-          <div className="mb-8 flex justify-end">
+          <div className="mb-8 flex justify-center">
             <button
               onClick={() => navigate("/AddBlog")}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border-[3px] border-white"
+              className="px-6 py-3 rounded-lg text-white font-semibold text-lg
+                         bg-gradient-to-br from-[#294a70] to-[#324D6B]
+                         hover:from-[#ffab1f] hover:to-[#ff9500]
+                         transform transition hover:-translate-y-1
+                         shadow-md hover:shadow-xl"
             >
               {t('blog.addBlog')}
             </button>

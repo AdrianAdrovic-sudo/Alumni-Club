@@ -225,7 +225,7 @@ export default function Contact() {
               type="submit"
               disabled={loading}
               className={`w-full py-3 rounded-lg text-white font-semibold text-lg
-                         bg-linear-to-br from-[#294a70] to-[#324D6B]
+                         bg-gradient-to-br from-[#294a70] to-[#324D6B]
                          hover:from-[#ffab1f] hover:to-[#ff9500]
                          transform transition hover:-translate-y-1
                          shadow-md hover:shadow-xl
