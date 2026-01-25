@@ -1,4 +1,4 @@
-import { FaSearch, FaFilter, FaUpload } from "react-icons/fa";
+import { FaFilter, FaUpload } from "react-icons/fa";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import UploadThesisModal from "../components/UploadThesisModal";
@@ -53,9 +53,9 @@ export default function DiplomskiRadovi() {
   const sortirani = [...filtrirani].sort((a, b) => {
     switch (sortBy) {
       case "datum-asc":
-        return new Date(a.datum.split('.').reverse().join('-')) - new Date(b.datum.split('.').reverse().join('-'));
+        return new Date(a.datum.split('.').reverse().join('-')).getTime() - new Date(b.datum.split('.').reverse().join('-')).getTime();
       case "datum-desc":
-        return new Date(b.datum.split('.').reverse().join('-')) - new Date(a.datum.split('.').reverse().join('-'));
+        return new Date(b.datum.split('.').reverse().join('-')).getTime() - new Date(a.datum.split('.').reverse().join('-')).getTime();
       case "ime-asc":
         return a.ime.localeCompare(b.ime);
       case "prezime-asc":
@@ -186,7 +186,6 @@ export default function DiplomskiRadovi() {
         </div>
 
         <div className="flex items-center w-full sm:w-96">
-
           <input
             type="text"
             placeholder="Pretraga..."
@@ -218,7 +217,7 @@ export default function DiplomskiRadovi() {
                   </th>
                   {isAdmin && (
                     <th className="px-4 py-3 text-left text-sm font-semibold">
-                      Actions
+                      Akcije
                     </th>
                   )}
                 </tr>
@@ -256,7 +255,7 @@ export default function DiplomskiRadovi() {
                           className="flex items-center gap-2 px-3 py-1.5 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors text-sm font-medium"
                         >
                           <FaUpload size={14} />
-                          Upload
+                          Otpremi
                         </button>
                       </td>
                     )}

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import "../css/Blog.css";
 
 type ImageProps = {
   src: string;
@@ -65,7 +64,7 @@ export const Blog = (props: BlogProps) => {
       try {
         const res = await fetch("/api/posts"); // ako backend radi na drugom prefixu, ovdje promijeni
         if (!res.ok) {
-          console.error("Failed to fetch posts:", res.status);
+          console.error("Neuspješno dohvatanje objava:", res.status);
           setLoading(false);
           return;
         }
@@ -82,7 +81,7 @@ export const Blog = (props: BlogProps) => {
             alt: post.title,
           },
           category: post.category,
-          readTime: post.read_time || "5 min read",
+          readTime: post.read_time || "5 min čitanja",
           title: post.title,
           description: post.short_desc,
           avatar: {
@@ -91,11 +90,11 @@ export const Blog = (props: BlogProps) => {
               "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
             alt: post.users
               ? `${post.users.first_name} ${post.users.last_name}`
-              : "Author",
+              : "Autor",
           },
           fullName: post.users
             ? `${post.users.first_name} ${post.users.last_name}`
-            : "Unknown author",
+            : "Nepoznat autor",
           date: post.created_at
             ? new Date(post.created_at).toLocaleDateString()
             : "",
@@ -103,7 +102,7 @@ export const Blog = (props: BlogProps) => {
 
         setPosts(mapped);
       } catch (err) {
-        console.error("Error fetching posts:", err);
+        console.error("Greška pri dohvatanju objava:", err);
       } finally {
         setLoading(false);
       }
@@ -348,9 +347,9 @@ export const Blog = (props: BlogProps) => {
 
 export const BlogDefaults: Props = {
   tagline: "Blog",
-  heading: "Short heading goes here",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  button: { title: "View all", variant: "secondary" },
+  heading: "Kratki naslov ide ovdje",
+  description: "Ovo je opis blog sekcije na crnogorskom jeziku.",
+  button: { title: "Prikaži sve", variant: "secondary" },
   blogPosts: [],
 };
 

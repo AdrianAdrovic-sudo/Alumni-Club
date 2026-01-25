@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
-import "../css/AddBlog.css";
 
 const AddBlog = () => {
   const navigate = useNavigate();
@@ -91,27 +90,27 @@ const AddBlog = () => {
   };
 
   return (
-    <section className="add-blog-section px-[5%] py-16 md:py-24 lg:py-28">
+    <section className="px-[5%] py-16 md:py-24 lg:py-28 bg-gradient-to-br from-[#324D6B] to-[#2a3f56] min-h-[calc(100vh-200px)]">
       <div className="container mx-auto max-w-4xl">
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
-            Create New Blog Post
+            Kreiraj novi blog post
           </h1>
           <p className="text-gray-300">
-            Fill in the details below to create a new blog post
+            Popunite detalje ispod da biste kreirali novi blog post
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="blog-form bg-white rounded-lg shadow-lg p-8"
+          className="bg-white rounded-lg shadow-lg p-8"
         >
-          <div className="form-group mb-6">
+          <div className="mb-6">
             <label
               htmlFor="title"
-              className="block text-gray-700 font-semibold mb-2"
+              className="block text-gray-700 font-semibold mb-2 text-base"
             >
-              Blog Title <span className="text-red-500">*</span>
+              Naslov bloga <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -120,17 +119,17 @@ const AddBlog = () => {
               value={formData.title}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter blog title"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+              placeholder="Unesite naslov bloga"
             />
           </div>
 
-          <div className="form-group mb-6">
+          <div className="mb-6">
             <label
               htmlFor="category"
-              className="block text-gray-700 font-semibold mb-2"
+              className="block text-gray-700 font-semibold mb-2 text-base"
             >
-              Category <span className="text-red-500">*</span>
+              Kategorija <span className="text-red-500">*</span>
             </label>
             <select
               id="category"
@@ -138,24 +137,24 @@ const AddBlog = () => {
               value={formData.category}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
             >
-              <option value="">Select a category</option>
-              <option value="Technology">Technology</option>
-              <option value="Business">Business</option>
-              <option value="Lifestyle">Lifestyle</option>
-              <option value="Education">Education</option>
-              <option value="Career">Career</option>
-              <option value="Other">Other</option>
+              <option value="">Izaberite kategoriju</option>
+              <option value="Technology">Tehnologija</option>
+              <option value="Business">Biznis</option>
+              <option value="Lifestyle">Životni stil</option>
+              <option value="Education">Obrazovanje</option>
+              <option value="Career">Karijera</option>
+              <option value="Other">Ostalo</option>
             </select>
           </div>
 
-          <div className="form-group mb-6">
+          <div className="mb-6">
             <label
               htmlFor="image"
-              className="block text-gray-700 font-semibold mb-2"
+              className="block text-gray-700 font-semibold mb-2 text-base"
             >
-              Image URL <span className="text-red-500">*</span>
+              URL slike <span className="text-red-500">*</span>
             </label>
             <input
               type="url"
@@ -164,17 +163,17 @@ const AddBlog = () => {
               value={formData.image}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
               placeholder="https://example.com/image.jpg"
             />
           </div>
 
-          <div className="form-group mb-6">
+          <div className="mb-6">
             <label
               htmlFor="readTime"
-              className="block text-gray-700 font-semibold mb-2"
+              className="block text-gray-700 font-semibold mb-2 text-base"
             >
-              Read Time <span className="text-red-500">*</span>
+              Vrijeme čitanja <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -183,17 +182,17 @@ const AddBlog = () => {
               value={formData.readTime}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., 5 min read"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
+              placeholder="npr. 5 min čitanja"
             />
           </div>
 
-          <div className="form-group mb-6">
+          <div className="mb-6">
             <label
               htmlFor="description"
-              className="block text-gray-700 font-semibold mb-2"
+              className="block text-gray-700 font-semibold mb-2 text-base"
             >
-              Short Description <span className="text-red-500">*</span>
+              Kratki opis <span className="text-red-500">*</span>
             </label>
             <textarea
               id="description"
@@ -202,17 +201,17 @@ const AddBlog = () => {
               onChange={handleChange}
               required
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              placeholder="Brief description of the blog post"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-300 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] font-inherit"
+              placeholder="Kratki opis blog posta"
             />
           </div>
 
-          <div className="form-group mb-8">
+          <div className="mb-8">
             <label
               htmlFor="content"
-              className="block text-gray-700 font-semibold mb-2"
+              className="block text-gray-700 font-semibold mb-2 text-base"
             >
-              Blog Content <span className="text-red-500">*</span>
+              Sadržaj bloga <span className="text-red-500">*</span>
             </label>
 
             {/* If key is missing, we still render, but TinyMCE will show setup nag */}
@@ -237,14 +236,14 @@ const AddBlog = () => {
                   "bullist numlist outdent indent | link image | code | removeformat",
                 content_style:
                   'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px }',
-                placeholder: "Write your blog content here...",
+                placeholder: "Napišite sadržaj vašeg bloga ovdje...",
               }}
             />
 
             {!TINYMCE_KEY && (
               <p className="mt-2 text-sm text-red-600">
-                Missing VITE_TINYMCE_API_KEY in frontend/.env. TinyMCE will show
-                the setup screen until you add a key.
+                Nedostaje VITE_TINYMCE_API_KEY u frontend/.env. TinyMCE će prikazati
+                setup ekran dok ne dodate ključ.
               </p>
             )}
           </div>
@@ -255,13 +254,13 @@ const AddBlog = () => {
               onClick={handleCancel}
               className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow-md transition-all duration-300"
             >
-              Cancel
+              Otkaži
             </button>
             <button
               type="submit"
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg"
             >
-              Publish Blog
+              Objavi blog
             </button>
           </div>
         </form>
