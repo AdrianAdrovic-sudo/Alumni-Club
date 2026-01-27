@@ -1,6 +1,7 @@
 import { FaSearch, FaFilter, FaUpload } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import adminService from "../services/adminService";
 import UploadThesisModal from "../components/UploadThesisModal";
 
 export default function DiplomskiRadovi() {
@@ -14,7 +15,52 @@ export default function DiplomskiRadovi() {
   const [selectedThesis, setSelectedThesis] = useState<any>(null);
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
 
-  const handleDownload = (fileUrl: string, fileName: string) => {
+  const [theses, setTheses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTheses = async () => {
+      try {
+        const users = await adminService.getAlumniDirectory();
+
+        // Map users to "thesis" structure
+        const mappedTheses = users.map((u: any) => {
+          // Attempt to map study_level to our types
+          let type = "bachelors";
+          const level = u.study_level?.toLowerCase() || "";
+          if (level.includes("master") || level.includes("magist")) type = "masters";
+          if (level.includes("specijal")) type = "specialist";
+
+          return {
+            id: u.id,
+            ime: u.first_name,
+            prezime: u.last_name,
+            naziv: u.study_direction || "Naslov rada nije unet", // Use study direction as proxy for title or placeholder
+            datum: u.enrollment_year ? `${u.enrollment_year}.` : "N/A", // Use enrollment year as proxy
+            fileUrl: null, // No file
+            type: type,
+            // Keep original user object for admin actions if needed
+            originalUser: u
+          };
+        });
+
+        setTheses(mappedTheses);
+      } catch (error) {
+        console.error("Failed to fetch theses", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTheses();
+  }, []);
+
+  const handleDownload = (fileUrl: string | null, fileName: string) => {
+    if (!fileUrl) {
+      alert("Fajl nije dostupan.");
+      return;
+    }
+
     // Create a temporary anchor element to trigger download
     const link = document.createElement('a');
     link.href = fileUrl;
@@ -24,21 +70,8 @@ export default function DiplomskiRadovi() {
     document.body.removeChild(link);
   };
 
-  const podaci = [
-    { ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009.", fileUrl: "/theses/zizic-milos.pdf", type: "bachelors" },
-    { ime: "Tripo", prezime: "Matijević", naziv: "Prikupljanje činjenica za informacioni sistem studentske službe", datum: "10.07.2009.", fileUrl: "/theses/matijevic-tripo.pdf", type: "masters" },
-    { ime: "Zoran", prezime: "Ćorović", naziv: "Model, objekti i veze informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/corovic-zoran.pdf", type: "bachelors" },
-    { ime: "Dženan", prezime: "Strujić", naziv: "Relacioni model informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/strujic-dzenan.pdf", type: "specialist" },
-    { ime: "Novak", prezime: "Radulović", naziv: "Forme i izvještaj informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/radulovic-novak.pdf", type: "masters" },
-    { ime: "Igor", prezime: "Pekić", naziv: "Sigurnost informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/pekic-igor.pdf", type: "bachelors" },
-    { ime: "Ana", prezime: "Jovanović", naziv: "Web aplikacija za studentsku službu", datum: "10.07.2009.", fileUrl: "/theses/jovanovic-ana.pdf", type: "specialist" },
-    { ime: "Jelena", prezime: "Marković", naziv: "Implementacija informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/markovic-jelena.pdf", type: "masters" },
-    { ime: "Marko", prezime: "Nikolić", naziv: "Testiranje informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/nikolic-marko.pdf", type: "bachelors" },
-    { ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/stojanovic-ivana.pdf", type: "specialist" },
-  ];
-
   // Filtriranje
-  const filtrirani = podaci.filter((p) => {
+  const filtrirani = theses.filter((p) => {
     const matchesSearch =
       p.ime.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.prezime.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -53,9 +86,16 @@ export default function DiplomskiRadovi() {
   const sortirani = [...filtrirani].sort((a, b) => {
     switch (sortBy) {
       case "datum-asc":
+<<<<<<< Updated upstream
         return new Date(a.datum.split('.').reverse().join('-')) - new Date(b.datum.split('.').reverse().join('-'));
       case "datum-desc":
         return new Date(b.datum.split('.').reverse().join('-')) - new Date(a.datum.split('.').reverse().join('-'));
+=======
+        // Parse date simply as string comparison if just year, or improve logic
+        return a.datum.localeCompare(b.datum);
+      case "datum-desc":
+        return b.datum.localeCompare(a.datum);
+>>>>>>> Stashed changes
       case "ime-asc":
         return a.ime.localeCompare(b.ime);
       case "prezime-asc":
@@ -175,6 +215,7 @@ export default function DiplomskiRadovi() {
 
 
       <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8">
+<<<<<<< Updated upstream
         <div className="w-full max-w-6xl shadow-md rounded-2xl overflow-hidden bg-white">
           <div className="w-full overflow-x-auto">
             <table className="w-full border-collapse table-auto">
@@ -195,6 +236,32 @@ export default function DiplomskiRadovi() {
                   {isAdmin && (
                     <th className="px-4 py-3 text-left text-sm font-semibold">
                       Actions
+=======
+        <div className="w-full max-w-6xl">
+          {/* Info text - moved here above table */}
+          <div className="mb-4">
+            <p className="text-sm sm:text-base text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+              💡 <strong>Savjet:</strong> Kliknite na naziv diplomskog rada da ga preuzmete na svoj uređaj.
+            </p>
+          </div>
+
+          <div className="shadow-md rounded-2xl overflow-hidden bg-white">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full border-collapse table-auto min-w-[600px]">
+                <thead className="bg-[#294a70] text-white">
+                  <tr>
+                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
+                      Ime
+                    </th>
+                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
+                      Prezime
+                    </th>
+                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
+                      Naziv diplomskog rada
+                    </th>
+                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold hidden sm:table-cell">
+                      Datum diplomiranja
+>>>>>>> Stashed changes
                     </th>
                   )}
                 </tr>

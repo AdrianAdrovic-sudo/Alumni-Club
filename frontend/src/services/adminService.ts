@@ -121,11 +121,49 @@ class AdminService {
         return response.data;
     }
 
+<<<<<<< Updated upstream
     // Analytics
     async getStats(): Promise<Stats> {
         const response = await this.api.get<Stats>('/admin/stats');
         return response.data;
     }
+=======
+  // Analytics
+  async getStats(): Promise<Stats> {
+    const response = await this.api.get<Stats>("/admin/stats");
+    return response.data;
+  }
+
+  // =========================
+  // NEW: Inquiries management
+  // =========================
+
+  /** List all non-deleted inquiries (admin only) */
+  async getInquiries(): Promise<ContactInquiry[]> {
+    const response = await this.api.get<InquiriesResponse>("/admin/inquiries");
+    return response.data.inquiries;
+  }
+
+  /** Mark inquiry as read (admin only) */
+  async markInquiryRead(id: number): Promise<ContactInquiry> {
+    const response = await this.api.patch<InquiryResponse>(`/admin/inquiries/${id}/read`);
+    return response.data.inquiry;
+  }
+
+  /** Delete inquiry (soft delete) (admin only) */
+  async deleteInquiry(id: number): Promise<ContactInquiry> {
+    const response = await this.api.delete<InquiryResponse>(`/admin/inquiries/${id}`);
+    return response.data.inquiry;
+  }
+
+  // =========================
+  // NEW: Alumni Directory
+  // =========================
+  async getAlumniDirectory(): Promise<any[]> {
+    const response = await this.api.get<{ users: any[] }>("/alumni/directory");
+    return response.data.users;
+  }
+>>>>>>> Stashed changes
 }
 
 export default new AdminService();
