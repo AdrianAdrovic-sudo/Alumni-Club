@@ -12,12 +12,11 @@ import Dashboard from "./pages/Dashboard";
 import Theses from "./pages/Theses";
 import Messages from "./components/messages/Messages";
 import { AuthProvider } from "./context/AuthContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import PublicRoute from "./components/common/PublicRoute";
 import PublicProfile from "./pages/PublicProfile";
 import AdminRoute from "./components/common/AdminRoute";
 import MyProfile from "./pages/MyProfile";
-import MyProfileEdit from "./pages/MyProfileEdit";
-import AddBlog from "./pages/AddBlog";
 import ResetPassword from "./pages/ResetPassword";
 import EventList from "./pages/EventList";
 import EventForm from "./pages/EventForm";
@@ -28,15 +27,15 @@ import AdminEventDetails from "./pages/AdminEventDetails";
 export default function App() {
   return (
     <AuthProvider>
-      <div className="bg-[#324D6B] min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 w-full pt-16 pb-32 bg-[#324D6B]">
+      <LanguageProvider>
+        <div className="bg-[#294a70] min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1 w-full pt-16 pb-32">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/Home" element={<Home />} />
             <Route path="/AlumniDirectory" element={<AlumniDirectory />} />
             <Route path="/Blog" element={<Blog />} />
-            <Route path="/AddBlog" element={<AddBlog />} />
 
             {/* Public login */}
             <Route
@@ -62,7 +61,6 @@ export default function App() {
             <Route path="/Contact" element={<Contact />} />
             <Route path="/Theses" element={<Theses />} />
             <Route path="/MyProfile" element={<MyProfile />} />
-            <Route path="/MyProfileEdit" element={<MyProfileEdit />} />
 
             {/* MESSAGES */}
             <Route path="/messages" element={<Messages />} />
@@ -121,6 +119,7 @@ export default function App() {
         </main>
         <Footer />
       </div>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

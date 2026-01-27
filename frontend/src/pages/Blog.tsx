@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../css/Blog.css';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
+import { Editor } from "@tinymce/tinymce-react";
+import { X, Plus } from "lucide-react";
 
 type ImageProps = {
   src: string;
@@ -8,6 +10,7 @@ type ImageProps = {
 };
 
 type BlogPost = {
+  id: number;
   url: string;
   image: ImageProps;
   category: string;
@@ -30,71 +33,251 @@ type Props = {
   blogPosts: BlogPost[];
 };
 
-export type BlogProps = React.ComponentPropsWithoutRef<"section"> & Partial<Props>;
+export type BlogProps = React.ComponentPropsWithoutRef<"section"> &
+  Partial<Props>;
 
 const ITEMS_PER_PAGE = 3;
 
 export const Blog = (props: BlogProps) => {
-  const { tagline, heading, description, button, blogPosts } = {
-    ...BlogDefaults,
-    ...props,
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+
+  // Modal state for blog post popup
+  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Add Blog Modal state
+  const [isAddBlogModalOpen, setIsAddBlogModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    category: "",
+    description: "",
+    content: "",
+    image: "",
+    readTime: "",
+  });
+
+  const TINYMCE_KEY = import.meta.env.VITE_TINYMCE_API_KEY || "";
+
+  // Function to open blog post in modal
+  const openBlogModal = (post: BlogPost) => {
+    setSelectedPost(post);
+    setIsModalOpen(true);
   };
 
-  const navigate = useNavigate();
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedPost(null);
+  };
+
+  // Add Blog Modal functions
+  const openAddBlogModal = () => {
+    setIsAddBlogModalOpen(true);
+  };
+
+  const closeAddBlogModal = () => {
+    setIsAddBlogModalOpen(false);
+    setFormData({
+      title: "",
+      category: "",
+      description: "",
+      content: "",
+      image: "",
+      readTime: "",
+    });
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleEditorChange = (content: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      content,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      title: formData.title,
+      category: formData.category,
+      imageUrl: formData.image,
+      readTime: formData.readTime,
+      shortDesc: formData.description,
+      content: formData.content,
+    };
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        let errBody: any = null;
+        try {
+          errBody = await res.json();
+        } catch (_) {}
+
+        console.error("Greška pri kreiranju bloga:", res.status, errBody);
+        alert(errBody?.message || "Neuspješno kreiranje blog posta.");
+        return;
+      }
+
+      const created = await res.json();
+      console.log("Kreirani post:", created);
+
+      // Refresh posts and close modal
+      fetchPosts();
+      closeAddBlogModal();
+    } catch (err) {
+      console.error("Network/JS greška pri kreiranju bloga:", err);
+      alert("Došlo je do greške prilikom slanja bloga.");
+    }
+  };
+
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // UZIMAMO BLOGOVE SA BACKENDA
+  const fetchPosts = async () => {
+    try {
+      const res = await fetch("/api/posts");
+      if (!res.ok) {
+        console.error("Neuspješno dohvatanje objava:", res.status);
+        setLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+
+      const mapped: BlogPost[] = data.map((post: any) => ({
+        id: post.id,
+        url: `/blog/${post.id}`,
+        image: {
+          src:
+            post.image_url ||
+            "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
+          alt: post.title,
+        },
+        category: post.category,
+        readTime: post.read_time || "5 min čitanja",
+        title: post.title,
+        description: post.short_desc,
+        avatar: {
+          src:
+            post.users?.profile_picture ||
+            "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+          alt: post.users
+            ? `${post.users.first_name} ${post.users.last_name}`
+            : "Autor",
+        },
+        fullName: post.users
+          ? `${post.users.first_name} ${post.users.last_name}`
+          : "Nepoznat autor",
+        date: post.created_at
+          ? new Date(post.created_at).toLocaleDateString()
+          : "",
+      }));
+
+      setPosts(mapped);
+    } catch (err) {
+      console.error("Greška pri dohvatanju objava:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
   const [showAll, setShowAll] = useState(false);
+
+  const blogPosts = posts;
 
   const visiblePosts = blogPosts.slice(0, ITEMS_PER_PAGE);
   const hiddenPosts = blogPosts.slice(ITEMS_PER_PAGE);
   const hasMorePosts = blogPosts.length > ITEMS_PER_PAGE;
 
-  // Calculate remaining items for centering logic (only when showing all)
   const remainingItems = showAll ? blogPosts.length % 3 : 0;
 
-  const renderCard = (post: BlogPost, index: number, isHidden: boolean = false) => {
+  const renderCard = (
+    post: BlogPost,
+    index: number,
+    isHidden: boolean = false
+  ) => {
     const totalIndex = isHidden ? ITEMS_PER_PAGE + index : index;
-    const isLastRow = showAll && totalIndex >= blogPosts.length - remainingItems;
+    const isLastRow =
+      showAll && totalIndex >= blogPosts.length - remainingItems;
 
-    // Calculate column span for last row items
-    let columnSpan = '';
+    let columnSpan = "";
     if (isLastRow && remainingItems === 1) {
-      columnSpan = 'lg:col-start-2';
+      columnSpan = "lg:col-start-2";
     } else if (isLastRow && remainingItems === 2) {
       const isFirstOfTwo = totalIndex === blogPosts.length - 2;
       if (isFirstOfTwo) {
-        columnSpan = 'lg:col-start-1 lg:col-end-2';
+        columnSpan = "lg:col-start-1 lg:col-end-2";
       } else {
-        columnSpan = 'lg:col-start-3 lg:col-end-4';
+        columnSpan = "lg:col-start-3 lg:col-end-4";
       }
     }
 
     return (
       <div
-        key={totalIndex}
-        className={`${columnSpan} ${isHidden ? 'animate-slide-in' : ''}`}
-        style={isHidden ? {
-          animationDelay: `${index * 100}ms`,
-          animationFillMode: 'both'
-        } : {}}
+        key={post.id}
+        className={`${columnSpan} ${isHidden ? "animate-slide-in" : ""}`}
+        style={
+          isHidden
+            ? {
+                animationDelay: `${index * 100}ms`,
+                animationFillMode: "both",
+              }
+            : {}
+        }
       >
-        <a href={post.url} className="mb-6 inline-block w-full max-w-full">
+        <div 
+          onClick={() => openBlogModal(post)}
+          className="mb-6 inline-block w-full max-w-full cursor-pointer"
+        >
           <div className="w-full overflow-hidden">
             <img
               src={post.image.src}
               alt={post.image.alt}
-              className="aspect-[3/2] size-full object-cover"
+              className="aspect-[3/2] size-full object-cover hover:scale-105 transition-transform duration-300"
             />
           </div>
-        </a>
-        <a
-          href={post.url}
-          className="mb-2 mr-4 inline-block max-w-full text-sm font-semibold"
+        </div>
+        <button
+          onClick={() => openBlogModal(post)}
+          className="mb-2 mr-4 inline-block max-w-full text-sm font-semibold hover:text-[#294a70] transition-colors cursor-pointer"
         >
           {post.category}
-        </a>
+        </button>
 
-        <a href={post.url} className="mb-2 block max-w-full">
-          <h5 className="text-xl font-bold md:text-2xl">{post.title}</h5>
-        </a>
+        <div 
+          onClick={() => openBlogModal(post)}
+          className="mb-2 block max-w-full cursor-pointer"
+        >
+          <h5 className="text-xl font-bold md:text-2xl hover:text-[#294a70] transition-colors">{post.title}</h5>
+        </div>
         <p>{post.description}</p>
         <div className="mt-6 flex items-center">
           <div className="mr-4 shrink-0">
@@ -118,130 +301,338 @@ export const Blog = (props: BlogProps) => {
   };
 
   return (
-    <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
-      <div className="container">
-        <div className="mb-12 md:mb-18 lg:mb-20">
-          <div className="mx-auto w-full max-w-lg text-center">
-            <p className="mb-3 font-semibold md:mb-4">{tagline}</p>
-            <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
-              {heading}
-            </h2>
-            <p className="md:text-md">{description}</p>
+    <>
+      <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
+        <div className="container">
+          <div className="mb-12 md:mb-18 lg:mb-20">
+            <div className="mx-auto w-full max-w-lg text-center">
+              <p className="mb-3 font-semibold md:mb-4">{t('blog.tagline')}</p>
+              <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
+                {t('blog.heading')}
+              </h2>
+              <p className="md:text-md">{t('blog.description')}</p>
+            </div>
           </div>
-        </div>
 
-        {/* Add Blog Button Section */}
-        <div className="mb-8 flex justify-end">
-          <button
-            onClick={() => navigate('/AddBlog')}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border-[3px] border-white"
-          >
-            Add Blog
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
-          {/* Always visible posts */}
-          {visiblePosts.map((post, index) => renderCard(post, index, false))}
-
-          {/* Hidden posts with animation */}
-          {showAll && hiddenPosts.map((post, index) => renderCard(post, index, true))}
-        </div>
-
-        {hasMorePosts && (
-          <div className="flex items-center justify-center">
+          <div className="mb-8 flex justify-center">
             <button
-              className={`default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white ${button.variant === "secondary" ? "default-blog-btn-secondary" : ""}`}
-              onClick={() => setShowAll(!showAll)}
+              onClick={openAddBlogModal}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold text-lg
+                         bg-gradient-to-br from-[#294a70] to-[#324D6B]
+                         hover:from-[#ffab1f] hover:to-[#ff9500]
+                         transform transition hover:-translate-y-1
+                         shadow-md hover:shadow-xl"
             >
-              {showAll ? "Show less" : button.title}
+              <Plus className="w-5 h-5" />
+              {t('blog.addBlog')}
             </button>
           </div>
-        )}
-      </div>
-    </section>
+
+          {loading ? (
+            <p className="text-center">{t('blog.loading')}</p>
+          ) : blogPosts.length === 0 ? (
+            <p className="text-center">{t('blog.noPosts')}</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
+                {visiblePosts.map((post, index) =>
+                  renderCard(post, index, false)
+                )}
+                {showAll &&
+                  hiddenPosts.map((post, index) => renderCard(post, index, true))}
+              </div>
+
+              {hasMorePosts && (
+                <div className="flex items-center justify-center">
+                  <button
+                    className="default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white default-blog-btn-secondary"
+                    onClick={() => setShowAll(!showAll)}
+                  >
+                    {showAll ? t('blog.showLess') : t('blog.viewAll')}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Add Blog Modal */}
+      {isAddBlogModalOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={closeAddBlogModal}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200 overflow-hidden">
+              
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-[#294a70] to-[#324D6B]">
+                <h3 className="text-2xl font-bold text-white">
+                  Kreiraj novi blog post
+                </h3>
+                <button
+                  onClick={closeAddBlogModal}
+                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
+                <div className="p-6">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    
+                    {/* Title */}
+                    <div>
+                      <label htmlFor="title" className="block text-gray-700 font-semibold mb-2">
+                        Naslov bloga <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
+                        placeholder="Unesite naslov bloga"
+                      />
+                    </div>
+
+                    {/* Category */}
+                    <div>
+                      <label htmlFor="category" className="block text-gray-700 font-semibold mb-2">
+                        Kategorija <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        id="category"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
+                      >
+                        <option value="">Izaberite kategoriju</option>
+                        <option value="Technology">Tehnologija</option>
+                        <option value="Business">Biznis</option>
+                        <option value="Lifestyle">Životni stil</option>
+                        <option value="Education">Obrazovanje</option>
+                        <option value="Career">Karijera</option>
+                        <option value="Other">Ostalo</option>
+                      </select>
+                    </div>
+
+                    {/* Image URL */}
+                    <div>
+                      <label htmlFor="image" className="block text-gray-700 font-semibold mb-2">
+                        URL slike <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="url"
+                        id="image"
+                        name="image"
+                        value={formData.image}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
+
+                    {/* Read Time */}
+                    <div>
+                      <label htmlFor="readTime" className="block text-gray-700 font-semibold mb-2">
+                        Vrijeme čitanja <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="readTime"
+                        name="readTime"
+                        value={formData.readTime}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
+                        placeholder="npr. 5 min čitanja"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">
+                        Kratki opis <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        required
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent resize-none"
+                        placeholder="Kratki opis blog posta"
+                      />
+                    </div>
+
+                    {/* Content Editor */}
+                    <div>
+                      <label htmlFor="content" className="block text-gray-700 font-semibold mb-2">
+                        Sadržaj bloga <span className="text-red-500">*</span>
+                      </label>
+                      <Editor
+                        apiKey={TINYMCE_KEY || "no-api-key"}
+                        value={formData.content}
+                        onEditorChange={handleEditorChange}
+                        init={{
+                          height: 400,
+                          menubar: false,
+                          plugins: [
+                            "lists",
+                            "link",
+                            "image",
+                            "code",
+                            "table",
+                            "wordcount",
+                          ],
+                          toolbar:
+                            "undo redo | formatselect | bold italic underline | " +
+                            "alignleft aligncenter alignright alignjustify | " +
+                            "bullist numlist outdent indent | link image | code | removeformat",
+                          content_style:
+                            'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px }',
+                          placeholder: "Napišite sadržaj vašeg bloga ovdje...",
+                        }}
+                      />
+                      {!TINYMCE_KEY && (
+                        <p className="mt-2 text-sm text-red-600">
+                          Nedostaje VITE_TINYMCE_API_KEY u frontend/.env. TinyMCE će prikazati
+                          setup ekran dok ne dodate ključ.
+                        </p>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="sticky bottom-0 p-6 border-t border-gray-200 bg-gray-50 z-10">
+                <button
+                  onClick={handleSubmit}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-lg text-white font-semibold
+                             bg-gradient-to-br from-[#294a70] to-[#324D6B]
+                             hover:from-[#ffab1f] hover:to-[#ff9500]
+                             transform transition hover:-translate-y-1
+                             shadow-md hover:shadow-xl"
+                >
+                  <Plus className="w-5 h-5" />
+                  Objavi blog
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Blog Post Modal */}
+      {isModalOpen && selectedPost && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={closeModal}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200 overflow-hidden">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {t('blog.modal.title')}
+                </h3>
+                <button
+                  onClick={closeModal}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="p-6">
+                  {/* Blog Image */}
+                  <img
+                    src={selectedPost.image.src}
+                    alt={selectedPost.image.alt}
+                    className="w-full h-64 object-cover rounded-lg mb-6"
+                  />
+
+                  {/* Category Badge */}
+                  <div className="inline-block bg-[#294a70] text-white px-3 py-1 rounded-full text-sm font-semibold mb-4">
+                    {selectedPost.category}
+                  </div>
+
+                  {/* Title */}
+                  <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
+                    {selectedPost.title}
+                  </h1>
+
+                  {/* Author Info */}
+                  <div className="flex items-center mb-6 pb-6 border-b border-gray-200">
+                    <img
+                      src={selectedPost.avatar.src}
+                      alt={selectedPost.avatar.alt}
+                      className="w-12 h-12 rounded-full object-cover mr-4"
+                    />
+                    <div>
+                      <div className="font-semibold text-gray-900">{selectedPost.fullName}</div>
+                      <div className="text-gray-600 text-sm">
+                        {selectedPost.date} • {selectedPost.readTime}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="prose prose-lg max-w-none">
+                    <p className="text-gray-700 leading-relaxed mb-4">
+                      {selectedPost.description}
+                    </p>
+                    <p className="text-gray-500 italic">
+                      {t('blog.modal.preview')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-gray-200 bg-gray-50">
+                <div className="flex justify-end">
+                  <button
+                    onClick={closeModal}
+                    className="px-6 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3854] transition-colors"
+                  >
+                    {t('blog.modal.close')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 };
 
 export const BlogDefaults: Props = {
   tagline: "Blog",
-  heading: "Short heading goes here",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  button: { title: "View all", variant: "secondary" },
-  blogPosts: [
-    {
-      url: "#",
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
-        alt: "Relume placeholder image 1",
-      },
-      category: "Category",
-      title: "Blog title heading will go here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
-      avatar: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder avatar 3",
-      },
-      fullName: "Full name",
-      date: "11 Jan 2022",
-      readTime: "5 min read",
-    },
-    {
-      url: "#",
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
-        alt: "Relume placeholder image 2",
-      },
-      category: "Category",
-      title: "Blog title heading will go here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
-      avatar: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder avatar 3",
-      },
-      fullName: "Full name",
-      date: "11 Jan 2022",
-      readTime: "5 min read",
-    },
-    {
-      url: "#",
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
-        alt: "Relume placeholder image 2",
-      },
-      category: "Category",
-      title: "Blog title heading will go here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
-      avatar: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder avatar 3",
-      },
-      fullName: "Full name",
-      date: "11 Jan 2022",
-      readTime: "5 min read",
-    },
-    {
-      url: "#",
-      image: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
-        alt: "Relume placeholder image 3",
-      },
-      category: "Category",
-      title: "Blog title heading will go here",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.",
-      avatar: {
-        src: "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
-        alt: "Relume placeholder avatar 3",
-      },
-      fullName: "Full name",
-      date: "11 Jan 2022",
-      readTime: "5 min read",
-    },
-  ],
+  heading: "Kratki naslov ide ovdje",
+  description: "Ovo je opis blog sekcije na crnogorskom jeziku.",
+  button: { title: "Prikaži sve", variant: "secondary" },
+  blogPosts: [],
 };
 
 export default Blog;

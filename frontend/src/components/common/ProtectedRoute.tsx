@@ -11,7 +11,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Učitavanje...</div>;
   }
 
   if (!user) {

@@ -1,5 +1,25 @@
 {
+  "name": "alumni-club",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Alumni Club full-stack application",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+
+    "build": "concurrently -n backend,frontend \"npm run build --prefix backend\" \"npm run build --prefix frontend\"",
+    "build:backend": "npm run build --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+
+    "start:backend": "npm run start --prefix backend",
+    "preview:frontend": "npm run preview --prefix frontend"
+  },
   "dependencies": {
     "ics": "^3.8.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
   }
 }

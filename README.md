@@ -52,6 +52,15 @@ SMTP_USER=apikey
 SMTP_PASS=????????????
 FROM_EMAIL=fit.alumni.club@gmail.com      
 ENROLL_TO=fit.alumni.club@gmail.com
+CONTACT_INBOX_EMAIL=fit.alumni.club@gmail.com
+```
+# 
+
+## Set up environment variables
+### Create .env file in frontend/ with: 
+```
+
+VITE_TINYMCE_API_KEY=qkcx67femxnaq01itdjrlnliucc2at403pzwt57aici7njws
 ```
 # 
 

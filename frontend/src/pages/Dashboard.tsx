@@ -5,6 +5,7 @@ import AdminService from "../services/adminService";
 import StatsCards from "../components/admin/StatsCards";
 import UserManagement from "../components/admin/UserManagement";
 import ContentManagement from "../components/admin/ContentManagement";
+import AdminInquiries from "../components/admin/AdminInquiries";
 
 interface Stats {
   totalUsers: number;
@@ -19,7 +20,9 @@ interface Stats {
 export default function Dashboard() {
   const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'content'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "users" | "content" | "inquiries"
+  >("overview");
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
 
@@ -30,7 +33,7 @@ export default function Dashboard() {
   }, [user, loading, navigate]);
 
   useEffect(() => {
-    if (user && user.role === 'admin' && activeTab === 'overview') {
+    if (user && user.role === "admin" && activeTab === "overview") {
       loadStats();
     }
   }, [user, activeTab]);
@@ -41,8 +44,8 @@ export default function Dashboard() {
       const statsData = await AdminService.getStats();
       setStats(statsData);
     } catch (error) {
-      console.error('Error loading stats:', error);
-      alert('Error loading dashboard statistics');
+      console.error("Greška pri učitavanju statistika:", error);
+      alert("Greška pri učitavanju statistika dashboard-a");
     } finally {
       setStatsLoading(false);
     }
@@ -53,7 +56,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Proveravam autentifikaciju...</p>
+          <p className="mt-4 text-gray-600">Provjeravam autentifikaciju...</p>
         </div>
       </div>
     );
@@ -63,21 +66,20 @@ export default function Dashboard() {
     return null;
   }
 
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user.role === "admin";
 
   return (
-    <div className="min-h-screen bg-white py-8">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="bg-white">
+      <div className="max-w-7xl mx-auto px-4 pt-16 pb-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            {isAdmin ? 'Admin Dashboard' : 'User Dashboard'}
+            {isAdmin ? "Admin Dashboard" : "Korisnički Dashboard"}
           </h1>
           <p className="text-lg text-gray-600">
             {isAdmin
-              ? 'Welcome to your administration panel'
-              : 'Welcome to your personal dashboard'
-            }
+              ? "Dobrodošli u vaš administratorski panel"
+              : "Dobrodošli u vaš lični dashboard"}
           </p>
         </div>
 
@@ -86,37 +88,45 @@ export default function Dashboard() {
           <div className="bg-gray-50 rounded-xl shadow-lg p-4 mb-8 border border-gray-200">
             <nav className="flex space-x-4">
               <button
-                onClick={() => setActiveTab('overview')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'overview'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                  }`}
+                onClick={() => setActiveTab("overview")}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === "overview"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                }`}
               >
-                Overview
+                Pregled
               </button>
               <button
-                onClick={() => setActiveTab('users')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'users'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                  }`}
+                onClick={() => setActiveTab("users")}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === "users"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                }`}
               >
-                User Management
+                Upravljanje korisnicima
               </button>
               <button
-                onClick={() => setActiveTab('content')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${activeTab === 'content'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
-                  }`}
+                onClick={() => setActiveTab("content")}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === "content"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                }`}
               >
-                Content Management
+                Upravljanje sadržajem
               </button>
+
               <button
-                onClick={() => navigate("/admin/events")}
-                className="px-4 py-2 rounded-lg font-medium transition bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                onClick={() => setActiveTab("inquiries")}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  activeTab === "inquiries"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                }`}
               >
-                Upravljanje događajima
+                Upiti
               </button>
             </nav>
           </div>
@@ -125,12 +135,12 @@ export default function Dashboard() {
         {/* Admin Content */}
         {isAdmin && (
           <div className="mb-8">
-            {activeTab === 'overview' && (
+            {activeTab === "overview" && (
               <div>
                 {statsLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading statistics...</p>
+                    <p className="mt-4 text-gray-600">Učitavanje statistika...</p>
                   </div>
                 ) : stats ? (
                   <StatsCards stats={stats} />
@@ -138,19 +148,20 @@ export default function Dashboard() {
               </div>
             )}
 
-            {activeTab === 'users' && <UserManagement />}
-            {activeTab === 'content' && <ContentManagement />}
+            {activeTab === "users" && <UserManagement />}
+            {activeTab === "content" && <ContentManagement />}
+            {activeTab === "inquiries" && <AdminInquiries />}
           </div>
         )}
 
         {/* User Profile */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-            Your Profile
+            Vaš profil
           </h2>
           <div className="space-y-3 text-gray-700">
             <div className="flex justify-between">
-              <span className="font-medium">Username:</span>
+              <span className="font-medium">Korisničko ime:</span>
               <span>{user.username}</span>
             </div>
             <div className="flex justify-between">
@@ -158,23 +169,28 @@ export default function Dashboard() {
               <span>{user.email}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Full Name:</span>
-              <span>{user.first_name} {user.last_name}</span>
+              <span className="font-medium">Puno ime:</span>
+              <span>
+                {user.first_name} {user.last_name}
+              </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Enrollment Year:</span>
+              <span className="font-medium">Godina upisa:</span>
               <span>{user.enrollment_year}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Occupation:</span>
-              <span>{user.occupation || 'Not specified'}</span>
+              <span className="font-medium">Zanimanje:</span>
+              <span>{user.occupation || "Nije specificirano"}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="font-medium">Role:</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${user.role === 'admin'
-                ? 'bg-purple-100 text-purple-800'
-                : 'bg-blue-100 text-blue-800'
-                }`}>
+              <span className="font-medium">Uloga:</span>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  user.role === "admin"
+                    ? "bg-purple-100 text-purple-800"
+                    : "bg-blue-100 text-blue-800"
+                }`}
+              >
                 {user.role}
               </span>
             </div>

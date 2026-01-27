@@ -8,7 +8,9 @@ interface ComposeMessageProps {
 }
 
 export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessageProps) {
-  const [receiverUsername, setReceiverUsername] = useState('');
+  const [toInput, setToInput] = useState('');
+  const [selected, setSelected] = useState<UserSuggestion[]>([]);
+
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
   const [sending, setSending] = useState(false);
@@ -25,13 +27,14 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
     const params = new URLSearchParams(location.search);
     const to = params.get('to');
     if (to) {
-      setReceiverUsername(to);
-      setShowSuggestions(false);
+      // Put into input so it triggers search and pick manually if you want
+      setToInput(to);
+      setShowSuggestions(true);
     }
   }, [location]);
 
   useEffect(() => {
-    const q = receiverUsername.trim();
+    const q = toInput.trim();
     if (q.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -42,7 +45,9 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
       try {
         setSearching(true);
         const res = await MessagesService.searchUsers(q);
-        setSuggestions(res.users);
+        // hide already-selected users from suggestions
+        const selectedSet = new Set(selected.map(s => s.username));
+        setSuggestions(res.users.filter(u => !selectedSet.has(u.username)));
         setShowSuggestions(true);
       } catch (err) {
         console.error('Error searching users', err);
@@ -52,13 +57,26 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
     }, 300);
 
     return () => clearTimeout(handle);
-  }, [receiverUsername]);
+  }, [toInput, selected]);
+
+  const handlePickSuggestion = (user: UserSuggestion) => {
+    // add chip
+    if (!selected.some(s => s.username === user.username)) {
+      setSelected([...selected, user]);
+    }
+    setToInput('');
+    setShowSuggestions(false);
+  };
+
+  const removeSelected = (username: string) => {
+    setSelected(selected.filter(s => s.username !== username));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!receiverUsername.trim() || !subject.trim() || !content.trim()) {
-      setError('Morate popuniti sva obavezna polja.');
+    if (selected.length === 0 || !subject.trim() || !content.trim()) {
+      setError('Morate izabrati bar jednog korisnika i popuniti sva polja.');
       return;
     }
 
@@ -67,12 +85,13 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
       setError('');
 
       await MessagesService.sendMessage({
-        receiverUsername: receiverUsername.trim(),
+        receiverUsernames: selected.map(s => s.username),
         subject: subject.trim(),
         content: content.trim()
       });
 
-      setReceiverUsername('');
+      setToInput('');
+      setSelected([]);
       setSubject('');
       setContent('');
       setSuggestions([]);
@@ -83,131 +102,135 @@ export default function ComposeMessage({ onMessageSent, onCancel }: ComposeMessa
       console.error('Greška pri slanju poruke:', error);
       setError(
         error.response?.data?.message ||
-        'Greška pri slanju poruke. Provjerite korisničko ime i pokušajte ponovo.'
+        'Greška pri slanju poruke. Provjerite korisnike i pokušajte ponovo.'
       );
     } finally {
       setSending(false);
     }
   };
 
-  const handlePickSuggestion = (user: UserSuggestion) => {
-    setReceiverUsername(user.username);
-    setShowSuggestions(false);
-  };
-
   return (
-    <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm">
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Započni novu prepisku</h2>
-      <p className="text-gray-600 mb-6">Započnite prepisku sa drugim alumni članom</p>
+    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Nova poruka</h2>
+        <button
+          onClick={onCancel}
+          className="text-sm text-gray-600 hover:text-gray-900"
+        >
+          Zatvori
+        </button>
+      </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center">
-            <svg className="h-5 w-5 text-red-400 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-            <p className="text-red-700">{error}</p>
-          </div>
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+          {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* TO */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Korisničko ime primaoca *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Kome šaljete?</label>
+
+          {/* chips */}
+          {selected.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {selected.map(u => (
+                <span
+                  key={u.username}
+                  className="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-sm text-blue-900"
+                >
+                  {u.first_name} {u.last_name} ({u.username})
+                  <button
+                    type="button"
+                    onClick={() => removeSelected(u.username)}
+                    className="text-blue-700 hover:text-blue-900"
+                    title="Ukloni"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className="relative">
             <input
-              type="text"
-              value={receiverUsername}
-              onChange={(e) => {
-                setReceiverUsername(e.target.value);
-                setShowSuggestions(true);
+              value={toInput}
+              onChange={(e) => setToInput(e.target.value)}
+              onFocus={() => {
+                if (suggestions.length > 0) setShowSuggestions(true);
               }}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-              placeholder="Unesite ime ili korisničko ime primaoca"
-              required
-              autoComplete="off"
+              placeholder="Kucajte korisničko ime ili ime..."
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-200"
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              <span className="text-gray-400 text-sm">@</span>
-            </div>
 
             {showSuggestions && (
-              <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {searching && (
-                  <div className="px-4 py-2 text-xs text-gray-400">
-                    Searching...
-                  </div>
+              <div className="absolute z-10 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg max-h-60 overflow-auto">
+                {searching ? (
+                  <div className="px-3 py-2 text-sm text-gray-500">Pretraga...</div>
+                ) : suggestions.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-gray-500">Nema rezultata.</div>
+                ) : (
+                  suggestions.map((u) => (
+                    <button
+                      type="button"
+                      key={u.username}
+                      onClick={() => handlePickSuggestion(u)}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
+                    >
+                      <span className="font-medium text-gray-900">
+                        {u.first_name} {u.last_name}
+                      </span>
+                      <span className="text-gray-500"> ({u.username})</span>
+                    </button>
+                  ))
                 )}
-                {!searching && suggestions.length === 0 && receiverUsername.trim().length >= 2 && (
-                  <div className="px-4 py-2 text-xs text-gray-400">
-                    Korisnik nije pronađen.
-                  </div>
-                )}
-                {suggestions.map((user) => (
-                  <button
-                    key={user.id}
-                    type="button"
-                    onClick={() => handlePickSuggestion(user)}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 flex flex-col"
-                  >
-                    <span className="font-medium text-gray-800">{user.username}</span>
-                    <span className="text-xs text-gray-500">
-                      {user.first_name} {user.last_name}
-                    </span>
-                  </button>
-                ))}
               </div>
             )}
           </div>
-          <p className="text-sm text-gray-500 mt-2">
-            Na osnovu korisničkog imena, imena ili prezimena izaberite primaoca iz liste.
+
+          <p className="mt-1 text-xs text-gray-500">
+            Možete dodati više korisnika. Svako će dobiti privatnu kopiju poruke.
           </p>
         </div>
 
+        {/* SUBJECT */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tema *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Naslov</label>
           <input
-            type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-            placeholder="O čemu se radi u ovoj prepisci?"
-            required
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-200"
+            placeholder="Naslov poruke"
           />
         </div>
 
+        {/* CONTENT */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Poruka *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Poruka</label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            rows={8}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-none"
-            placeholder="Napišite svoju poruku ovdje..."
-            required
+            className="w-full min-h-[140px] rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-200"
+            placeholder="Napišite poruku..."
           />
         </div>
 
-        <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+        <div className="flex gap-2 justify-end">
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition duration-200"
+            className="rounded-lg px-4 py-2 text-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
           >
-            Poništi
+            Otkaži
           </button>
+
           <button
-            type="submit"
             disabled={sending}
-            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="rounded-lg px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
           >
-            {sending ? 'Slanje...' : 'Pošalji poruku'}
+            {sending ? "Slanje..." : "Pošalji"}
           </button>
         </div>
       </form>

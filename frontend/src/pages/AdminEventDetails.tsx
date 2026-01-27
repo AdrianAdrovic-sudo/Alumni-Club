@@ -3,13 +3,17 @@ import { useParams, useNavigate } from "react-router-dom";
 
 interface Attendee {
   id: number;
+  rsvp: "Going" | "Waitlist";
   users: {
     id: number;
     first_name: string;
     last_name: string;
     email: string;
-  };
-  rsvp: "Going" | "Waitlist";
+  } | null;
+
+  guest_first_name: string | null;
+  guest_last_name: string | null;
+  guest_email: string | null;
 }
 
 interface EventData {
@@ -33,10 +37,12 @@ const AdminEventDetails: React.FC = () => {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [tab, setTab] = useState<"details" | "attendees">("details");
 
+  const token = localStorage.getItem("token");
+
   // Fetch event info
   const loadEvent = async () => {
     const res = await fetch(`/api/events/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
     setEvent(data);
@@ -45,7 +51,7 @@ const AdminEventDetails: React.FC = () => {
   // Fetch attendees
   const loadAttendees = async () => {
     const res = await fetch(`/api/events/${id}/attendees`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
     setAttendees(data);
@@ -60,12 +66,23 @@ const AdminEventDetails: React.FC = () => {
     if (!attendees.length) return;
 
     const csv =
-      "Name,Email,Status\n" +
+      "Name,Email,Status,Type\n" +
       attendees
-        .map(
-          (a) =>
-            `${a.users.first_name} ${a.users.last_name},${a.users.email},${a.rsvp}`
-        )
+        .map((a) => {
+          const isGuest = !a.users;
+
+          const name = isGuest
+            ? `${a.guest_first_name} ${a.guest_last_name}`
+            : `${a.users!.first_name} ${a.users!.last_name}`;
+
+          const email = isGuest
+            ? a.guest_email
+            : a.users!.email;
+
+          return `${name},${email},${a.rsvp},${
+            isGuest ? "Guest" : "User"
+          }`;
+        })
         .join("\n");
 
     const blob = new Blob([csv], { type: "text/csv" });
@@ -80,42 +97,49 @@ const AdminEventDetails: React.FC = () => {
   };
 
   const downloadICal = async () => {
-  try {
-    const res = await fetch(`/api/events/${id}/calendar`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-    if (!res.ok) throw new Error("Server error");
+    try {
+      const res = await fetch(`/api/events/${id}/calendar`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Server error");
 
-    const icsText = await res.text();
-    const blob = new Blob([icsText], { type: "text/calendar;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
+      const icsText = await res.text();
+      const blob = new Blob([icsText], {
+        type: "text/calendar;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `event_${id}.ics`;
-    a.click();
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `event_${id}.ics`;
+      a.click();
 
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error(err);
-    alert("Ne mogu preuzeti calendar");
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Ne mogu preuzeti calendar");
+    }
+  };
+
+  if (!event) {
+    return <div className="p-10 text-center">Učitavanje...</div>;
   }
-};
-
-  if (!event) return <div className="p-10 text-center">Učitavanje...</div>;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12">
       <div className="max-w-4xl mx-auto bg-white rounded-xl p-6 shadow">
-
-        <h1 className="text-3xl font-bold mb-4 text-center">{event.title}</h1>
+        <h1 className="text-3xl font-bold mb-4 text-center">
+          {event.title}
+        </h1>
 
         {/* Tabs */}
         <div className="flex border-b mb-6">
           <button
             onClick={() => setTab("details")}
             className={`px-2 py-1 w-1/4 text-sm text-center ${
-              tab === "details" ? "border-b-2 border-blue-600 font-semibold" : "text-gray-500"
+              tab === "details"
+                ? "border-b-2 border-blue-600 font-semibold"
+                : "text-gray-500"
             }`}
           >
             Detalji
@@ -123,7 +147,9 @@ const AdminEventDetails: React.FC = () => {
           <button
             onClick={() => setTab("attendees")}
             className={`px-2 py-1 w-1/4 text-sm text-center ${
-              tab === "attendees" ? "border-b-2 border-blue-600 font-semibold" : "text-gray-500"
+              tab === "attendees"
+                ? "border-b-2 border-blue-600 font-semibold"
+                : "text-gray-500"
             }`}
           >
             Učesnici
@@ -133,8 +159,12 @@ const AdminEventDetails: React.FC = () => {
         {/* DETAILS TAB */}
         {tab === "details" && (
           <div className="space-y-3">
-            <p><strong>Opis:</strong> {event.description}</p>
-            <p><strong>Lokacija:</strong> {event.location}</p>
+            <p>
+              <strong>Opis:</strong> {event.description}
+            </p>
+            <p>
+              <strong>Lokacija:</strong> {event.location}
+            </p>
             <p>
               <strong>Vrijeme:</strong>{" "}
               {new Date(event.start_time).toLocaleString()} –{" "}
@@ -142,16 +172,17 @@ const AdminEventDetails: React.FC = () => {
             </p>
 
             <div className="mt-4 p-4 bg-gray-50 rounded border space-y-1">
-              <h3 className="text-lg font-semibold mb-2">Kapacitet</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Kapacitet
+              </h3>
               <p>Going: {event.goingCount}</p>
               <p>Waitlist: {event.waitlistCount}</p>
               <p>Preostala mjesta: {event.remainingSeats}</p>
             </div>
 
-            {/* Add to calendar */}
             <button
               onClick={downloadICal}
-              className="mt-2 px-2 py-1 w-1/8 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+              className="mt-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
             >
               Dodaj u kalendar
             </button>
@@ -165,14 +196,16 @@ const AdminEventDetails: React.FC = () => {
               <h3 className="text-xl font-semibold">Učesnici</h3>
               <button
                 onClick={exportCSV}
-                className="px-2 py-1 w-1/8 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
               >
                 Export CSV
               </button>
             </div>
 
             {attendees.length === 0 ? (
-              <p className="text-gray-500">Nema prijavljenih.</p>
+              <p className="text-gray-500">
+                Nema prijavljenih.
+              </p>
             ) : (
               <table className="w-full text-left border-collapse">
                 <thead className="bg-gray-50 border-b">
@@ -183,27 +216,48 @@ const AdminEventDetails: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {attendees.map(a => (
-                    <tr key={a.id} className="border-b">
-                      <td className="p-2 text-sm">{a.users.first_name} {a.users.last_name}</td>
-                      <td className="p-2 text-sm">{a.users.email}</td>
-                      <td className="p-2 text-sm">{a.rsvp}</td>
-                    </tr>
-                  ))}
+                  {attendees.map((a) => {
+                    const isGuest = !a.users;
+
+                    const name = isGuest
+                      ? `${a.guest_first_name} ${a.guest_last_name}`
+                      : `${a.users!.first_name} ${a.users!.last_name}`;
+
+                    const email = isGuest
+                      ? a.guest_email
+                      : a.users!.email;
+
+                    return (
+                      <tr key={a.id} className="border-b">
+                        <td className="p-2 text-sm">
+                          {name}
+                          {isGuest && (
+                            <span className="ml-2 text-xs text-gray-500">
+                              (Gost)
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-2 text-sm">
+                          {email}
+                        </td>
+                        <td className="p-2 text-sm">
+                          {a.rsvp}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
           </div>
         )}
 
-        {/* Nazad dugme */}
         <button
-          onClick={() => navigate("/admin/events")}
-          className="mt-4 px-2 py-1 w-1/8 bg-gray-300 text-gray-800 text-sm rounded hover:bg-gray-400"
+          onClick={() => navigate("/dashboard")}
+          className="mt-6 px-3 py-1 bg-gray-300 text-gray-800 text-sm rounded hover:bg-gray-400"
         >
-          ← Nazad
+          ← Nazad na dashboard
         </button>
-
       </div>
     </div>
   );

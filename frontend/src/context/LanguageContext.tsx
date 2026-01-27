@@ -17,7 +17,7 @@ type TranslationKeys = {
   'header.logout': string;
   'header.login': string;
   'header.myProfile': string;
-
+  
   // AboutUs translations
   'aboutus.title': string;
   'aboutus.subtitle': string;
@@ -48,7 +48,7 @@ type TranslationKeys = {
   'aboutus.value3.text': string;
   'aboutus.value4.title': string;
   'aboutus.value4.text': string;
-
+  
   // Footer translations
   'footer.title': string;
   'footer.university': string;
@@ -59,7 +59,7 @@ type TranslationKeys = {
   'footer.email': string;
   'footer.socialNetworks': string;
   'footer.copyright': string;
-
+  
   // Home page translations
   'home.tagline': string;
   'home.heading': string;
@@ -71,7 +71,7 @@ type TranslationKeys = {
   'home.section3.heading': string;
   'home.section3.description': string;
   'home.readMore': string;
-
+  
   // Blog page translations
   'blog.tagline': string;
   'blog.heading': string;
@@ -107,11 +107,11 @@ const translations: Record<Language, TranslationKeys> = {
     'header.welcome': 'Dobrodošao/la',
     'header.inbox': 'Inbox',
     'header.profile': 'Profil',
-    'header.dashboard': 'Administratorski panel',
+    'header.dashboard': 'Dashboard',
     'header.logout': 'Odjavi se',
     'header.login': 'Prijavi se',
     'header.myProfile': 'Moj profil',
-
+    
     // AboutUs translations
     'aboutus.title': 'O nama',
     'aboutus.subtitle': 'Alumni zajednica Fakulteta za informacione tehnologije',
@@ -142,7 +142,7 @@ const translations: Record<Language, TranslationKeys> = {
     'aboutus.value3.text': 'Kontinuirano učenje i razvoj',
     'aboutus.value4.title': 'Izvrsnost',
     'aboutus.value4.text': 'Težnja ka vrhunskim rezultatima',
-
+    
     // Footer translations
     'footer.title': 'Alumni Klub FIT',
     'footer.university': 'Univerzitet Mediteran - Fakultet za informacione tehnologije',
@@ -153,7 +153,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.email': 'E-mail',
     'footer.socialNetworks': 'Društvene mreže',
     'footer.copyright': '© 2025 Alumni FIT. Zajedno gradimo budućnost.',
-
+    
     // Home page translations
     'home.tagline': 'Dobrodošli',
     'home.heading': 'Alumni Club Mediteran',
@@ -165,7 +165,7 @@ const translations: Record<Language, TranslationKeys> = {
     'home.section3.heading': 'Karijerni razvoj',
     'home.section3.description': 'Pristupite ekskluzivnim job oglasima, radionicama i događajima koji će vam pomoći u napredovanju karijere.',
     'home.readMore': 'Pročitaj više...',
-
+    
     // Blog page translations
     'blog.tagline': 'Blog',
     'blog.heading': 'Najnovije vijesti i članci',
@@ -194,7 +194,7 @@ const translations: Record<Language, TranslationKeys> = {
     'header.logout': 'Logout',
     'header.login': 'Login',
     'header.myProfile': 'My Profile',
-
+    
     // AboutUs translations
     'aboutus.title': 'About Us',
     'aboutus.subtitle': 'Alumni community of the Faculty of Information Technology',
@@ -225,7 +225,7 @@ const translations: Record<Language, TranslationKeys> = {
     'aboutus.value3.text': 'Continuous learning and development',
     'aboutus.value4.title': 'Excellence',
     'aboutus.value4.text': 'Striving for outstanding results',
-
+    
     // Footer translations
     'footer.title': 'Alumni Club FIT',
     'footer.university': 'University Mediteran - Faculty of Information Technology',
@@ -236,7 +236,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.email': 'E-mail',
     'footer.socialNetworks': 'Social Media',
     'footer.copyright': '© 2025 Alumni FIT. Building the future together.',
-
+    
     // Home page translations
     'home.tagline': 'Welcome',
     'home.heading': 'Alumni Club Mediteran',
@@ -248,7 +248,7 @@ const translations: Record<Language, TranslationKeys> = {
     'home.section3.heading': 'Career development',
     'home.section3.description': 'Access exclusive job postings, workshops and events that will help you advance your career.',
     'home.readMore': 'Read more...',
-
+    
     // Blog page translations
     'blog.tagline': 'Blog',
     'blog.heading': 'Latest news and articles',
