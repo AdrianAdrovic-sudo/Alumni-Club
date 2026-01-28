@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { BiLogoDribbble, BiLogoLinkedinSquare } from "react-icons/bi";
-import { FaXTwitter } from "react-icons/fa6";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
-import { log } from "console";
 
 type ImageProps = {
   src: string;
@@ -76,8 +73,8 @@ const Button: React.FC<
 
   const sizeClasses = {
     sm: "px-3 py-1.5 text-sm",
-    md: "px-6 py-3 text-lg",
-    lg: "px-8 py-4 text-xl",
+    md: "px-4 py-2 text-base",
+    lg: "px-6 py-3 text-lg",
   };
 
   return (
@@ -93,12 +90,10 @@ const Button: React.FC<
 
 const AlumniMemberCard = ({ member }: { member: AlumniMember }) => {
   const navigate = useNavigate();
-  const [showPopup, setShowPopup] = useState(false);
 
   const handleClick = () => {
     if (!member.isPublic) {
-      setShowPopup(true);
-    return;
+      return;
     }
     navigate(`/alumni/${member.id}`);
   };
@@ -254,7 +249,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
   if (directoryLoading) {
     return (
       <section className="px-[5%] py-16 md:py-24 lg:py-28 bg-[#294a70] min-h-screen">
-        <div className="text-center text-white">Loading...</div>
+        <div className="text-center text-white">Učitavanje...</div>
       </section>
     );
   }
@@ -314,7 +309,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
           <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200">
             <div className="p-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                Pridružite se Alumni Klubu
+                Pridružite se Alumni klubu
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -455,11 +450,12 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
 
 export const AlumniDirectoryDefaults: Props = {
   tagline: "Mediteran FIT",
-  heading: "Alumni Klub",
+  heading: "Alumni klub",
   description:
-    "Dobrodošli u naš alumni klub. Povezujemo bivše studente i pratimo njihove uspjehe.",
+    "Dobrodošli u naš Alumni klub. Povezujemo bivše studente i pratimo njihove uspjehe.",
+  alumniMembers: [], 
   footer: {
-    heading: "Pridružite se Alumni Klubu!",
+    heading: "Pridružite se Alumni klubu!",
     description: "Pošaljite prijavu i budite dio naše mreže bivših studenata.",
     button: { title: "Prijavite se", variant: "primary", size: "lg" },
   },
