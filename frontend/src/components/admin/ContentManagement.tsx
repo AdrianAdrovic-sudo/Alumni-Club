@@ -24,20 +24,30 @@ interface Post {
 }
 
 export default function ContentManagement() {
-  const [activeTab, setActiveTab] = useState<"posts" | "events">("posts");
+  const [activeTab, setActiveTab] = useState<"pending" | "approved" | "events">("pending");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (activeTab === "posts") {
-      loadPosts();
+    if (activeTab === "pending") {
+      loadPendingPosts();
+    } else if (activeTab === "approved") {
+      loadApprovedPosts();
     }
+  }, [activeTab, currentPage]);
+
+  useEffect(() => {
+    // Reset page when switching tabs
+    setCurrentPage(1);
   }, [activeTab]);
 
-  const loadPosts = async () => {
+  const loadPendingPosts = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -57,6 +67,45 @@ export default function ContentManagement() {
 
       const data = await res.json();
       setPosts(data);
+    } catch (error) {
+      console.error("Greška prilikom učitavanja objava:", error);
+      setError("Došlo je do greške. Pokušajte ponovo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadApprovedPosts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await fetch(`/api/posts?page=${currentPage}&limit=10`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.message || "Neuspešno učitavanje objava.");
+        return;
+      }
+
+      const data = await res.json();
+      
+      // Check if data has pagination structure
+      if (data.posts && data.pagination) {
+        setPosts(data.posts);
+        setTotalPages(data.pagination.pages);
+        setTotalPosts(data.pagination.total);
+      } else {
+        // Fallback for simple array response
+        setPosts(data);
+        setTotalPages(1);
+        setTotalPosts(data.length);
+      }
     } catch (error) {
       console.error("Greška prilikom učitavanja objava:", error);
       setError("Došlo je do greške. Pokušajte ponovo.");
@@ -127,20 +176,30 @@ export default function ContentManagement() {
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex space-x-8">
           <button
-            onClick={() => setActiveTab("posts")}
+            onClick={() => setActiveTab("pending")}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === "posts"
-                ? "border-blue-500 text-blue-600"
+              activeTab === "pending"
+                ? "border-[#294a70] text-[#294a70]"
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
-            Objave
+            Objave na čekanju
+          </button>
+          <button
+            onClick={() => setActiveTab("approved")}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === "approved"
+                ? "border-[#294a70] text-[#294a70]"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }`}
+          >
+            Odobrene objave
           </button>
           <button
             onClick={() => setActiveTab("events")}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === "events"
-                ? "border-blue-500 text-blue-600"
+                ? "border-[#294a70] text-[#294a70]"
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
@@ -149,12 +208,12 @@ export default function ContentManagement() {
         </nav>
       </div>
 
-      {/* POSTS TAB */}
-      {activeTab === "posts" && (
+      {/* PENDING POSTS TAB */}
+      {activeTab === "pending" && (
         <>
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#294a70] mx-auto"></div>
               <p className="mt-4 text-gray-600">Učitavanje objava...</p>
             </div>
           ) : error ? (
@@ -162,33 +221,74 @@ export default function ContentManagement() {
           ) : posts.length === 0 ? (
             <p className="text-gray-600">Trenutno nema objava na čekanju.</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
+              {posts.map((post) => (
+                <div
+                  key={post.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-[#294a70] text-lg">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mt-1">
+                        Autor: {post.users.first_name} {post.users.last_name}
+                      </p>
+                    </div>
+                    
+                    <div className="flex gap-2 ml-4">
+                      <button
+                        onClick={() => handleApprovePost(post.id)}
+                        className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
+                      >
+                        Odobri
+                      </button>
+                      <button
+                        onClick={() => handleDeletePost(post.id)}
+                        className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors"
+                      >
+                        Obriši
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* APPROVED POSTS TAB */}
+      {activeTab === "approved" && (
+        <>
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#294a70] mx-auto"></div>
+              <p className="mt-4 text-gray-600">Učitavanje objava...</p>
+            </div>
+          ) : error ? (
+            <p className="text-red-600">{error}</p>
+          ) : posts.length === 0 ? (
+            <p className="text-gray-600">Trenutno nema odobrenih objava.</p>
+          ) : (
+            <div className="space-y-3">
               {posts.map((post) => (
                 <div
                   key={post.id}
                   className="border border-gray-200 rounded-lg p-4"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {post.users.first_name} {post.users.last_name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        @{post.users.username} •{" "}
-                        {new Date(post.created_at).toLocaleDateString()}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Kategorija: {post.category} •{" "}
-                        {post.read_time || "N/A"}
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-[#294a70] text-lg">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mt-1">
+                        Autor: {post.users.first_name} {post.users.last_name}
                       </p>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleApprovePost(post.id)}
-                        className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-                      >
-                        Odobri
-                      </button>
+                    
+                    <div className="flex gap-2 ml-4">
                       <button
                         onClick={() => handleDeletePost(post.id)}
                         className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600"
@@ -197,26 +297,47 @@ export default function ContentManagement() {
                       </button>
                     </div>
                   </div>
-
-                  <h3 className="font-semibold text-gray-900 mb-1">
-                    {post.title}
-                  </h3>
-                  <p className="text-gray-700 mb-2">{post.short_desc}</p>
-
-                  <div
-                    className="text-gray-700 prose max-w-none"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
-                  />
-
-                  {post.image_url && (
-                    <img
-                      src={post.image_url}
-                      alt="Post"
-                      className="max-w-xs rounded-lg mt-3"
-                    />
-                  )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* PAGINATION FOR APPROVED POSTS */}
+          {activeTab === "approved" && !loading && !error && totalPages > 1 && (
+            <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+              <div className="text-sm text-gray-600">
+                Prikazano {((currentPage - 1) * 10) + 1}-{Math.min(currentPage * 10, totalPosts)} od {totalPosts} objava
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded-lg text-sm ${
+                    currentPage === 1
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-[#294a70] text-white hover:bg-[#1e3a5f]"
+                  }`}
+                >
+                  ← Prethodna
+                </button>
+                
+                <span className="px-3 py-1 text-sm text-gray-600">
+                  Strana {currentPage} od {totalPages}
+                </span>
+                
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1 rounded-lg text-sm ${
+                    currentPage === totalPages
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-[#294a70] text-white hover:bg-[#1e3a5f]"
+                  }`}
+                >
+                  Sledeća →
+                </button>
+              </div>
             </div>
           )}
         </>

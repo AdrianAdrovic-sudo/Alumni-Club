@@ -88,6 +88,8 @@ export default function MyProfile() {
         if (!resp.ok) return;
 
         const data = await resp.json();
+        console.log("Podaci učitani sa backend-a:", data);
+        console.log("enrollment_year iz backend-a:", data.enrollment_year);
 
         const profileInfo = {
           ime: data.first_name || "",
@@ -102,6 +104,9 @@ export default function MyProfile() {
           javniProfil: data.is_public ?? true,
         };
 
+        console.log("Mapiran profileInfo:", profileInfo);
+        console.log("godinaZavrsetka nakon mapiranja:", profileInfo.godinaZavrsetka);
+
         setProfileData(profileInfo);
         setEditFormData({
           ...profileInfo,
@@ -111,7 +116,7 @@ export default function MyProfile() {
         });
 
         if (data.profile_picture) {
-          setProfilnaSlika(`http://localhost:4000${data.profile_picture}`);
+          setProfilnaSlika(`http://localhost:4000${data.profile_picture}?t=${Date.now()}`);
         }
       } catch (err) {
         console.error(err);
@@ -122,12 +127,24 @@ export default function MyProfile() {
   }, []);
 
   const openEditModal = () => {
+    console.log("Otvaranje edit modal-a");
+    console.log("Trenutni profileData:", profileData);
+    console.log("Trenutna godinaZavrsetka:", profileData.godinaZavrsetka);
+    
     setEditFormData({
       ...profileData,
       profilnaSlikaFile: null,
       cvFile: null,
       cvFileName: "",
     });
+    
+    console.log("EditFormData nakon postavljanja:", {
+      ...profileData,
+      profilnaSlikaFile: null,
+      cvFile: null,
+      cvFileName: "",
+    });
+    
     setIsEditModalOpen(true);
   };
 
@@ -138,9 +155,12 @@ export default function MyProfile() {
   // Edit form handlers
   const handleEditChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    console.log(`Mijenjam polje ${name} na vrijednost: ${value}`);
 
     if (name === "nivoStudija") {
       setEditFormData(prev => ({ ...prev, nivoStudija: value, smjer: "" }));
+      console.log("Resetovan smjer zbog promjene nivoa studija");
       return;
     }
 
@@ -148,6 +168,10 @@ export default function MyProfile() {
       ...prev,
       [name]: value,
     }));
+    
+    if (name === "godinaZavrsetka") {
+      console.log("Nova godina diplomiranja postavljena:", value);
+    }
   };
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -195,6 +219,7 @@ export default function MyProfile() {
       };
 
       console.log("Šaljem podatke na backend:", payload);
+      console.log("Godina diplomiranja koja se šalje:", editFormData.godinaZavrsetka);
 
       // Update main profile info
       const response = await fetch("http://localhost:4000/api/users/me", {
@@ -214,17 +239,26 @@ export default function MyProfile() {
 
       const updatedData = await response.json();
       console.log("Backend odgovor:", updatedData);
+      console.log("Ažuriran enrollment_year:", updatedData.enrollment_year);
 
       // Upload avatar
       if (editFormData.profilnaSlikaFile) {
         const formData = new FormData();
         formData.append("avatar", editFormData.profilnaSlikaFile);
 
-        await fetch("http://localhost:4000/api/users/me/avatar", {
+        const avatarResponse = await fetch("http://localhost:4000/api/users/me/avatar", {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
           body: formData,
         });
+
+        if (avatarResponse.ok) {
+          const avatarData = await avatarResponse.json();
+          // Ažuriraj sliku u state-u sa cache-busting parametrom
+          if (avatarData.profile_picture) {
+            setProfilnaSlika(`http://localhost:4000${avatarData.profile_picture}?t=${Date.now()}`);
+          }
+        }
       }
 
       // Upload CV
@@ -240,7 +274,7 @@ export default function MyProfile() {
       }
 
       // Update local state
-      setProfileData({
+      const updatedProfileData = {
         ime: editFormData.ime,
         prezime: editFormData.prezime,
         email: editFormData.email,
@@ -251,7 +285,12 @@ export default function MyProfile() {
         mjestoRada: editFormData.mjestoRada,
         firma: editFormData.firma,
         javniProfil: editFormData.javniProfil,
-      });
+      };
+      
+      console.log("Ažuriram local state sa:", updatedProfileData);
+      console.log("Nova godina diplomiranja u local state:", updatedProfileData.godinaZavrsetka);
+      
+      setProfileData(updatedProfileData);
 
       closeEditModal();
     } catch (err) {
@@ -260,7 +299,8 @@ export default function MyProfile() {
   };
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 17 }, (_, i) => currentYear - i);
+  const startYear = 2009; // Najranija godina diplomiranja
+  const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => currentYear - i);
 
   // Sidebar menu items
   const menuItems = [

@@ -76,13 +76,19 @@ export default function UserManagement() {
         is_active: filters.is_active === '' ? undefined : filters.is_active === 'true'
       };
       
+      console.log("Šaljem filtere na backend:", backendFilters);
+      console.log("Stranica:", pagination.page, "Limit:", pagination.limit);
+      
       const data = await AdminService.getUsers(backendFilters, pagination.page, pagination.limit);
-      setUsers((data.data as unknown as ExtendedUser[]) || []);
+      console.log("Podaci sa backend-a:", data);
+      console.log("Broj korisnika:", data.users?.length);
+      
+      setUsers((data.users as unknown as ExtendedUser[]) || []);
       setPagination({
-        page: data.page,
-        limit: data.limit,
-        total: data.total,
-        pages: data.totalPages
+        page: data.pagination.page,
+        limit: data.pagination.limit,
+        total: data.pagination.total,
+        pages: data.pagination.pages
       });
     } catch (error) {
       console.error('Greška prilikom učitavanja korisnika:', error);
@@ -293,17 +299,17 @@ export default function UserManagement() {
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
       {/* Header with Create Buttons */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">Upravljanje korisnicima</h2>
+        <h2 className="text-2xl font-semibold text-[#294a70]">Upravljanje korisnicima</h2>
         <div className="flex space-x-3">
           <button
             onClick={() => setShowBulkImportModal(true)}
-            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition duration-200"
+            className="bg-[#294a70] hover:bg-[#1f3854] text-white py-2 px-4 rounded-lg transition duration-200"
           >
             Masovni import
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition duration-200"
+            className="bg-[#ffab1f] hover:bg-[#ff9500] text-white py-2 px-4 rounded-lg transition duration-200"
           >
             Kreiraj korisnika
           </button>
@@ -317,7 +323,7 @@ export default function UserManagement() {
           <input
             type="text"
             placeholder="Pretražite korisnike..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70] text-gray-700"
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
@@ -325,7 +331,7 @@ export default function UserManagement() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Uloga</label>
           <select
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70] text-gray-700"
             value={filters.role}
             onChange={(e) => setFilters({ ...filters, role: e.target.value })}
           >
@@ -337,7 +343,7 @@ export default function UserManagement() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
           <select
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70] text-gray-700"
             value={filters.is_active}
             onChange={(e) => setFilters({ ...filters, is_active: e.target.value })}
           >
@@ -426,7 +432,7 @@ export default function UserManagement() {
                           {user.is_active ? (
                             <button
                               onClick={() => handleDeactivate(user.id)}
-                              className="px-3 py-1 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-600 transition"
+                              className="px-3 py-1 bg-[#ffab1f] text-white rounded-lg text-sm hover:bg-[#ff9500] transition"
                             >
                               Deaktiviraj
                             </button>
@@ -580,7 +586,7 @@ export default function UserManagement() {
                 <button
                   type="submit"
                   disabled={createLoading}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+                  className="px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3854] transition disabled:opacity-50"
                 >
                   {createLoading ? 'Kreiranje...' : 'Kreiraj korisnika'}
                 </button>
@@ -643,7 +649,7 @@ export default function UserManagement() {
                 <button
                   type="submit"
                   disabled={bulkImportLoading || !csvData.trim()}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+                  className="px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3854] transition disabled:opacity-50"
                 >
                   {bulkImportLoading ? 'Importovanje...' : 'Importuj korisnike'}
                 </button>

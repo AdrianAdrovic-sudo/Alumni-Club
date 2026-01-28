@@ -50,10 +50,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (storedToken && storedUser) {
         try {
-          setUser(JSON.parse(storedUser));
-          setToken(storedToken);
+          // Test if token is valid by making a simple API call
+          const response = await fetch('/api/auth/verify', {
+            headers: {
+              'Authorization': `Bearer ${storedToken}`
+            }
+          });
+
+          if (response.ok) {
+            setUser(JSON.parse(storedUser));
+            setToken(storedToken);
+          } else {
+            // Token is invalid, clear it
+            console.log('Token je neispravna, brišem je...');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
         } catch (error) {
-          // Invalid stored data, clear it
+          // Invalid stored data or network error, clear it
+          console.log('Greška pri proveri tokena, brišem podatke...');
           localStorage.removeItem('token');
           localStorage.removeItem('user');
         }

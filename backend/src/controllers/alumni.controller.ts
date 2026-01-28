@@ -38,9 +38,20 @@ export const getAlumniProfile = async (req: Request, res: Response) => {
         occupation: true,
         enrollment_year: true,
         profile_picture: true,
-        is_public: true
+        is_public: true,
+        work_location: true,
+        position: true,
+        study_direction: true,
+        study_level: true,
+        cv_url: true,
+        created_at: true
       },
     });
+
+    console.log("Found user:", user);
+    console.log("User position:", user?.position);
+    console.log("User study_level:", user?.study_level);
+    console.log("User study_direction:", user?.study_direction);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

@@ -68,7 +68,7 @@ const Button: React.FC<
     "inline-flex items-center justify-center font-medium transition-all rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2";
 
   const variantClasses = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+    primary: "bg-[#ffab1f] text-white hover:bg-[#ff9500] focus:ring-[#ffab1f]",
     secondary:
       "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500",
     link: "text-blue-600 hover:text-blue-700 underline",
@@ -76,8 +76,8 @@ const Button: React.FC<
 
   const sizeClasses = {
     sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg",
+    md: "px-6 py-3 text-lg",
+    lg: "px-8 py-4 text-xl",
   };
 
   return (
@@ -116,10 +116,10 @@ const AlumniMemberCard = ({ member }: { member: AlumniMember }) => {
         />
       </div>
       <div className="mb-3 md:mb-4">
-        <h5 className="text-md font-semibold md:text-lg">{member.name}</h5>
-        <h6 className="md:text-md">{member.jobTitle}</h6>
+        <h5 className="text-md font-semibold md:text-lg text-white">{member.name}</h5>
+        <h6 className="md:text-md text-white">{member.jobTitle}</h6>
       </div>
-      <p>{member.description}</p>
+      <p className="text-white">{member.description}</p>
       <div className="mt-6 grid grid-flow-col grid-cols-[max-content] gap-3.5 self-center">
         {member.socialLinks.map((link: SocialLink, index: number) => (
           <a key={index} href={link.href}>
@@ -170,7 +170,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
         const mapped: AlumniMember[] = backendUsers.map((u: any) => ({
           id: u.id,
           image: {
-          src: u.profile_picture ? `${API_BASE_URL}${u.profile_picture}`
+          src: u.profile_picture ? `${API_BASE_URL}${u.profile_picture}?t=${Date.now()}`
           : "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
         },
           name: `${u.first_name} ${u.last_name}`,
@@ -189,6 +189,17 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
       };
 
     loadUsers();
+
+    // Osvježi podatke kada se korisnik vrati na stranicu
+    const handleFocus = () => {
+      loadUsers();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const validateForm = () => {
@@ -242,22 +253,22 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
 
   if (directoryLoading) {
     return (
-      <section className="px-[5%] py-16 md:py-24 lg:py-28">
-        <div className="text-center text-gray-200">Učitavanje...</div>
+      <section className="px-[5%] py-16 md:py-24 lg:py-28 bg-[#294a70] min-h-screen">
+        <div className="text-center text-white">Loading...</div>
       </section>
     );
   }
 
   return (
   <>
-    <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
+    <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28 bg-[#294a70] min-h-screen">
       <div className="container">
         <div className="mx-auto mb-12 max-w-lg text-center md:mb-18 lg:mb-20">
-          <p className="mb-3 font-semibold md:mb-4">{tagline}</p>
-          <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
+          <p className="mb-3 font-semibold md:mb-4 text-white">{tagline}</p>
+          <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl text-white">
             {heading}
           </h2>
-          <p className="md:text-md">{description}</p>
+          <p className="md:text-md text-white">{description}</p>
         </div>
 
         <div className="grid grid-cols-1 items-start justify-center gap-x-8 gap-y-12 md:grid-cols-3 md:gap-x-8 md:gap-y-16 lg:gap-x-12">
@@ -278,10 +289,10 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
 
         {!isLoggedIn && (
           <div className="mx-auto mt-14 w-full max-w-md text-center md:mt-20 lg:mt-24">
-            <h4 className="mb-3 text-2xl font-bold md:mb-4 md:text-3xl md:leading-[1.3] lg:text-4xl">
+            <h4 className="mb-3 text-3xl font-bold md:mb-4 md:text-4xl md:leading-[1.3] lg:text-5xl text-white">
               {footer.heading}
             </h4>
-            <p className="md:text-md">{footer.description}</p>
+            <p className="md:text-md text-white">{footer.description}</p>
             <div className="mt-6 flex items-center justify-center gap-x-4 textcenter md:mt-8">
               <Button {...footer.button} onClick={() => setIsModalOpen(true)}>
                 {footer.button.title}
@@ -450,7 +461,7 @@ export const AlumniDirectoryDefaults: Props = {
   footer: {
     heading: "Pridružite se Alumni Klubu!",
     description: "Pošaljite prijavu i budite dio naše mreže bivših studenata.",
-    button: { title: "Prijavite se", variant: "secondary", size: "md" },
+    button: { title: "Prijavite se", variant: "primary", size: "lg" },
   },
 };
 

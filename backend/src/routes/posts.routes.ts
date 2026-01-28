@@ -8,6 +8,7 @@ import {
   approvePost,
   deletePost,
   getPostById,
+  updatePost,
 } from "../services/posts.service";
 
 const router = Router();
@@ -16,9 +17,12 @@ const router = Router();
  * GET /api/posts
  * Javna ruta – vraća samo odobrene postove
  */
-router.get("/posts", async (_req, res) => {
+router.get("/posts", async (req, res) => {
   try {
-    const posts = await getApprovedPosts();
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    
+    const posts = await getApprovedPosts(page, limit);
     return res.json(posts);
   } catch (err) {
     console.error("Error fetching posts:", err);
@@ -93,6 +97,38 @@ router.patch(
     }
   }
 );
+
+router.put("/posts/:id", authenticate, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const user = req.user!;
+    const { title, category, short_desc, content, read_time } = req.body;
+
+    // Provjeri da li post postoji
+    const post = await getPostById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Samo admin ili vlasnik posta može da mijenja
+    if (user.role !== "admin" && post.user_id !== user.id) {
+      return res.status(403).json({ message: "You can edit only your own posts" });
+    }
+
+    const updatedPost = await updatePost(id, {
+      title,
+      category,
+      short_desc,
+      content,
+      read_time,
+    });
+
+    return res.json(updatedPost);
+  } catch (err) {
+    console.error("Error updating post:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.delete("/posts/:id", authenticate, async (req, res) => {
   try {

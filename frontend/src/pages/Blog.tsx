@@ -17,6 +17,7 @@ type BlogPost = {
   readTime: string;
   title: string;
   description: string;
+  content: string; // Dodajem content polje
   avatar: ImageProps;
   fullName: string;
   date: string;
@@ -167,8 +168,11 @@ export const Blog = (props: BlogProps) => {
       }
 
       const data = await res.json();
+      
+      // Handle both old format (array) and new format (with pagination)
+      const postsArray = data.posts || data;
 
-      const mapped: BlogPost[] = data.map((post: any) => ({
+      const mapped: BlogPost[] = postsArray.map((post: any) => ({
         id: post.id,
         url: `/blog/${post.id}`,
         image: {
@@ -181,10 +185,11 @@ export const Blog = (props: BlogProps) => {
         readTime: post.read_time || "5 min čitanja",
         title: post.title,
         description: post.short_desc,
+        content: post.content || "", // Dodajem content polje
         avatar: {
-          src:
-            post.users?.profile_picture ||
-            "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
+          src: post.users?.profile_picture 
+            ? `http://localhost:4000${post.users.profile_picture}?t=${Date.now()}`
+            : "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
           alt: post.users
             ? `${post.users.first_name} ${post.users.last_name}`
             : "Autor",
@@ -243,56 +248,69 @@ export const Blog = (props: BlogProps) => {
     return (
       <div
         key={post.id}
-        className={`${columnSpan} ${isHidden ? "animate-slide-in" : ""}`}
+        className={`${columnSpan} ${isHidden ? "animate-slide-in" : "animate-fade-in"}`}
         style={
           isHidden
             ? {
                 animationDelay: `${index * 100}ms`,
                 animationFillMode: "both",
               }
-            : {}
+            : {
+                animationDelay: `${index * 150}ms`,
+                animationFillMode: "both",
+              }
         }
       >
-        <div 
-          onClick={() => openBlogModal(post)}
-          className="mb-6 inline-block w-full max-w-full cursor-pointer"
-        >
-          <div className="w-full overflow-hidden">
-            <img
-              src={post.image.src}
-              alt={post.image.alt}
-              className="aspect-[3/2] size-full object-cover hover:scale-105 transition-transform duration-300"
-            />
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] overflow-hidden border border-gray-100 hover:border-[#294a70]/30 h-full flex flex-col group">
+          <div 
+            onClick={() => openBlogModal(post)}
+            className="cursor-pointer relative overflow-hidden"
+          >
+            <div className="w-full overflow-hidden">
+              <img
+                src={post.image.src}
+                alt={post.image.alt}
+                className="aspect-[4/3] size-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
           </div>
-        </div>
-        <button
-          onClick={() => openBlogModal(post)}
-          className="mb-2 mr-4 inline-block max-w-full text-sm font-semibold hover:text-[#294a70] transition-colors cursor-pointer"
-        >
-          {post.category}
-        </button>
+          
+          <div className="p-4 flex flex-col flex-1">
+            <button
+              onClick={() => openBlogModal(post)}
+              className="mb-2 inline-block px-2 py-1 bg-[#294a70] text-white text-xs font-semibold rounded-full hover:bg-[#1f3854] transition-all duration-300 transform hover:scale-105 cursor-pointer w-fit"
+            >
+              {post.category}
+            </button>
 
-        <div 
-          onClick={() => openBlogModal(post)}
-          className="mb-2 block max-w-full cursor-pointer"
-        >
-          <h5 className="text-xl font-bold md:text-2xl hover:text-[#294a70] transition-colors">{post.title}</h5>
-        </div>
-        <p>{post.description}</p>
-        <div className="mt-6 flex items-center">
-          <div className="mr-4 shrink-0">
-            <img
-              src={post.avatar.src}
-              alt={post.avatar.alt}
-              className="size-12 min-h-12 min-w-12 rounded-full object-cover"
-            />
-          </div>
-          <div>
-            <h6 className="text-sm font-semibold">{post.fullName}</h6>
-            <div className="flex items-center">
-              <p className="text-sm">{post.date}</p>
-              <span className="mx-2">•</span>
-              <p className="text-sm">{post.readTime}</p>
+            <div 
+              onClick={() => openBlogModal(post)}
+              className="mb-2 block cursor-pointer flex-1"
+            >
+              <h5 className="text-lg font-bold text-[#294a70] hover:text-[#1f3854] transition-all duration-300 line-clamp-2 group-hover:text-[#ffab1f]">
+                {post.title}
+              </h5>
+            </div>
+            
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1 transition-colors duration-300 group-hover:text-gray-700">{post.description}</p>
+            
+            <div className="flex items-center pt-3 border-t border-gray-100 mt-auto transition-all duration-300 group-hover:border-[#294a70]/20">
+              <div className="mr-3 shrink-0">
+                <img
+                  src={post.avatar.src}
+                  alt={post.avatar.alt}
+                  className="size-8 min-h-8 min-w-8 rounded-full object-cover border-2 border-gray-200 transition-all duration-300 group-hover:border-[#294a70]/30 group-hover:scale-110"
+                />
+              </div>
+              <div className="flex-1">
+                <h6 className="text-xs font-semibold text-gray-900 transition-colors duration-300 group-hover:text-[#294a70]">{post.fullName}</h6>
+                <div className="flex items-center text-gray-500 transition-colors duration-300 group-hover:text-gray-600">
+                  <p className="text-xs">{post.date}</p>
+                  <span className="mx-1 text-xs">•</span>
+                  <p className="text-xs">{post.readTime}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -302,15 +320,15 @@ export const Blog = (props: BlogProps) => {
 
   return (
     <>
-      <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
+      <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28 bg-[#294a70] min-h-screen">
         <div className="container">
           <div className="mb-12 md:mb-18 lg:mb-20">
             <div className="mx-auto w-full max-w-lg text-center">
-              <p className="mb-3 font-semibold md:mb-4">{t('blog.tagline')}</p>
-              <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
+              <p className="mb-3 font-semibold md:mb-4 text-white">{t('blog.tagline')}</p>
+              <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl text-white">
                 {t('blog.heading')}
               </h2>
-              <p className="md:text-md">{t('blog.description')}</p>
+              <p className="md:text-md text-white">{t('blog.description')}</p>
             </div>
           </div>
 
@@ -329,12 +347,12 @@ export const Blog = (props: BlogProps) => {
           </div>
 
           {loading ? (
-            <p className="text-center">{t('blog.loading')}</p>
+            <p className="text-center text-white">{t('blog.loading')}</p>
           ) : blogPosts.length === 0 ? (
-            <p className="text-center">{t('blog.noPosts')}</p>
+            <p className="text-center text-white">{t('blog.noPosts')}</p>
           ) : (
             <>
-              <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 md:gap-y-12 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-6 lg:grid-cols-4 lg:gap-6">
                 {visiblePosts.map((post, index) =>
                   renderCard(post, index, false)
                 )}
@@ -343,9 +361,9 @@ export const Blog = (props: BlogProps) => {
               </div>
 
               {hasMorePosts && (
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center mt-12">
                   <button
-                    className="default-blog-btn mt-10 md:mt-14 lg:mt-16 border-[3px] border-white default-blog-btn-secondary"
+                    className="px-8 py-3 bg-white border-2 border-white text-[#294a70] rounded-lg font-semibold hover:bg-[#294a70] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
                     onClick={() => setShowAll(!showAll)}
                   >
                     {showAll ? t('blog.showLess') : t('blog.viewAll')}
@@ -551,18 +569,10 @@ export const Blog = (props: BlogProps) => {
                 <h3 className="text-2xl font-bold text-gray-900">
                   {t('blog.modal.title')}
                 </h3>
-                <button
-                  onClick={closeModal}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
               </div>
 
               {/* Modal Content */}
-              <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="overflow-y-auto max-h-[calc(90vh-200px)] pb-20">
                 <div className="p-6">
                   {/* Blog Image */}
                   <img
@@ -598,22 +608,20 @@ export const Blog = (props: BlogProps) => {
 
                   {/* Content */}
                   <div className="prose prose-lg max-w-none">
-                    <p className="text-gray-700 leading-relaxed mb-4">
-                      {selectedPost.description}
-                    </p>
-                    <p className="text-gray-500 italic">
-                      {t('blog.modal.preview')}
-                    </p>
+                    <div 
+                      className="text-gray-700 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: selectedPost.content || selectedPost.description }}
+                    />
                   </div>
                 </div>
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 border-t border-gray-200 bg-gray-50">
-                <div className="flex justify-end">
+              <div className="p-6 border-t border-gray-200 bg-white">
+                <div className="flex justify-center">
                   <button
                     onClick={closeModal}
-                    className="px-6 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3854] transition-colors"
+                    className="px-8 py-3 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3854] transition-colors font-semibold text-lg shadow-lg"
                   >
                     {t('blog.modal.close')}
                   </button>
