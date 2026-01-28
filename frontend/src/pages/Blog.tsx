@@ -94,6 +94,7 @@ export const Blog = (props: BlogProps) => {
     >
   ) => {
     const { name, value } = e.target;
+    console.log(`Menjam polje ${name} na vrednost:`, value); // Debug log
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -110,6 +111,13 @@ export const Blog = (props: BlogProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Proverava da li je korisnik ulogovan
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Morate biti ulogovani da biste kreirali blog post.");
+      return;
+    }
+
     const payload = {
       title: formData.title,
       category: formData.category,
@@ -120,13 +128,11 @@ export const Blog = (props: BlogProps) => {
     };
 
     try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch("/api/posts", {
+      const res = await fetch("http://localhost:4000/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -138,6 +144,14 @@ export const Blog = (props: BlogProps) => {
         } catch (_) {}
 
         console.error("Greška pri kreiranju bloga:", res.status, errBody);
+        
+        if (res.status === 401) {
+          alert("Sesija je istekla. Molimo prijavite se ponovo.");
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+        
         alert(errBody?.message || "Neuspješno kreiranje blog posta.");
         return;
       }
@@ -148,6 +162,7 @@ export const Blog = (props: BlogProps) => {
       // Refresh posts and close modal
       fetchPosts();
       closeAddBlogModal();
+      alert("Blog post je uspešno kreiran!");
     } catch (err) {
       console.error("Network/JS greška pri kreiranju bloga:", err);
       alert("Došlo je do greške prilikom slanja bloga.");
@@ -160,7 +175,7 @@ export const Blog = (props: BlogProps) => {
   // UZIMAMO BLOGOVE SA BACKENDA
   const fetchPosts = async () => {
     try {
-      const res = await fetch("/api/posts");
+      const res = await fetch("http://localhost:4000/api/posts");
       if (!res.ok) {
         console.error("Neuspješno dohvatanje objava:", res.status);
         setLoading(false);
@@ -332,19 +347,22 @@ export const Blog = (props: BlogProps) => {
             </div>
           </div>
 
-          <div className="mb-8 flex justify-center">
-            <button
-              onClick={openAddBlogModal}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold text-lg
-                         bg-gradient-to-br from-[#ffab1f] to-[#ff9500]
-                         hover:from-[#ff9500] hover:to-[#e6850e]
-                         transform transition hover:-translate-y-1
-                         shadow-md hover:shadow-xl"
-            >
-              <Plus className="w-5 h-5" />
-              {t('blog.addBlog')}
-            </button>
-          </div>
+          {/* Dugme za dodavanje bloga - samo za ulogovane korisnike */}
+          {localStorage.getItem("token") && (
+            <div className="mb-8 flex justify-center">
+              <button
+                onClick={openAddBlogModal}
+                className="flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold text-lg
+                           bg-gradient-to-br from-[#ffab1f] to-[#ff9500]
+                           hover:from-[#ff9500] hover:to-[#e6850e]
+                           transform transition hover:-translate-y-1
+                           shadow-md hover:shadow-xl"
+              >
+                <Plus className="w-5 h-5" />
+                {t('blog.addBlog')}
+              </button>
+            </div>
+          )}
 
           {loading ? (
             <p className="text-center text-white">{t('blog.loading')}</p>
@@ -500,36 +518,19 @@ export const Blog = (props: BlogProps) => {
                       <label htmlFor="content" className="block text-gray-700 font-semibold mb-2">
                         Sadržaj bloga <span className="text-red-500">*</span>
                       </label>
-                      <Editor
-                        apiKey={TINYMCE_KEY || "no-api-key"}
+                      <textarea
+                        id="content"
+                        name="content"
                         value={formData.content}
-                        onEditorChange={handleEditorChange}
-                        init={{
-                          height: 400,
-                          menubar: false,
-                          plugins: [
-                            "lists",
-                            "link",
-                            "image",
-                            "code",
-                            "table",
-                            "wordcount",
-                          ],
-                          toolbar:
-                            "undo redo | formatselect | bold italic underline | " +
-                            "alignleft aligncenter alignright alignjustify | " +
-                            "bullist numlist outdent indent | link image | code | removeformat",
-                          content_style:
-                            'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px }',
-                          placeholder: "Napišite sadržaj vašeg bloga ovdje...",
-                        }}
+                        onChange={handleChange}
+                        required
+                        rows={15}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent resize-vertical"
+                        placeholder="Napišite sadržaj vašeg bloga ovdje..."
                       />
-                      {!TINYMCE_KEY && (
-                        <p className="mt-2 text-sm text-red-600">
-                          Nedostaje VITE_TINYMCE_API_KEY u frontend/.env. TinyMCE će prikazati
-                          setup ekran dok ne dodate ključ.
-                        </p>
-                      )}
+                      <p className="mt-2 text-sm text-blue-600">
+                        Osnovni text editor. Za napredni editor sa formatiranjem, dodajte VITE_TINYMCE_API_KEY u frontend/.env fajl.
+                      </p>
                     </div>
                   </form>
                 </div>

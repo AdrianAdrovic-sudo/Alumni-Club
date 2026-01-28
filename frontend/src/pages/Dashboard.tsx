@@ -74,7 +74,7 @@ export default function Dashboard() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-[#294a70] mb-4">
-            {isAdmin ? "Admin Dashboard" : "Korisnički Dashboard"}
+            {isAdmin ? "Admin panel" : "Korisnički Dashboard"}
           </h1>
           <p className="text-lg text-gray-600">
             {isAdmin
