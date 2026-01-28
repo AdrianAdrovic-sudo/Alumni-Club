@@ -114,7 +114,9 @@ const AlumniMemberCard = ({ member }: { member: AlumniMember }) => {
         <h5 className="text-md font-semibold md:text-lg text-white">{member.name}</h5>
         <h6 className="md:text-md text-white">{member.jobTitle}</h6>
       </div>
-      <p className="text-white">{member.description}</p>
+      {member.description && (
+        <p className="text-white text-sm opacity-90 break-all">{member.description}</p>
+      )}
       <div className="mt-6 grid grid-flow-col grid-cols-[max-content] gap-3.5 self-center">
         {member.socialLinks.map((link: SocialLink, index: number) => (
           <a key={index} href={link.href}>
@@ -170,7 +172,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
         },
           name: `${u.first_name} ${u.last_name}`,
           jobTitle: u.occupation || "Nije navedeno",
-          description: "Alumni član.",
+          description: u.email || "", // Email umjesto praznog opisa
           socialLinks: [],
           isPublic: u.is_public,
        }));

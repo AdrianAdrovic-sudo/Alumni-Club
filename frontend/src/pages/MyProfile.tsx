@@ -46,11 +46,13 @@ export default function MyProfile() {
 
   const [profilnaSlika, setProfilnaSlika] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState<ProfileData & {
-    profilnaSlikaFile: File | null;
-    cvFile: File | null;
-    cvFileName: string;
-  }>({
+  const [editFormData, setEditFormData] = useState<
+    ProfileData & {
+      profilnaSlikaFile: File | null;
+      cvFile: File | null;
+      cvFileName: string;
+    }
+  >({
     ime: "",
     prezime: "",
     email: "",
@@ -67,8 +69,15 @@ export default function MyProfile() {
   });
 
   const smjerOpcije = {
-    "Osnovne studije": ["Softversko inženjerstvo", "Informaciono-komunikacione tehnologije"],
-    "Master studije": ["Informaciono-komunikacione tehnologije", "Softverski inženjering", "Informatika u obrazovanju"],
+    "Osnovne studije": [
+      "Softversko inženjerstvo",
+      "Informaciono-komunikacione tehnologije",
+    ],
+    "Master studije": [
+      "Informaciono-komunikacione tehnologije",
+      "Softverski inženjering",
+      "Informatika u obrazovanju",
+    ],
     "Specijalističke studije": ["Informacione tehnologije"],
   };
 
@@ -105,7 +114,10 @@ export default function MyProfile() {
         };
 
         console.log("Mapiran profileInfo:", profileInfo);
-        console.log("godinaZavrsetka nakon mapiranja:", profileInfo.godinaZavrsetka);
+        console.log(
+          "godinaZavrsetka nakon mapiranja:",
+          profileInfo.godinaZavrsetka
+        );
 
         setProfileData(profileInfo);
         setEditFormData({
@@ -116,7 +128,9 @@ export default function MyProfile() {
         });
 
         if (data.profile_picture) {
-          setProfilnaSlika(`http://localhost:4000${data.profile_picture}?t=${Date.now()}`);
+          setProfilnaSlika(
+            `http://localhost:4000${data.profile_picture}?t=${Date.now()}`
+          );
         }
       } catch (err) {
         console.error(err);
@@ -130,21 +144,21 @@ export default function MyProfile() {
     console.log("Otvaranje edit modal-a");
     console.log("Trenutni profileData:", profileData);
     console.log("Trenutna godinaZavrsetka:", profileData.godinaZavrsetka);
-    
+
     setEditFormData({
       ...profileData,
       profilnaSlikaFile: null,
       cvFile: null,
       cvFileName: "",
     });
-    
+
     console.log("EditFormData nakon postavljanja:", {
       ...profileData,
       profilnaSlikaFile: null,
       cvFile: null,
       cvFileName: "",
     });
-    
+
     setIsEditModalOpen(true);
   };
 
@@ -153,22 +167,24 @@ export default function MyProfile() {
   };
 
   // Edit form handlers
-  const handleEditChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleEditChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    
+
     console.log(`Mijenjam polje ${name} na vrijednost: ${value}`);
 
     if (name === "nivoStudija") {
-      setEditFormData(prev => ({ ...prev, nivoStudija: value, smjer: "" }));
+      setEditFormData((prev) => ({ ...prev, nivoStudija: value, smjer: "" }));
       console.log("Resetovan smjer zbog promjene nivoa studija");
       return;
     }
 
-    setEditFormData(prev => ({
+    setEditFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    
+
     if (name === "godinaZavrsetka") {
       console.log("Nova godina diplomiranja postavljena:", value);
     }
@@ -178,7 +194,7 @@ export default function MyProfile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setEditFormData(prev => ({ ...prev, profilnaSlikaFile: file }));
+    setEditFormData((prev) => ({ ...prev, profilnaSlikaFile: file }));
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -191,7 +207,7 @@ export default function MyProfile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setEditFormData(prev => ({
+    setEditFormData((prev) => ({
       ...prev,
       cvFile: file,
       cvFileName: file.name,
@@ -263,17 +279,22 @@ export default function MyProfile() {
         const formData = new FormData();
         formData.append("avatar", editFormData.profilnaSlikaFile);
 
-        const avatarResponse = await fetch("http://localhost:4000/api/users/me/avatar", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        });
+        const avatarResponse = await fetch(
+          "http://localhost:4000/api/users/me/avatar",
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData,
+          }
+        );
 
         if (avatarResponse.ok) {
           const avatarData = await avatarResponse.json();
           // Ažuriraj sliku u state-u sa cache-busting parametrom
           if (avatarData.profile_picture) {
-            setProfilnaSlika(`http://localhost:4000${avatarData.profile_picture}?t=${Date.now()}`);
+            setProfilnaSlika(
+              `http://localhost:4000${avatarData.profile_picture}?t=${Date.now()}`
+            );
           }
         }
       }
@@ -294,7 +315,7 @@ export default function MyProfile() {
       const updatedProfileData = {
         ime: editFormData.ime,
         prezime: editFormData.prezime,
-        email: editFormData.email,
+        email: editFormData.email, // stays the same (read-only in UI)
         pozicija: editFormData.pozicija,
         nivoStudija: editFormData.nivoStudija,
         smjer: editFormData.smjer,
@@ -303,10 +324,13 @@ export default function MyProfile() {
         firma: editFormData.firma,
         javniProfil: editFormData.javniProfil,
       };
-      
+
       console.log("Ažuriram local state sa:", updatedProfileData);
-      console.log("Nova godina diplomiranja u local state:", updatedProfileData.godinaZavrsetka);
-      
+      console.log(
+        "Nova godina diplomiranja u local state:",
+        updatedProfileData.godinaZavrsetka
+      );
+
       setProfileData(updatedProfileData);
 
       closeEditModal();
@@ -317,7 +341,10 @@ export default function MyProfile() {
 
   const currentYear = new Date().getFullYear();
   const startYear = 2009; // Najranija godina diplomiranja
-  const years = Array.from({ length: currentYear - startYear + 1 }, (_, i) => currentYear - i);
+  const years = Array.from(
+    { length: currentYear - startYear + 1 },
+    (_, i) => currentYear - i
+  );
 
   // Sidebar menu items
   const menuItems = [
@@ -326,31 +353,30 @@ export default function MyProfile() {
       label: "Izmijeni profil",
       action: openEditModal,
       color: "text-[#294a70] hover:text-[#1f3854]",
-      bg: "hover:bg-blue-50"
+      bg: "hover:bg-blue-50",
     },
     {
       icon: <Image className="w-5 h-5" />,
       label: "Promijeni sliku",
-      action: () => document.getElementById('avatar-upload')?.click(),
+      action: () => document.getElementById("avatar-upload")?.click(),
       color: "text-[#294a70] hover:text-[#1f3854]",
-      bg: "hover:bg-blue-50"
+      bg: "hover:bg-blue-50",
     },
     {
       icon: <Shield className="w-5 h-5" />,
       label: "Privatnost",
       action: () => {
-        setProfileData(prev => ({ ...prev, javniProfil: !prev.javniProfil }));
+        setProfileData((prev) => ({ ...prev, javniProfil: !prev.javniProfil }));
         // TODO: Save to backend immediately
       },
       color: "text-[#294a70] hover:text-[#1f3854]",
-      bg: "hover:bg-blue-50"
+      bg: "hover:bg-blue-50",
     },
   ];
 
   return (
     <>
       <div className="w-full min-h-screen bg-gray-50 flex">
-        
         {/* Sidebar Menu */}
         <div className="w-80 bg-white shadow-xl border-r border-gray-200 flex flex-col">
           {/* Sidebar Header */}
@@ -380,7 +406,9 @@ export default function MyProfile() {
             {/* Privacy Status Card */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-gray-700">Status profila</span>
+                <span className="text-sm font-semibold text-gray-700">
+                  Status profila
+                </span>
                 {profileData.javniProfil ? (
                   <Eye className="w-4 h-4 text-green-600" />
                 ) : (
@@ -388,7 +416,9 @@ export default function MyProfile() {
                 )}
               </div>
               <p className="text-xs text-gray-600">
-                {profileData.javniProfil ? "Profil je javan" : "Profil je privatan"}
+                {profileData.javniProfil
+                  ? "Profil je javan"
+                  : "Profil je privatan"}
               </p>
             </div>
           </div>
@@ -397,10 +427,8 @@ export default function MyProfile() {
         {/* Main Content */}
         <div className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
-            
             {/* Profile Card */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-              
               {/* Profile Header */}
               <div className="bg-gradient-to-r from-[#294a70] to-[#324D6B] px-8 py-6">
                 <div className="flex items-center gap-6">
@@ -427,13 +455,15 @@ export default function MyProfile() {
                       className="hidden"
                     />
                   </div>
-                  
+
                   <div className="text-white">
                     <h1 className="text-3xl font-bold">
                       {profileData.ime} {profileData.prezime}
                     </h1>
                     {profileData.pozicija && (
-                      <p className="text-blue-100 text-lg mt-1">{profileData.pozicija}</p>
+                      <p className="text-blue-100 text-lg mt-1">
+                        {profileData.pozicija}
+                      </p>
                     )}
                     <p className="text-blue-200 text-sm mt-2">
                       Alumni Club Mediteran
@@ -445,44 +475,80 @@ export default function MyProfile() {
               {/* Profile Information */}
               <div className="p-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <ProfileItem icon={<Mail />} label="Email" value={profileData.email} />
-                  <ProfileItem icon={<BookOpen />} label="Nivo studija" value={profileData.nivoStudija} />
-                  <ProfileItem icon={<BookOpen />} label="Smjer" value={profileData.smjer} />
-                  <ProfileItem icon={<BookOpen />} label="Godina diplomiranja" value={profileData.godinaZavrsetka} />
-                  <ProfileItem icon={<MapPin />} label="Mjesto rada" value={profileData.mjestoRada} />
-                  <ProfileItem icon={<Briefcase />} label="Firma" value={profileData.firma} />
+                  <ProfileItem
+                    icon={<Mail />}
+                    label="Email"
+                    value={profileData.email}
+                  />
+                  <ProfileItem
+                    icon={<BookOpen />}
+                    label="Nivo studija"
+                    value={profileData.nivoStudija}
+                  />
+                  <ProfileItem
+                    icon={<BookOpen />}
+                    label="Smjer"
+                    value={profileData.smjer}
+                  />
+                  <ProfileItem
+                    icon={<BookOpen />}
+                    label="Godina diplomiranja"
+                    value={profileData.godinaZavrsetka}
+                  />
+                  <ProfileItem
+                    icon={<MapPin />}
+                    label="Mjesto rada"
+                    value={profileData.mjestoRada}
+                  />
+                  <ProfileItem
+                    icon={<Briefcase />}
+                    label="Firma"
+                    value={profileData.firma}
+                  />
                 </div>
 
                 {/* Additional Info */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Dodatne informacije</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Dodatne informacije
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Shield className="w-4 h-4 text-gray-600" />
-                        <span className="text-sm font-medium text-gray-700">Privatnost</span>
+                        <span className="text-sm font-medium text-gray-700">
+                          Privatnost
+                        </span>
                       </div>
                       <p className="text-sm text-gray-600">
-                        {profileData.javniProfil ? "Javan profil" : "Privatan profil"}
+                        {profileData.javniProfil
+                          ? "Javan profil"
+                          : "Privatan profil"}
                       </p>
                     </div>
-                    
+
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <FileText className="w-4 h-4 text-gray-600" />
-                        <span className="text-sm font-medium text-gray-700">CV</span>
+                        <span className="text-sm font-medium text-gray-700">
+                          CV
+                        </span>
                       </div>
                       <p className="text-sm text-gray-600">
                         {editFormData.cvFileName || "Nije otpremljen"}
                       </p>
                     </div>
-                    
+
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <User className="w-4 h-4 text-gray-600" />
-                        <span className="text-sm font-medium text-gray-700">Status</span>
+                        <span className="text-sm font-medium text-gray-700">
+                          Status
+                        </span>
                       </div>
-                      <p className="text-sm text-green-600 font-medium">Aktivan</p>
+                      <p className="text-sm text-green-600 font-medium">
+                        Aktivan
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -502,12 +568,9 @@ export default function MyProfile() {
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200 overflow-hidden">
-              
               {/* Modal Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-[#294a70] to-[#324D6B]">
-                <h3 className="text-2xl font-bold text-white">
-                  Izmijeni profil
-                </h3>
+                <h3 className="text-2xl font-bold text-white">Izmijeni profil</h3>
                 <button
                   onClick={closeEditModal}
                   className="p-2 hover:bg-white/20 rounded-full transition-colors"
@@ -519,13 +582,16 @@ export default function MyProfile() {
               {/* Modal Content */}
               <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
                 <div className="p-6">
-                  
                   {/* Avatar Upload */}
                   <div className="flex flex-col items-center mb-8">
                     <div className="relative">
                       <div className="w-32 h-32 rounded-full overflow-hidden shadow-xl border-4 border-white ring-4 ring-[#ffab1f]/30">
                         {profilnaSlika ? (
-                          <img src={profilnaSlika} className="w-full h-full object-cover" alt="Profile" />
+                          <img
+                            src={profilnaSlika}
+                            className="w-full h-full object-cover"
+                            alt="Profile"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#294a70] to-[#324D6B]">
                             <User className="w-12 h-12 text-white" />
@@ -536,15 +602,32 @@ export default function MyProfile() {
 
                     <label className="mt-4 px-6 py-2 bg-gradient-to-br from-[#ffab1f] to-[#ff9500] text-white font-semibold rounded-full cursor-pointer hover:shadow-lg transition-all">
                       Promijeni sliku
-                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
                     </label>
                   </div>
 
                   {/* Form Fields */}
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField icon={<User />} label="Ime" name="ime" value={editFormData.ime} onChange={handleEditChange} />
-                      <FormField icon={<User />} label="Prezime" name="prezime" value={editFormData.prezime} onChange={handleEditChange} />
+                      <FormField
+                        icon={<User />}
+                        label="Ime"
+                        name="ime"
+                        value={editFormData.ime}
+                        onChange={handleEditChange}
+                      />
+                      <FormField
+                        icon={<User />}
+                        label="Prezime"
+                        name="prezime"
+                        value={editFormData.prezime}
+                        onChange={handleEditChange}
+                      />
                     </div>
                     
                     <EmailField 
@@ -556,13 +639,31 @@ export default function MyProfile() {
                     />
                     <FormField icon={<Briefcase />} label="Pozicija" name="pozicija" value={editFormData.pozicija} onChange={handleEditChange} />
 
-                    <FormSelect 
-                      icon={<BookOpen />} 
-                      label="Nivo studija" 
-                      name="nivoStudija" 
-                      value={editFormData.nivoStudija} 
-                      onChange={handleEditChange} 
-                      options={Object.keys(smjerOpcije)} 
+                    {/* EMAIL: READ-ONLY */}
+                    <FormField
+                      icon={<Mail />}
+                      label="Email"
+                      name="email"
+                      value={editFormData.email}
+                      onChange={handleEditChange}
+                      readOnly
+                    />
+
+                    <FormField
+                      icon={<Briefcase />}
+                      label="Pozicija"
+                      name="pozicija"
+                      value={editFormData.pozicija}
+                      onChange={handleEditChange}
+                    />
+
+                    <FormSelect
+                      icon={<BookOpen />}
+                      label="Nivo studija"
+                      name="nivoStudija"
+                      value={editFormData.nivoStudija}
+                      onChange={handleEditChange}
+                      options={Object.keys(smjerOpcije)}
                     />
 
                     {editFormData.nivoStudija && (
@@ -572,7 +673,11 @@ export default function MyProfile() {
                         name="smjer"
                         value={editFormData.smjer}
                         onChange={handleEditChange}
-                        options={smjerOpcije[editFormData.nivoStudija as keyof typeof smjerOpcije] || []}
+                        options={
+                          smjerOpcije[
+                            editFormData.nivoStudija as keyof typeof smjerOpcije
+                          ] || []
+                        }
                       />
                     )}
 
@@ -582,49 +687,90 @@ export default function MyProfile() {
                       name="godinaZavrsetka"
                       value={editFormData.godinaZavrsetka}
                       onChange={handleEditChange}
-                      options={years.map(year => String(year))}
+                      options={years.map((year) => String(year))}
                     />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField icon={<MapPin />} label="Mjesto rada" name="mjestoRada" value={editFormData.mjestoRada} onChange={handleEditChange} />
-                      <FormField icon={<Briefcase />} label="Firma" name="firma" value={editFormData.firma} onChange={handleEditChange} />
+                      <FormField
+                        icon={<MapPin />}
+                        label="Mjesto rada"
+                        name="mjestoRada"
+                        value={editFormData.mjestoRada}
+                        onChange={handleEditChange}
+                      />
+                      <FormField
+                        icon={<Briefcase />}
+                        label="Firma"
+                        name="firma"
+                        value={editFormData.firma}
+                        onChange={handleEditChange}
+                      />
                     </div>
 
                     {/* CV Upload */}
                     <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                      <div className="text-[#ffab1f]"><FileText /></div>
+                      <div className="text-[#ffab1f]">
+                        <FileText />
+                      </div>
                       <div className="flex-1">
-                        <label className="text-sm text-gray-600 font-medium block mb-2">CV</label>
+                        <label className="text-sm text-gray-600 font-medium block mb-2">
+                          CV
+                        </label>
                         {editFormData.cvFileName ? (
-                          <p className="text-sm text-gray-800">{editFormData.cvFileName}</p>
+                          <p className="text-sm text-gray-800">
+                            {editFormData.cvFileName}
+                          </p>
                         ) : (
-                          <p className="text-sm text-gray-500">Nijedan fajl nije odabran</p>
+                          <p className="text-sm text-gray-500">
+                            Nijedan fajl nije odabran
+                          </p>
                         )}
                       </div>
                       <label className="px-4 py-2 text-white font-semibold text-sm bg-gradient-to-br from-[#294a70] to-[#324D6B] rounded-lg cursor-pointer hover:shadow-lg transition-all">
                         Dodaj CV
-                        <input type="file" accept=".pdf,.doc,.docx" onChange={handleCvUpload} className="hidden" />
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleCvUpload}
+                          className="hidden"
+                        />
                       </label>
                     </div>
 
                     {/* Privacy Settings */}
                     <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                      <label className="text-sm text-gray-600 font-medium block mb-3">Vidljivost profila</label>
+                      <label className="text-sm text-gray-600 font-medium block mb-3">
+                        Vidljivost profila
+                      </label>
                       <div className="flex gap-3">
                         <button
                           type="button"
-                          onClick={() => setEditFormData(prev => ({ ...prev, javniProfil: false }))}
+                          onClick={() =>
+                            setEditFormData((prev) => ({
+                              ...prev,
+                              javniProfil: false,
+                            }))
+                          }
                           className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all ${
-                            !editFormData.javniProfil ? "bg-[#ffab1f] text-white" : "bg-white text-gray-600 border border-gray-300"
+                            !editFormData.javniProfil
+                              ? "bg-[#ffab1f] text-white"
+                              : "bg-white text-gray-600 border border-gray-300"
                           }`}
                         >
                           Privatan
                         </button>
                         <button
                           type="button"
-                          onClick={() => setEditFormData(prev => ({ ...prev, javniProfil: true }))}
+                          onClick={() =>
+                            setEditFormData((prev) => ({
+                              ...prev,
+                              javniProfil: true,
+                            }))
+                          }
                           className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all ${
-                            editFormData.javniProfil ? "bg-[#ffab1f] text-white" : "bg-white text-gray-600 border border-gray-300"
+                            editFormData.javniProfil
+                              ? "bg-[#ffab1f] text-white"
+                              : "bg-white text-gray-600 border border-gray-300"
                           }`}
                         >
                           Javan
@@ -683,28 +829,53 @@ function ProfileItem({
       <div className="text-[#ffab1f]">{icon}</div>
       <div>
         <p className="text-sm text-gray-500 font-medium">{label}</p>
-        <p className="text-base font-semibold text-[#294a70]">
-          {value || "—"}
-        </p>
+        <p className="text-base font-semibold text-[#294a70]">{value || "—"}</p>
       </div>
     </div>
   );
 }
 
-function FormField({ icon, label, name, type = "text", value, onChange, placeholder }: any) {
+function FormField({
+  icon,
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  readOnly = false,
+  disabled = false,
+}: any) {
   return (
-    <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+    <div
+      className={`flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200 ${
+        disabled ? "opacity-70" : ""
+      }`}
+    >
       <div className="text-[#ffab1f]">{icon}</div>
       <div className="flex-1">
-        <label className="text-sm text-gray-600 font-medium block mb-2">{label}</label>
+        <label className="text-sm text-gray-600 font-medium block mb-2">
+          {label}
+        </label>
         <input
           type={type}
           name={name}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="w-full text-base font-semibold text-[#294a70] bg-transparent border-none focus:outline-none"
+          readOnly={readOnly}
+          disabled={disabled}
+          className={`w-full text-base font-semibold bg-transparent border-none focus:outline-none ${
+            readOnly || disabled
+              ? "cursor-not-allowed text-gray-500"
+              : "text-[#294a70]"
+          }`}
         />
+        {readOnly && name === "email" && (
+          <p className="text-xs text-gray-500 mt-1">
+            Email nije moguće mijenjati.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -756,16 +927,22 @@ function FormSelect({ icon, label, name, value, onChange, options }: any) {
     <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
       <div className="text-[#ffab1f]">{icon}</div>
       <div className="flex-1">
-        <label className="text-sm text-gray-600 font-medium block mb-2">{label}</label>
+        <label className="text-sm text-gray-600 font-medium block mb-2">
+          {label}
+        </label>
         <select
           name={name}
           value={value}
           onChange={onChange}
           className="w-full text-base font-semibold text-[#294a70] bg-transparent border-none focus:outline-none"
         >
-          <option value="" disabled>Izaberite...</option>
+          <option value="" disabled>
+            Izaberite...
+          </option>
           {options.map((op: string) => (
-            <option key={op} value={op}>{op}</option>
+            <option key={op} value={op}>
+              {op}
+            </option>
           ))}
         </select>
       </div>
