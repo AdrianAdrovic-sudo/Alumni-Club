@@ -222,9 +222,19 @@ export default function MyProfile() {
       const token = localStorage.getItem("token");
       if (!token) return;
 
+      // Email validacija na frontend strani
+      if (editFormData.email && editFormData.email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(editFormData.email.trim())) {
+          alert("Molimo unesite valjan email format");
+          return;
+        }
+      }
+
       const payload = {
         ime: editFormData.ime,
         prezime: editFormData.prezime,
+        email: editFormData.email,
         pozicija: editFormData.pozicija,
         nivoStudija: editFormData.nivoStudija,
         smjer: editFormData.smjer,
@@ -250,6 +260,13 @@ export default function MyProfile() {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Backend greška:", errorData);
+        
+        // Prikaži specifičnu grešku korisniku
+        if (errorData.message) {
+          alert(`Greška: ${errorData.message}`);
+        } else {
+          alert("Došlo je do greške prilikom ažuriranja profila");
+        }
         return;
       }
 
@@ -612,6 +629,15 @@ export default function MyProfile() {
                         onChange={handleEditChange}
                       />
                     </div>
+                    
+                    <EmailField 
+                      icon={<Mail />} 
+                      label="Email" 
+                      name="email" 
+                      value={editFormData.email} 
+                      onChange={handleEditChange} 
+                    />
+                    <FormField icon={<Briefcase />} label="Pozicija" name="pozicija" value={editFormData.pozicija} onChange={handleEditChange} />
 
                     {/* EMAIL: READ-ONLY */}
                     <FormField
@@ -849,6 +875,47 @@ function FormField({
           <p className="text-xs text-gray-500 mt-1">
             Email nije moguće mijenjati.
           </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EmailField({ icon, label, name, value, onChange }: any) {
+  const [isValid, setIsValid] = useState(true);
+  const [showValidation, setShowValidation] = useState(false);
+
+  const validateEmail = (email: string) => {
+    if (!email.trim()) return true; // Prazan email je OK
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim());
+  };
+
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    onChange(e);
+    
+    setShowValidation(newValue.length > 0);
+    setIsValid(validateEmail(newValue));
+  };
+
+  return (
+    <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+      <div className="text-[#ffab1f]">{icon}</div>
+      <div className="flex-1">
+        <label className="text-sm text-gray-600 font-medium block mb-2">{label}</label>
+        <input
+          type="email"
+          name={name}
+          value={value}
+          onChange={handleEmailChange}
+          className={`w-full text-base font-semibold bg-transparent border-none focus:outline-none ${
+            showValidation && !isValid ? 'text-red-600' : 'text-[#294a70]'
+          }`}
+          placeholder="ime@example.com"
+        />
+        {showValidation && !isValid && (
+          <p className="text-xs text-red-500 mt-1">Molimo unesite valjan email format</p>
         )}
       </div>
     </div>

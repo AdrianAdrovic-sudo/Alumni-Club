@@ -4,11 +4,15 @@ import prisma from "../prisma";
 export const getAlumniDirectory = async (req: Request, res: Response) => {
   try {
     const users = await prisma.users.findMany({
+      where: {
+        role: "user" // Samo obični korisnici, ne admin
+      },
       select: {
         id: true,
         username: true,
         first_name: true,
         last_name: true,
+        email: true,
         occupation: true,
         profile_picture: true,
         is_public: true

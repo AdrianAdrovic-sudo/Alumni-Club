@@ -279,7 +279,7 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Home page translations
     'home.tagline': 'Welcome',
-    'home.heading': 'Alumni Club Mediteran',
+    'home.heading': 'Alumni Club FIT',
     'home.description': 'Connecting generations of students and professionals through an innovative platform that enables networking, mentorship and experience sharing. Join our community and build your future together with us.',
     'home.section1.heading': 'Networking and connections',
     'home.section1.description': 'Find old colleagues, meet new people from the industry and expand your professional network through our platform.',
