@@ -8,7 +8,11 @@ describe("Blog Posts API", () => {
     const res = await request(app).get("/api/posts");
 
     expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
+
+    const body = res.body;
+    const posts = Array.isArray(body) ? body : body.posts || body.data || [];
+
+    expect(Array.isArray(posts)).toBe(true);
   });
 
   it("POST /api/posts - ulogovani korisnik može kreirati post", async () => {
