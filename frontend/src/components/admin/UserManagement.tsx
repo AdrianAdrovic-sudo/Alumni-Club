@@ -379,7 +379,7 @@ export default function UserManagement() {
                 <tr className="bg-gray-50">
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Korisnik</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Uloga</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Upis</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Diplomiranje</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Aktivnost</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Akcije</th>
@@ -545,7 +545,7 @@ export default function UserManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Godina upisa</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Godina diplomiranja</label>
                   <input
                     type="number"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
