@@ -49,6 +49,8 @@ export const getAllTheses = async (
     const orderBy: Prisma.usersOrderByWithRelationInput = {};
     if (sortBy === "student_name") {
         orderBy.first_name = sortOrder;
+    } else if (sortBy === "student_last_name") {
+        orderBy.last_name = sortOrder;
     } else if (sortBy === "title") {
         orderBy.thesis_title = sortOrder;
     } else if (sortBy === "defense_date") {

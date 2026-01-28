@@ -9,7 +9,8 @@ export default function DiplomskiRadovi() {
   const isAdmin = user?.role === 'admin';
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("created_at");
+  const [sortBy, setSortBy] = useState("defense_date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showFilter, setShowFilter] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedThesis, setSelectedThesis] = useState<any>(null);
@@ -19,7 +20,7 @@ export default function DiplomskiRadovi() {
 
   useEffect(() => {
     fetchTheses();
-  }, [searchTerm, sortBy, thesisTypeFilter]); // Add dependencies to auto-refresh
+  }, [searchTerm, sortBy, sortOrder, thesisTypeFilter]); // Add dependencies to auto-refresh
 
   const fetchTheses = async () => {
     setLoading(true);
@@ -29,7 +30,7 @@ export default function DiplomskiRadovi() {
           search: searchTerm,
           type: thesisTypeFilter,
           sortBy: sortBy, // Pass sort param to backend
-          sortOrder: 'desc' // Or make this dynamic
+          sortOrder: sortOrder
         }
       });
       setTheses(response.data.theses);
@@ -95,20 +96,32 @@ export default function DiplomskiRadovi() {
               <div className="border-b border-[#1f3a5a] pb-2">
                 <div className="px-4 py-2 text-xs text-gray-300 font-semibold uppercase">Sortiraj</div>
                 <button
-                  onClick={() => { setSortBy("defense_date"); setShowFilter(false); }}
-                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "defense_date" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+                  onClick={() => { setSortBy("defense_date"); setSortOrder("desc"); setShowFilter(false); }}
+                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "defense_date" && sortOrder === "desc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
                 >
-                  Datum
+                  Datum (najnoviji prvo)
                 </button>
                 <button
-                  onClick={() => { setSortBy("student_name"); setShowFilter(false); }}
-                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "student_name" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+                  onClick={() => { setSortBy("defense_date"); setSortOrder("asc"); setShowFilter(false); }}
+                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "defense_date" && sortOrder === "asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+                >
+                  Datum (najstariji prvo)
+                </button>
+                <button
+                  onClick={() => { setSortBy("student_name"); setSortOrder("asc"); setShowFilter(false); }}
+                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "student_name" && sortOrder === "asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
                 >
                   Ime (A-Z)
                 </button>
                 <button
-                  onClick={() => { setSortBy("title"); setShowFilter(false); }}
-                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "title" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+                  onClick={() => { setSortBy("student_last_name"); setSortOrder("asc"); setShowFilter(false); }}
+                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "student_last_name" && sortOrder === "asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+                >
+                  Prezime (A-Z)
+                </button>
+                <button
+                  onClick={() => { setSortBy("title"); setSortOrder("asc"); setShowFilter(false); }}
+                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "title" && sortOrder === "asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
                 >
                   Naziv rada (A-Z)
                 </button>
