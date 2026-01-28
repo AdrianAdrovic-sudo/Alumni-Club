@@ -3,9 +3,11 @@ import img1 from '../assets/img1.jpg';
 import img2 from '../assets/img2.jpg';
 import img3 from '../assets/img3.jpg';
 import { useLanguage } from '../context/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 
 const Home: React.FC = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -19,12 +21,12 @@ const Home: React.FC = () => {
       const now = new Date();
       // Kreiraj datum eksplicitno: godina, mjesec (0-11), dan
       const targetDate = new Date(2026, 4, 15, 0, 0, 0);
-      
+
       console.log('Trenutno vrijeme:', now);
       console.log('Ciljni datum:', targetDate);
-      
+
       const timeDifference = targetDate.getTime() - now.getTime();
-      
+
       console.log('Razlika u milisekundama:', timeDifference);
 
       if (timeDifference > 0) {
@@ -45,7 +47,7 @@ const Home: React.FC = () => {
 
     return () => clearInterval(interval);
   }, []);
-  
+
   const sections = [
     {
       image: {
@@ -122,7 +124,7 @@ const Home: React.FC = () => {
                   <p className="md:text-md">{t('home.description')}</p>
                 </div>
               </div>
-              
+
               {/* Sections with staggered animations */}
               <div className="grid grid-cols-1 items-start justify-center gap-y-12 md:grid-cols-3 md:gap-x-8 md:gap-y-16 lg:gap-x-12 max-[950px]:flex-col max-[950px]:items-center max-[950px]:w-[98vw] max-[950px]:gap-6">
                 {sections?.map((section, index) => (
@@ -135,9 +137,9 @@ const Home: React.FC = () => {
                     }}
                   >
                     <div className="mb-6 md:mb-8">
-                      <img 
-                        src={section.image.src} 
-                        alt={section.image.alt} 
+                      <img
+                        src={section.image.src}
+                        alt={section.image.alt}
                         className="max-[950px]:w-[88vw] max-[950px]:min-w-[120px] max-[950px]:max-w-[250px] rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                       />
                     </div>
@@ -151,10 +153,11 @@ const Home: React.FC = () => {
             </div>
           </div>
         </section>
-        
+
         {/* Orange Button with White Text - animated */}
         <div className="flex justify-center items-center mt-16 animate-fade-in opacity-0" style={{ animationDelay: '1400ms', animationFillMode: 'forwards' }}>
           <button
+            onClick={() => navigate('/AboutUs')}
             className="py-3 px-8 rounded-lg text-white font-semibold text-lg
                        bg-[#ffab1f] border-2 border-[#ffab1f]
                        hover:bg-[#ff9500] hover:border-[#ff9500]
