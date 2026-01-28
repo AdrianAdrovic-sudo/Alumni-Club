@@ -102,7 +102,7 @@ export default function PublicProfile() {
               {user.work_location && (
                 <PublicInfo 
                   icon={<MapPin size={16} />}
-                  label="Firma / Mjesto rada" 
+                  label="Mjesto rada" 
                   value={user.work_location} 
                 />
               )}

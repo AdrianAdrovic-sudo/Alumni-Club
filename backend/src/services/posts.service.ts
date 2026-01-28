@@ -36,16 +36,6 @@ export const getApprovedPosts = async (page: number = 1, limit: number = 10) => 
       orderBy: {
         created_at: "desc",
       },
-      include: {
-        users: {
-          select: {
-            id: true,
-            first_name: true,
-            last_name: true,
-            profile_picture: true,
-          },
-        },
-      },
       select: {
         id: true,
         title: true,

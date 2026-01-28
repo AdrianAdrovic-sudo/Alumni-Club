@@ -248,34 +248,38 @@ export const Blog = (props: BlogProps) => {
     return (
       <div
         key={post.id}
-        className={`${columnSpan} ${isHidden ? "animate-slide-in" : ""}`}
+        className={`${columnSpan} ${isHidden ? "animate-slide-in" : "animate-fade-in"}`}
         style={
           isHidden
             ? {
                 animationDelay: `${index * 100}ms`,
                 animationFillMode: "both",
               }
-            : {}
+            : {
+                animationDelay: `${index * 150}ms`,
+                animationFillMode: "both",
+              }
         }
       >
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-[#294a70]/20 h-full flex flex-col">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] overflow-hidden border border-gray-100 hover:border-[#294a70]/30 h-full flex flex-col group">
           <div 
             onClick={() => openBlogModal(post)}
-            className="cursor-pointer"
+            className="cursor-pointer relative overflow-hidden"
           >
             <div className="w-full overflow-hidden">
               <img
                 src={post.image.src}
                 alt={post.image.alt}
-                className="aspect-[4/3] size-full object-cover hover:scale-105 transition-transform duration-300"
+                className="aspect-[4/3] size-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           </div>
           
           <div className="p-4 flex flex-col flex-1">
             <button
               onClick={() => openBlogModal(post)}
-              className="mb-2 inline-block px-2 py-1 bg-[#294a70] text-white text-xs font-semibold rounded-full hover:bg-[#1f3854] transition-colors cursor-pointer w-fit"
+              className="mb-2 inline-block px-2 py-1 bg-[#294a70] text-white text-xs font-semibold rounded-full hover:bg-[#1f3854] transition-all duration-300 transform hover:scale-105 cursor-pointer w-fit"
             >
               {post.category}
             </button>
@@ -284,24 +288,24 @@ export const Blog = (props: BlogProps) => {
               onClick={() => openBlogModal(post)}
               className="mb-2 block cursor-pointer flex-1"
             >
-              <h5 className="text-lg font-bold text-[#294a70] hover:text-[#1f3854] transition-colors line-clamp-2">
+              <h5 className="text-lg font-bold text-[#294a70] hover:text-[#1f3854] transition-all duration-300 line-clamp-2 group-hover:text-[#ffab1f]">
                 {post.title}
               </h5>
             </div>
             
-            <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">{post.description}</p>
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1 transition-colors duration-300 group-hover:text-gray-700">{post.description}</p>
             
-            <div className="flex items-center pt-3 border-t border-gray-100 mt-auto">
+            <div className="flex items-center pt-3 border-t border-gray-100 mt-auto transition-all duration-300 group-hover:border-[#294a70]/20">
               <div className="mr-3 shrink-0">
                 <img
                   src={post.avatar.src}
                   alt={post.avatar.alt}
-                  className="size-8 min-h-8 min-w-8 rounded-full object-cover border-2 border-gray-200"
+                  className="size-8 min-h-8 min-w-8 rounded-full object-cover border-2 border-gray-200 transition-all duration-300 group-hover:border-[#294a70]/30 group-hover:scale-110"
                 />
               </div>
               <div className="flex-1">
-                <h6 className="text-xs font-semibold text-gray-900">{post.fullName}</h6>
-                <div className="flex items-center text-gray-500">
+                <h6 className="text-xs font-semibold text-gray-900 transition-colors duration-300 group-hover:text-[#294a70]">{post.fullName}</h6>
+                <div className="flex items-center text-gray-500 transition-colors duration-300 group-hover:text-gray-600">
                   <p className="text-xs">{post.date}</p>
                   <span className="mx-1 text-xs">•</span>
                   <p className="text-xs">{post.readTime}</p>
@@ -316,15 +320,15 @@ export const Blog = (props: BlogProps) => {
 
   return (
     <>
-      <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28">
+      <section id="relume" className="px-[5%] py-16 md:py-24 lg:py-28 bg-[#294a70] min-h-screen">
         <div className="container">
           <div className="mb-12 md:mb-18 lg:mb-20">
             <div className="mx-auto w-full max-w-lg text-center">
-              <p className="mb-3 font-semibold md:mb-4">{t('blog.tagline')}</p>
-              <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
+              <p className="mb-3 font-semibold md:mb-4 text-white">{t('blog.tagline')}</p>
+              <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl text-white">
                 {t('blog.heading')}
               </h2>
-              <p className="md:text-md">{t('blog.description')}</p>
+              <p className="md:text-md text-white">{t('blog.description')}</p>
             </div>
           </div>
 
@@ -343,9 +347,9 @@ export const Blog = (props: BlogProps) => {
           </div>
 
           {loading ? (
-            <p className="text-center">{t('blog.loading')}</p>
+            <p className="text-center text-white">{t('blog.loading')}</p>
           ) : blogPosts.length === 0 ? (
-            <p className="text-center">{t('blog.noPosts')}</p>
+            <p className="text-center text-white">{t('blog.noPosts')}</p>
           ) : (
             <>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-6 lg:grid-cols-4 lg:gap-6">
@@ -359,7 +363,7 @@ export const Blog = (props: BlogProps) => {
               {hasMorePosts && (
                 <div className="flex items-center justify-center mt-12">
                   <button
-                    className="px-8 py-3 bg-white border-2 border-[#294a70] text-[#294a70] rounded-lg font-semibold hover:bg-[#294a70] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+                    className="px-8 py-3 bg-white border-2 border-white text-[#294a70] rounded-lg font-semibold hover:bg-[#294a70] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
                     onClick={() => setShowAll(!showAll)}
                   >
                     {showAll ? t('blog.showLess') : t('blog.viewAll')}

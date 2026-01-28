@@ -116,10 +116,10 @@ const Home: React.FC = () => {
               {/* Header with fade-in animation */}
               <div className="mb-12 text-center md:mb-18 lg:mb-20 animate-fade-in opacity-0" style={{ animationDelay: '200ms' }}>
                 <div className="w-full max-w-lg">
-                  <h2 className="mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl">
+                  <h2 className="mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl text-white">
                     {t('home.heading')}
                   </h2>
-                  <p className="md:text-md">{t('home.description')}</p>
+                  <p className="md:text-md text-white">{t('home.description')}</p>
                 </div>
               </div>
               
@@ -141,10 +141,10 @@ const Home: React.FC = () => {
                         className="max-[950px]:w-[88vw] max-[950px]:min-w-[120px] max-[950px]:max-w-[250px] rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                       />
                     </div>
-                    <h3 className="mb-5 text-2xl font-bold md:mb-6 md:text-3xl md:leading-[1.3] lg:text-4xl">
+                    <h3 className="mb-5 text-2xl font-bold md:mb-6 md:text-3xl md:leading-[1.3] lg:text-4xl text-white">
                       {section.heading}
                     </h3>
-                    <p>{section.description}</p>
+                    <p className="text-white">{section.description}</p>
                   </div>
                 ))}
               </div>

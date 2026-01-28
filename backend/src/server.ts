@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
 import app from './app';
 import jwt from 'jsonwebtoken';
+
+// Load environment variables from .env file
+dotenv.config();
 
 
 

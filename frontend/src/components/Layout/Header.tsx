@@ -29,7 +29,7 @@ function Header() {
     "px-3 py-1.5 border-2 border-[#294a70] rounded-full text-[#294a70] hover:bg-[#eef2ff] text-sm transition-colors whitespace-nowrap";
 
   const authButton =
-    "px-4 py-2 rounded-full bg-[#294a70] text-white font-medium hover:bg-[#1d3652] transition text-sm";
+    "px-4 py-2 rounded-full bg-[#1f3854] text-white font-medium hover:bg-[#152b3f] transition text-sm";
 
   return (
     <header className="bg-white shadow-lg border-b-[3px] border-[#ffab1f] fixed top-0 w-full z-50">

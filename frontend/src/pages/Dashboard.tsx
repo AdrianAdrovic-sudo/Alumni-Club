@@ -173,14 +173,6 @@ export default function Dashboard() {
                 {user.first_name} {user.last_name}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Godina upisa:</span>
-              <span>{user.enrollment_year}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Zanimanje:</span>
-              <span>{user.occupation || "Nije specificirano"}</span>
-            </div>
             <div className="flex justify-between items-center">
               <span className="font-medium">Uloga:</span>
               <span
