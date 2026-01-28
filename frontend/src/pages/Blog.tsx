@@ -336,8 +336,8 @@ export const Blog = (props: BlogProps) => {
             <button
               onClick={openAddBlogModal}
               className="flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold text-lg
-                         bg-gradient-to-br from-[#294a70] to-[#324D6B]
-                         hover:from-[#ffab1f] hover:to-[#ff9500]
+                         bg-gradient-to-br from-[#ffab1f] to-[#ff9500]
+                         hover:from-[#ff9500] hover:to-[#e6850e]
                          transform transition hover:-translate-y-1
                          shadow-md hover:shadow-xl"
             >

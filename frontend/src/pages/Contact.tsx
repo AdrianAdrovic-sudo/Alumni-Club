@@ -108,7 +108,7 @@ export default function Contact() {
               {
                 icon: <FaEnvelope />,
                 title: "Email",
-                lines: ["info@alumni-fit.com", "support@alumni-fit.com"],
+                lines: ["fit.alumni.club@gmail.com"],
               },
               {
                 icon: <FaClock />,
@@ -153,7 +153,7 @@ export default function Contact() {
           >
             <div className="mb-6">
               <label className="block text-[#294a70] font-medium mb-2">
-                Ime i Prezime
+                Ime i prezime
               </label>
               <input
                 value={fullName}

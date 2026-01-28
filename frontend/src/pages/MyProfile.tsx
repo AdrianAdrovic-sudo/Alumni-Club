@@ -308,15 +308,15 @@ export default function MyProfile() {
       icon: <Edit className="w-5 h-5" />,
       label: "Izmijeni profil",
       action: openEditModal,
-      color: "text-blue-600 hover:text-blue-700",
+      color: "text-[#294a70] hover:text-[#1f3854]",
       bg: "hover:bg-blue-50"
     },
     {
       icon: <Image className="w-5 h-5" />,
       label: "Promijeni sliku",
       action: () => document.getElementById('avatar-upload')?.click(),
-      color: "text-green-600 hover:text-green-700",
-      bg: "hover:bg-green-50"
+      color: "text-[#294a70] hover:text-[#1f3854]",
+      bg: "hover:bg-blue-50"
     },
     {
       icon: <Shield className="w-5 h-5" />,
@@ -325,8 +325,8 @@ export default function MyProfile() {
         setProfileData(prev => ({ ...prev, javniProfil: !prev.javniProfil }));
         // TODO: Save to backend immediately
       },
-      color: "text-purple-600 hover:text-purple-700",
-      bg: "hover:bg-purple-50"
+      color: "text-[#294a70] hover:text-[#1f3854]",
+      bg: "hover:bg-blue-50"
     },
   ];
 
