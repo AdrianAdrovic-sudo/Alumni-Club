@@ -55,7 +55,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#294a70] mx-auto"></div>
           <p className="mt-4 text-gray-600">Provjeravam autentifikaciju...</p>
         </div>
       </div>
@@ -73,7 +73,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 pt-16 pb-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          <h1 className="text-4xl font-bold text-[#294a70] mb-4">
             {isAdmin ? "Admin Dashboard" : "Korisnički Dashboard"}
           </h1>
           <p className="text-lg text-gray-600">
@@ -86,44 +86,43 @@ export default function Dashboard() {
         {/* Admin Navigation */}
         {isAdmin && (
           <div className="bg-gray-50 rounded-xl shadow-lg p-4 mb-8 border border-gray-200">
-            <nav className="flex space-x-4">
+            <nav className="flex flex-wrap gap-3">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
+                className={`px-6 py-3 rounded-lg font-medium transition ${
                   activeTab === "overview"
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                    ? "bg-[#294a70] text-white"
+                    : "bg-white text-[#294a70] hover:bg-blue-50 border border-[#294a70]"
                 }`}
               >
                 Pregled
               </button>
               <button
                 onClick={() => setActiveTab("users")}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
+                className={`px-6 py-3 rounded-lg font-medium transition ${
                   activeTab === "users"
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                    ? "bg-[#294a70] text-white"
+                    : "bg-white text-[#294a70] hover:bg-blue-50 border border-[#294a70]"
                 }`}
               >
                 Upravljanje korisnicima
               </button>
               <button
                 onClick={() => setActiveTab("content")}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
+                className={`px-6 py-3 rounded-lg font-medium transition ${
                   activeTab === "content"
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                    ? "bg-[#294a70] text-white"
+                    : "bg-white text-[#294a70] hover:bg-blue-50 border border-[#294a70]"
                 }`}
               >
                 Upravljanje sadržajem
               </button>
-
               <button
                 onClick={() => setActiveTab("inquiries")}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
+                className={`px-6 py-3 rounded-lg font-medium transition ${
                   activeTab === "inquiries"
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                    ? "bg-[#294a70] text-white"
+                    : "bg-white text-[#294a70] hover:bg-blue-50 border border-[#294a70]"
                 }`}
               >
                 Upiti
@@ -139,7 +138,7 @@ export default function Dashboard() {
               <div>
                 {statsLoading ? (
                   <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#294a70] mx-auto"></div>
                     <p className="mt-4 text-gray-600">Učitavanje statistika...</p>
                   </div>
                 ) : stats ? (
@@ -156,7 +155,7 @@ export default function Dashboard() {
 
         {/* User Profile */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+          <h2 className="text-2xl font-semibold text-[#294a70] mb-4 border-b border-gray-200 pb-2">
             Vaš profil
           </h2>
           <div className="space-y-3 text-gray-700">
@@ -187,11 +186,11 @@ export default function Dashboard() {
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
                   user.role === "admin"
-                    ? "bg-purple-100 text-purple-800"
-                    : "bg-blue-100 text-blue-800"
+                    ? "bg-[#ffab1f] text-white"
+                    : "bg-[#294a70] text-white"
                 }`}
               >
-                {user.role}
+                {user.role === "admin" ? "Administrator" : "Korisnik"}
               </span>
             </div>
           </div>

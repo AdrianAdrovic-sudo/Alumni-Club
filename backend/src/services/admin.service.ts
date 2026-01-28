@@ -7,6 +7,8 @@ const prisma = new PrismaClient();
 export class AdminService {
   // User Management
   static async getAllUsers(filters: UserFilters = {}, page: number = 1, limit: number = 10) {
+    console.log("AdminService.getAllUsers pozvan sa:", { filters, page, limit });
+    
     const skip = (page - 1) * limit;
     
     const where: any = {};
@@ -23,6 +25,8 @@ export class AdminService {
         { username: { contains: filters.search, mode: 'insensitive' } }
       ];
     }
+
+    console.log("Prisma where uslovi:", where);
 
     const [users, total] = await Promise.all([
       prisma.users.findMany({
@@ -53,6 +57,8 @@ export class AdminService {
       }),
       prisma.users.count({ where })
     ]);
+
+    console.log("Pronađeno korisnika:", users.length, "od ukupno:", total);
 
     return {
       users,
@@ -201,8 +207,9 @@ static async createUser(userData: CreateUserInput) {
   }
 
   static async deletePost(postId: number) {
-    return prisma.posts.delete({
-      where: { id: postId }
+    return prisma.posts.update({
+      where: { id: postId },
+      data: { is_deleted: true }
     });
   }
 

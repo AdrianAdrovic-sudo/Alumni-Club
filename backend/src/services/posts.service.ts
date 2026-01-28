@@ -24,26 +24,66 @@ export const createPost = async (data: {
   });
 };
 
-export const getApprovedPosts = async () => {
-  return await prisma.posts.findMany({
-    where: {
-      is_approved: true,
-      is_deleted: false,
-    },
-    orderBy: {
-      created_at: "desc",
-    },
-    include: {
-      users: {
-        select: {
-          id: true,
-          first_name: true,
-          last_name: true,
-          profile_picture: true,
+export const getApprovedPosts = async (page: number = 1, limit: number = 10) => {
+  const skip = (page - 1) * limit;
+  
+  const [posts, total] = await Promise.all([
+    prisma.posts.findMany({
+      where: {
+        is_approved: true,
+        is_deleted: false,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      include: {
+        users: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            profile_picture: true,
+          },
         },
       },
-    },
-  });
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        image_url: true,
+        read_time: true,
+        short_desc: true,
+        content: true,
+        created_at: true,
+        users: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            profile_picture: true,
+          },
+        },
+      },
+      skip,
+      take: limit,
+    }),
+    prisma.posts.count({
+      where: {
+        is_approved: true,
+        is_deleted: false,
+      },
+    })
+  ]);
+
+  return {
+    posts,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit)
+    }
+  };
 };
 
 export const getPendingPosts = async () => {
@@ -91,6 +131,26 @@ export const deletePost = async (postId: number) => {
     },
   });
 };
+
+export const updatePost = async (postId: number, data: {
+  title?: string;
+  category?: string;
+  short_desc?: string;
+  content?: string;
+  read_time?: string;
+}) => {
+  return await prisma.posts.update({
+    where: { id: postId },
+    data: {
+      ...(data.title && { title: data.title }),
+      ...(data.category && { category: data.category }),
+      ...(data.short_desc && { short_desc: data.short_desc }),
+      ...(data.content && { content: data.content }),
+      ...(data.read_time !== undefined && { read_time: data.read_time || null }),
+    },
+  });
+};
+
 export const getPostById = async (postId: number) => {
   return await prisma.posts.findUnique({
     where: { id: postId },
