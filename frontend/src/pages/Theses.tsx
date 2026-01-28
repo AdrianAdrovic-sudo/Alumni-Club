@@ -1,21 +1,47 @@
 import { FaSearch, FaFilter, FaUpload } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import UploadThesisModal from "../components/UploadThesisModal";
+import api from "../services/api";
 
 export default function DiplomskiRadovi() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("datum-desc");
+  const [sortBy, setSortBy] = useState("created_at");
   const [showFilter, setShowFilter] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedThesis, setSelectedThesis] = useState<any>(null);
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
+  const [theses, setTheses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTheses();
+  }, [searchTerm, sortBy, thesisTypeFilter]); // Add dependencies to auto-refresh
+
+  const fetchTheses = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/theses", {
+        params: {
+          search: searchTerm,
+          type: thesisTypeFilter,
+          sortBy: sortBy, // Pass sort param to backend
+          sortOrder: 'desc' // Or make this dynamic
+        }
+      });
+      setTheses(response.data.theses);
+    } catch (error) {
+      console.error("Failed to fetch theses", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDownload = (fileUrl: string, fileName: string) => {
-    // Create a temporary anchor element to trigger download
+    if (!fileUrl) return;
     const link = document.createElement('a');
     link.href = fileUrl;
     link.download = fileName;
@@ -24,48 +50,18 @@ export default function DiplomskiRadovi() {
     document.body.removeChild(link);
   };
 
-  const podaci = [
-    { ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009.", fileUrl: "/theses/zizic-milos.pdf", type: "bachelors" },
-    { ime: "Tripo", prezime: "Matijević", naziv: "Prikupljanje činjenica za informacioni sistem studentske službe", datum: "10.07.2009.", fileUrl: "/theses/matijevic-tripo.pdf", type: "masters" },
-    { ime: "Zoran", prezime: "Ćorović", naziv: "Model, objekti i veze informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/corovic-zoran.pdf", type: "bachelors" },
-    { ime: "Dženan", prezime: "Strujić", naziv: "Relacioni model informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/strujic-dzenan.pdf", type: "specialist" },
-    { ime: "Novak", prezime: "Radulović", naziv: "Forme i izvještaj informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/radulovic-novak.pdf", type: "masters" },
-    { ime: "Igor", prezime: "Pekić", naziv: "Sigurnost informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/pekic-igor.pdf", type: "bachelors" },
-    { ime: "Ana", prezime: "Jovanović", naziv: "Web aplikacija za studentsku službu", datum: "10.07.2009.", fileUrl: "/theses/jovanovic-ana.pdf", type: "specialist" },
-    { ime: "Jelena", prezime: "Marković", naziv: "Implementacija informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/markovic-jelena.pdf", type: "masters" },
-    { ime: "Marko", prezime: "Nikolić", naziv: "Testiranje informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/nikolic-marko.pdf", type: "bachelors" },
-    { ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/stojanovic-ivana.pdf", type: "specialist" },
-  ];
-
-  // Filtriranje
-  const filtrirani = podaci.filter((p) => {
-    const matchesSearch =
-      p.ime.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.prezime.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.naziv.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
-
-    return matchesSearch && matchesType;
-  });
-
-  // Sortiranje
-  const sortirani = [...filtrirani].sort((a, b) => {
-    switch (sortBy) {
-      case "datum-asc":
-        return new Date(a.datum.split('.').reverse().join('-')).getTime() - new Date(b.datum.split('.').reverse().join('-')).getTime();
-      case "datum-desc":
-        return new Date(b.datum.split('.').reverse().join('-')).getTime() - new Date(a.datum.split('.').reverse().join('-')).getTime();
-      case "ime-asc":
-        return a.ime.localeCompare(b.ime);
-      case "prezime-asc":
-        return a.prezime.localeCompare(b.prezime);
-      case "naziv-asc":
-        return a.naziv.localeCompare(b.naziv);
-      default:
-        return 0;
-    }
-  });
+  // Mapped for display - backend field names might differ slightly, adjust if needed
+  // Backend returns: title, student_first_name, student_last_name, defense_date, etc.
+  // Frontend expectation: ime, prezime, naziv, datum
+  const displayTheses = theses.map(t => ({
+    ...t,
+    // Fallback to "Unknown" if name is missing
+    ime: t.student_first_name || "Unknown",
+    prezime: t.student_last_name || "User",
+    naziv: t.title || "Untitled Thesis",
+    datum: t.defense_date ? new Date(t.defense_date).toLocaleDateString("de-DE") : "N/A", // Format as DD.MM.YYYY
+    fileUrl: t.document_url
+  }));
 
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
@@ -99,32 +95,20 @@ export default function DiplomskiRadovi() {
               <div className="border-b border-[#1f3a5a] pb-2">
                 <div className="px-4 py-2 text-xs text-gray-300 font-semibold uppercase">Sortiraj</div>
                 <button
-                  onClick={() => { setSortBy("datum-desc"); setShowFilter(false); }}
-                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "datum-desc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+                  onClick={() => { setSortBy("defense_date"); setShowFilter(false); }}
+                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "defense_date" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
                 >
-                  Datum (najnoviji prvo)
+                  Datum
                 </button>
                 <button
-                  onClick={() => { setSortBy("datum-asc"); setShowFilter(false); }}
-                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "datum-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
-                >
-                  Datum (najstariji prvo)
-                </button>
-                <button
-                  onClick={() => { setSortBy("ime-asc"); setShowFilter(false); }}
-                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "ime-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+                  onClick={() => { setSortBy("student_name"); setShowFilter(false); }}
+                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "student_name" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
                 >
                   Ime (A-Z)
                 </button>
                 <button
-                  onClick={() => { setSortBy("prezime-asc"); setShowFilter(false); }}
-                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "prezime-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
-                >
-                  Prezime (A-Z)
-                </button>
-                <button
-                  onClick={() => { setSortBy("naziv-asc"); setShowFilter(false); }}
-                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "naziv-asc" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
+                  onClick={() => { setSortBy("title"); setShowFilter(false); }}
+                  className={`w-full text-left px-4 py-3 text-sm text-white transition-all ${sortBy === "title" ? "bg-[#1f3a5a] font-semibold" : "hover:bg-[#1f3a5a]"}`}
                 >
                   Naziv rada (A-Z)
                 </button>
@@ -184,7 +168,7 @@ export default function DiplomskiRadovi() {
               💡 <strong>Savjet:</strong> Kliknite na naziv diplomskog rada da ga preuzmete na svoj uređaj.
             </p>
           </div>
-          
+
           <div className="shadow-md rounded-2xl overflow-hidden bg-white">
             <div className="w-full overflow-x-auto">
               <table className="w-full border-collapse table-auto min-w-[600px]">
@@ -210,45 +194,55 @@ export default function DiplomskiRadovi() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortirani.map((p, idx) => (
-                    <tr
-                      key={idx}
-                      className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                    >
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
-                        {p.ime}
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
-                        {p.prezime}
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
-                        <button
-                          onClick={() => handleDownload(p.fileUrl, `${p.prezime}-${p.ime}.pdf`)}
-                          className="text-gray-800 hover:text-[#294a70] cursor-pointer text-left bg-transparent border-none p-0 m-0 font-medium transition-colors hover:underline"
-                          title="Kliknite da preuzmete rad"
-                        >
-                          {p.naziv}
-                        </button>
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200 hidden sm:table-cell">
-                        {p.datum}
-                      </td>
-                      {isAdmin && (
-                        <td className="px-2 sm:px-4 py-3 text-sm sm:text-base border-b border-gray-200">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={isAdmin ? 5 : 4} className="text-center py-8">Učitavanje...</td>
+                    </tr>
+                  ) : displayTheses.length === 0 ? (
+                    <tr>
+                      <td colSpan={isAdmin ? 5 : 4} className="text-center py-8">Nema rezultata.</td>
+                    </tr>
+                  ) : (
+                    displayTheses.map((p, idx) => (
+                      <tr
+                        key={idx}
+                        className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                      >
+                        <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
+                          {p.ime}
+                        </td>
+                        <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
+                          {p.prezime}
+                        </td>
+                        <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
                           <button
-                            onClick={() => {
-                              setSelectedThesis(p);
-                              setShowUploadModal(true);
-                            }}
-                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors text-sm font-medium"
+                            onClick={() => handleDownload(p.fileUrl, `${p.prezime}-${p.ime}.pdf`)}
+                            className="text-gray-800 hover:text-[#294a70] cursor-pointer text-left bg-transparent border-none p-0 m-0 font-medium transition-colors hover:underline"
+                            title="Kliknite da preuzmete rad"
                           >
-                            <FaUpload size={12} />
-                            <span className="hidden sm:inline">Otpremi</span>
+                            {p.naziv}
                           </button>
                         </td>
-                      )}
-                    </tr>
-                  ))}
+                        <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200 hidden sm:table-cell">
+                          {p.datum}
+                        </td>
+                        {isAdmin && (
+                          <td className="px-2 sm:px-4 py-3 text-sm sm:text-base border-b border-gray-200">
+                            <button
+                              onClick={() => {
+                                setSelectedThesis(p);
+                                setShowUploadModal(true);
+                              }}
+                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors text-sm font-medium"
+                            >
+                              <FaUpload size={12} />
+                              <span className="hidden sm:inline">Otpremi</span>
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -262,6 +256,8 @@ export default function DiplomskiRadovi() {
         onClose={() => {
           setShowUploadModal(false);
           setSelectedThesis(null);
+          // Refresh list after upload
+          fetchTheses();
         }}
         thesisContext={selectedThesis}
       />
