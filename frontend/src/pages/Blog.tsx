@@ -17,7 +17,7 @@ type BlogPost = {
   readTime: string;
   title: string;
   description: string;
-  content: string; // Dodajem content polje
+  content: string;
   avatar: ImageProps;
   fullName: string;
   date: string;
@@ -34,33 +34,47 @@ type Props = {
   blogPosts: BlogPost[];
 };
 
-export type BlogProps = React.ComponentPropsWithoutRef<"section"> &
-  Partial<Props>;
+export type BlogProps = React.ComponentPropsWithoutRef<"section"> & Partial<Props>;
 
 const ITEMS_PER_PAGE = 3;
+const BACKEND_BASE_URL = "http://localhost:4000";
+
+function resolvePostImageSrc(imageUrl: string | null | undefined) {
+  if (!imageUrl) {
+    return "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg";
+  }
+  // If it is a local upload path, prefix backend
+  if (imageUrl.startsWith("/uploads/")) return `${BACKEND_BASE_URL}${imageUrl}`;
+  // Otherwise assume it is already a full URL
+  return imageUrl;
+}
 
 export const Blog = (props: BlogProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  // Modal state for blog post popup
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // Add Blog Modal state
+
   const [isAddBlogModalOpen, setIsAddBlogModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    category: string;
+    description: string;
+    content: string;
+    imageFile: File | null;
+    readTime: string;
+  }>({
     title: "",
     category: "",
     description: "",
     content: "",
-    image: "",
+    imageFile: null,
     readTime: "",
   });
 
   const TINYMCE_KEY = import.meta.env.VITE_TINYMCE_API_KEY || "";
 
-  // Function to open blog post in modal
   const openBlogModal = (post: BlogPost) => {
     setSelectedPost(post);
     setIsModalOpen(true);
@@ -71,7 +85,6 @@ export const Blog = (props: BlogProps) => {
     setSelectedPost(null);
   };
 
-  // Add Blog Modal functions
   const openAddBlogModal = () => {
     setIsAddBlogModalOpen(true);
   };
@@ -83,21 +96,26 @@ export const Blog = (props: BlogProps) => {
       category: "",
       description: "",
       content: "",
-      image: "",
+      imageFile: null,
       readTime: "",
     });
   };
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    console.log(`Menjam polje ${name} na vrednost:`, value); // Debug log
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData((prev) => ({
+      ...prev,
+      imageFile: file,
     }));
   };
 
@@ -111,30 +129,33 @@ export const Blog = (props: BlogProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Proverava da li je korisnik ulogovan
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Morate biti ulogovani da biste kreirali blog post.");
       return;
     }
 
-    const payload = {
-      title: formData.title,
-      category: formData.category,
-      imageUrl: formData.image,
-      readTime: formData.readTime,
-      shortDesc: formData.description,
-      content: formData.content,
-    };
+    // Require image upload (since previously it was required as URL)
+    if (!formData.imageFile) {
+      alert("Molimo dodajte sliku (upload).");
+      return;
+    }
 
     try {
+      const fd = new FormData();
+      fd.append("title", formData.title);
+      fd.append("category", formData.category);
+      fd.append("readTime", formData.readTime);
+      fd.append("shortDesc", formData.description);
+      fd.append("content", formData.content);
+      fd.append("image", formData.imageFile);
+
       const res = await fetch("http://localhost:4000/api/posts", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: fd,
       });
 
       if (!res.ok) {
@@ -144,14 +165,14 @@ export const Blog = (props: BlogProps) => {
         } catch (_) {}
 
         console.error("Greška pri kreiranju bloga:", res.status, errBody);
-        
+
         if (res.status === 401) {
           alert("Sesija je istekla. Molimo prijavite se ponovo.");
           localStorage.removeItem("token");
           window.location.href = "/login";
           return;
         }
-        
+
         alert(errBody?.message || "Neuspješno kreiranje blog posta.");
         return;
       }
@@ -159,7 +180,6 @@ export const Blog = (props: BlogProps) => {
       const created = await res.json();
       console.log("Kreirani post:", created);
 
-      // Refresh posts and close modal
       fetchPosts();
       closeAddBlogModal();
       alert("Blog post je uspešno kreiran!");
@@ -172,7 +192,6 @@ export const Blog = (props: BlogProps) => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // UZIMAMO BLOGOVE SA BACKENDA
   const fetchPosts = async () => {
     try {
       const res = await fetch("http://localhost:4000/api/posts");
@@ -183,26 +202,22 @@ export const Blog = (props: BlogProps) => {
       }
 
       const data = await res.json();
-      
-      // Handle both old format (array) and new format (with pagination)
       const postsArray = data.posts || data;
 
       const mapped: BlogPost[] = postsArray.map((post: any) => ({
         id: post.id,
         url: `/blog/${post.id}`,
         image: {
-          src:
-            post.image_url ||
-            "https://d22po4pjz3o32e.cloudfront.net/placeholder-image-landscape.svg",
+          src: resolvePostImageSrc(post.image_url),
           alt: post.title,
         },
         category: post.category,
         readTime: post.read_time || "5 min čitanja",
         title: post.title,
         description: post.short_desc,
-        content: post.content || "", // Dodajem content polje
+        content: post.content || "",
         avatar: {
-          src: post.users?.profile_picture 
+          src: post.users?.profile_picture
             ? `http://localhost:4000${post.users.profile_picture}?t=${Date.now()}`
             : "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
           alt: post.users
@@ -212,9 +227,7 @@ export const Blog = (props: BlogProps) => {
         fullName: post.users
           ? `${post.users.first_name} ${post.users.last_name}`
           : "Nepoznat autor",
-        date: post.created_at
-          ? new Date(post.created_at).toLocaleDateString()
-          : "",
+        date: post.created_at ? new Date(post.created_at).toLocaleDateString() : "",
       }));
 
       setPosts(mapped);
@@ -232,21 +245,14 @@ export const Blog = (props: BlogProps) => {
   const [showAll, setShowAll] = useState(false);
 
   const blogPosts = posts;
-
   const visiblePosts = blogPosts.slice(0, ITEMS_PER_PAGE);
   const hiddenPosts = blogPosts.slice(ITEMS_PER_PAGE);
   const hasMorePosts = blogPosts.length > ITEMS_PER_PAGE;
-
   const remainingItems = showAll ? blogPosts.length % 3 : 0;
 
-  const renderCard = (
-    post: BlogPost,
-    index: number,
-    isHidden: boolean = false
-  ) => {
+  const renderCard = (post: BlogPost, index: number, isHidden: boolean = false) => {
     const totalIndex = isHidden ? ITEMS_PER_PAGE + index : index;
-    const isLastRow =
-      showAll && totalIndex >= blogPosts.length - remainingItems;
+    const isLastRow = showAll && totalIndex >= blogPosts.length - remainingItems;
 
     let columnSpan = "";
     if (isLastRow && remainingItems === 1) {
@@ -266,21 +272,12 @@ export const Blog = (props: BlogProps) => {
         className={`${columnSpan} ${isHidden ? "animate-slide-in" : "animate-fade-in"}`}
         style={
           isHidden
-            ? {
-                animationDelay: `${index * 100}ms`,
-                animationFillMode: "both",
-              }
-            : {
-                animationDelay: `${index * 150}ms`,
-                animationFillMode: "both",
-              }
+            ? { animationDelay: `${index * 100}ms`, animationFillMode: "both" }
+            : { animationDelay: `${index * 150}ms`, animationFillMode: "both" }
         }
       >
         <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] overflow-hidden border border-gray-100 hover:border-[#294a70]/30 h-full flex flex-col group">
-          <div 
-            onClick={() => openBlogModal(post)}
-            className="cursor-pointer relative overflow-hidden"
-          >
+          <div onClick={() => openBlogModal(post)} className="cursor-pointer relative overflow-hidden">
             <div className="w-full overflow-hidden">
               <img
                 src={post.image.src}
@@ -290,7 +287,7 @@ export const Blog = (props: BlogProps) => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           </div>
-          
+
           <div className="p-4 flex flex-col flex-1">
             <button
               onClick={() => openBlogModal(post)}
@@ -299,17 +296,16 @@ export const Blog = (props: BlogProps) => {
               {post.category}
             </button>
 
-            <div 
-              onClick={() => openBlogModal(post)}
-              className="mb-2 block cursor-pointer flex-1"
-            >
+            <div onClick={() => openBlogModal(post)} className="mb-2 block cursor-pointer flex-1">
               <h5 className="text-lg font-bold text-[#294a70] hover:text-[#1f3854] transition-all duration-300 line-clamp-2 group-hover:text-[#ffab1f]">
                 {post.title}
               </h5>
             </div>
-            
-            <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1 transition-colors duration-300 group-hover:text-gray-700">{post.description}</p>
-            
+
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1 transition-colors duration-300 group-hover:text-gray-700">
+              {post.description}
+            </p>
+
             <div className="flex items-center pt-3 border-t border-gray-100 mt-auto transition-all duration-300 group-hover:border-[#294a70]/20">
               <div className="mr-3 shrink-0">
                 <img
@@ -319,7 +315,9 @@ export const Blog = (props: BlogProps) => {
                 />
               </div>
               <div className="flex-1">
-                <h6 className="text-xs font-semibold text-gray-900 transition-colors duration-300 group-hover:text-[#294a70]">{post.fullName}</h6>
+                <h6 className="text-xs font-semibold text-gray-900 transition-colors duration-300 group-hover:text-[#294a70]">
+                  {post.fullName}
+                </h6>
                 <div className="flex items-center text-gray-500 transition-colors duration-300 group-hover:text-gray-600">
                   <p className="text-xs">{post.date}</p>
                   <span className="mx-1 text-xs">•</span>
@@ -339,15 +337,14 @@ export const Blog = (props: BlogProps) => {
         <div className="container">
           <div className="mb-12 md:mb-18 lg:mb-20">
             <div className="mx-auto w-full max-w-lg text-center">
-              <p className="mb-3 font-semibold md:mb-4 text-white">{t('blog.tagline')}</p>
+              <p className="mb-3 font-semibold md:mb-4 text-white">{t("blog.tagline")}</p>
               <h2 className="rb-5 mb-5 text-5xl font-bold md:mb-6 md:text-7xl lg:text-8xl text-white">
-                {t('blog.heading')}
+                {t("blog.heading")}
               </h2>
-              <p className="md:text-md text-white">{t('blog.description')}</p>
+              <p className="md:text-md text-white">{t("blog.description")}</p>
             </div>
           </div>
 
-          {/* Dugme za dodavanje bloga - samo za ulogovane korisnike */}
           {localStorage.getItem("token") && (
             <div className="mb-8 flex justify-center">
               <button
@@ -359,23 +356,20 @@ export const Blog = (props: BlogProps) => {
                            shadow-md hover:shadow-xl"
               >
                 <Plus className="w-5 h-5" />
-                {t('blog.addBlog')}
+                {t("blog.addBlog")}
               </button>
             </div>
           )}
 
           {loading ? (
-            <p className="text-center text-white">{t('blog.loading')}</p>
+            <p className="text-center text-white">{t("blog.loading")}</p>
           ) : blogPosts.length === 0 ? (
-            <p className="text-center text-white">{t('blog.noPosts')}</p>
+            <p className="text-center text-white">{t("blog.noPosts")}</p>
           ) : (
             <>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-6 lg:grid-cols-4 lg:gap-6">
-                {visiblePosts.map((post, index) =>
-                  renderCard(post, index, false)
-                )}
-                {showAll &&
-                  hiddenPosts.map((post, index) => renderCard(post, index, true))}
+                {visiblePosts.map((post, index) => renderCard(post, index, false))}
+                {showAll && hiddenPosts.map((post, index) => renderCard(post, index, true))}
               </div>
 
               {hasMorePosts && (
@@ -384,7 +378,7 @@ export const Blog = (props: BlogProps) => {
                     className="px-8 py-3 bg-white border-2 border-white text-[#294a70] rounded-lg font-semibold hover:bg-[#294a70] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
                     onClick={() => setShowAll(!showAll)}
                   >
-                    {showAll ? t('blog.showLess') : t('blog.viewAll')}
+                    {showAll ? t("blog.showLess") : t("blog.viewAll")}
                   </button>
                 </div>
               )}
@@ -393,7 +387,6 @@ export const Blog = (props: BlogProps) => {
         </div>
       </section>
 
-      {/* Add Blog Modal */}
       {isAddBlogModalOpen && (
         <>
           <div
@@ -403,33 +396,22 @@ export const Blog = (props: BlogProps) => {
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200 overflow-hidden">
-              
-              {/* Modal Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-[#294a70] to-[#324D6B]">
-                <h3 className="text-2xl font-bold text-white">
-                  Kreiraj novi blog post
-                </h3>
-                <button
-                  onClick={closeAddBlogModal}
-                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
-                >
+                <h3 className="text-2xl font-bold text-white">Kreiraj novi blog post</h3>
+                <button onClick={closeAddBlogModal} className="p-2 hover:bg-white/20 rounded-full transition-colors">
                   <X className="w-6 h-6 text-white" />
                 </button>
               </div>
 
-              {/* Modal Content */}
               <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
                 <div className="p-6">
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    
-                    {/* Title */}
                     <div>
-                      <label htmlFor="title" className="block text-gray-700 font-semibold mb-2">
+                      <label className="block text-gray-700 font-semibold mb-2">
                         Naslov bloga <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        id="title"
                         name="title"
                         value={formData.title}
                         onChange={handleChange}
@@ -439,13 +421,11 @@ export const Blog = (props: BlogProps) => {
                       />
                     </div>
 
-                    {/* Category */}
                     <div>
-                      <label htmlFor="category" className="block text-gray-700 font-semibold mb-2">
+                      <label className="block text-gray-700 font-semibold mb-2">
                         Kategorija <span className="text-red-500">*</span>
                       </label>
                       <select
-                        id="category"
                         name="category"
                         value={formData.category}
                         onChange={handleChange}
@@ -462,31 +442,31 @@ export const Blog = (props: BlogProps) => {
                       </select>
                     </div>
 
-                    {/* Image URL */}
+                    {/* NEW: Image Upload */}
                     <div>
-                      <label htmlFor="image" className="block text-gray-700 font-semibold mb-2">
-                        URL slike <span className="text-red-500">*</span>
+                      <label className="block text-gray-700 font-semibold mb-2">
+                        Slika (upload) <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="url"
-                        id="image"
-                        name="image"
-                        value={formData.image}
-                        onChange={handleChange}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
-                        placeholder="https://example.com/image.jpg"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent"
                       />
+                      {formData.imageFile && (
+                        <p className="text-sm text-gray-600 mt-2">
+                          Odabrano: <span className="font-semibold">{formData.imageFile.name}</span>
+                        </p>
+                      )}
                     </div>
 
-                    {/* Read Time */}
                     <div>
-                      <label htmlFor="readTime" className="block text-gray-700 font-semibold mb-2">
+                      <label className="block text-gray-700 font-semibold mb-2">
                         Vrijeme čitanja <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        id="readTime"
                         name="readTime"
                         value={formData.readTime}
                         onChange={handleChange}
@@ -496,13 +476,11 @@ export const Blog = (props: BlogProps) => {
                       />
                     </div>
 
-                    {/* Description */}
                     <div>
-                      <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">
+                      <label className="block text-gray-700 font-semibold mb-2">
                         Kratki opis <span className="text-red-500">*</span>
                       </label>
                       <textarea
-                        id="description"
                         name="description"
                         value={formData.description}
                         onChange={handleChange}
@@ -513,13 +491,11 @@ export const Blog = (props: BlogProps) => {
                       />
                     </div>
 
-                    {/* Content Editor */}
                     <div>
-                      <label htmlFor="content" className="block text-gray-700 font-semibold mb-2">
+                      <label className="block text-gray-700 font-semibold mb-2">
                         Sadržaj bloga <span className="text-red-500">*</span>
                       </label>
                       <textarea
-                        id="content"
                         name="content"
                         value={formData.content}
                         onChange={handleChange}
@@ -536,7 +512,6 @@ export const Blog = (props: BlogProps) => {
                 </div>
               </div>
 
-              {/* Modal Footer */}
               <div className="sticky bottom-0 p-6 border-t border-gray-200 bg-gray-50 z-10">
                 <button
                   onClick={handleSubmit}
@@ -555,7 +530,6 @@ export const Blog = (props: BlogProps) => {
         </>
       )}
 
-      {/* Blog Post Modal */}
       {isModalOpen && selectedPost && (
         <>
           <div
@@ -565,34 +539,26 @@ export const Blog = (props: BlogProps) => {
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200 overflow-hidden">
-              {/* Modal Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h3 className="text-2xl font-bold text-gray-900">
-                  {t('blog.modal.title')}
-                </h3>
+                <h3 className="text-2xl font-bold text-gray-900">{t("blog.modal.title")}</h3>
               </div>
 
-              {/* Modal Content */}
               <div className="overflow-y-auto max-h-[calc(90vh-200px)] pb-20">
                 <div className="p-6">
-                  {/* Blog Image */}
                   <img
                     src={selectedPost.image.src}
                     alt={selectedPost.image.alt}
                     className="w-full h-64 object-cover rounded-lg mb-6"
                   />
 
-                  {/* Category Badge */}
                   <div className="inline-block bg-[#294a70] text-white px-3 py-1 rounded-full text-sm font-semibold mb-4">
                     {selectedPost.category}
                   </div>
 
-                  {/* Title */}
                   <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
                     {selectedPost.title}
                   </h1>
 
-                  {/* Author Info */}
                   <div className="flex items-center mb-6 pb-6 border-b border-gray-200">
                     <img
                       src={selectedPost.avatar.src}
@@ -607,9 +573,8 @@ export const Blog = (props: BlogProps) => {
                     </div>
                   </div>
 
-                  {/* Content */}
                   <div className="prose prose-lg max-w-none">
-                    <div 
+                    <div
                       className="text-gray-700 leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: selectedPost.content || selectedPost.description }}
                     />
@@ -617,14 +582,13 @@ export const Blog = (props: BlogProps) => {
                 </div>
               </div>
 
-              {/* Modal Footer */}
               <div className="p-6 border-t border-gray-200 bg-white">
                 <div className="flex justify-center">
                   <button
                     onClick={closeModal}
                     className="px-8 py-3 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3854] transition-colors font-semibold text-lg shadow-lg"
                   >
-                    {t('blog.modal.close')}
+                    {t("blog.modal.close")}
                   </button>
                 </div>
               </div>
