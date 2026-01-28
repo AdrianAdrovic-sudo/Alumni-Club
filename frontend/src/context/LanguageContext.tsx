@@ -176,7 +176,7 @@ const translations: Record<Language, TranslationKeys> = {
     
     // Home page translations
     'home.tagline': 'Dobrodošli',
-    'home.heading': 'Alumni Club Mediteran',
+    'home.heading': 'Alumni Klub Mediteran',
     'home.description': 'Povezujemo generacije studenata i profesionalaca kroz inovativnu platformu koja omogućava networking, mentorstvo i razmjenu iskustava. Pridružite se našoj zajednici i gradite svoju budućnost zajedno sa nama.',
     'home.section1.heading': 'Networking i povezivanje',
     'home.section1.description': 'Pronađite stare kolege, upoznajte nove ljude iz industrije i proširite svoju profesionalnu mrežu kroz našu platformu.',

@@ -170,7 +170,7 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
         const mapped: AlumniMember[] = backendUsers.map((u: any) => ({
           id: u.id,
           image: {
-          src: u.profile_picture ? `${API_BASE_URL}${u.profile_picture}`
+          src: u.profile_picture ? `${API_BASE_URL}${u.profile_picture}?t=${Date.now()}`
           : "https://d22po4pjz3o32e.cloudfront.net/placeholder-image.svg",
         },
           name: `${u.first_name} ${u.last_name}`,
@@ -189,6 +189,17 @@ export const AlumniDirectory = (props: AlumniDirectoryProps) => {
       };
 
     loadUsers();
+
+    // Osvježi podatke kada se korisnik vrati na stranicu
+    const handleFocus = () => {
+      loadUsers();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const validateForm = () => {
