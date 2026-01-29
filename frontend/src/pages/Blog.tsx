@@ -36,7 +36,7 @@ type Props = {
 
 export type BlogProps = React.ComponentPropsWithoutRef<"section"> & Partial<Props>;
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 4;
 const BACKEND_BASE_URL = "http://localhost:4000";
 
 function resolvePostImageSrc(imageUrl: string | null | undefined) {
@@ -194,7 +194,8 @@ export const Blog = (props: BlogProps) => {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/posts");
+      // Dohvati sve blogove odjednom (bez paginacije)
+      const res = await fetch("http://localhost:4000/api/posts?limit=100");
       if (!res.ok) {
         console.error("Neuspješno dohvatanje objava:", res.status);
         setLoading(false);
@@ -230,6 +231,7 @@ export const Blog = (props: BlogProps) => {
         date: post.created_at ? new Date(post.created_at).toLocaleDateString() : "",
       }));
 
+      // Backend već vraća blogove sortirane po created_at DESC (najnoviji prvi)
       setPosts(mapped);
     } catch (err) {
       console.error("Greška pri dohvatanju objava:", err);
@@ -248,28 +250,13 @@ export const Blog = (props: BlogProps) => {
   const visiblePosts = blogPosts.slice(0, ITEMS_PER_PAGE);
   const hiddenPosts = blogPosts.slice(ITEMS_PER_PAGE);
   const hasMorePosts = blogPosts.length > ITEMS_PER_PAGE;
-  const remainingItems = showAll ? blogPosts.length % 3 : 0;
 
   const renderCard = (post: BlogPost, index: number, isHidden: boolean = false) => {
-    const totalIndex = isHidden ? ITEMS_PER_PAGE + index : index;
-    const isLastRow = showAll && totalIndex >= blogPosts.length - remainingItems;
-
-    let columnSpan = "";
-    if (isLastRow && remainingItems === 1) {
-      columnSpan = "lg:col-start-2";
-    } else if (isLastRow && remainingItems === 2) {
-      const isFirstOfTwo = totalIndex === blogPosts.length - 2;
-      if (isFirstOfTwo) {
-        columnSpan = "lg:col-start-1 lg:col-end-2";
-      } else {
-        columnSpan = "lg:col-start-3 lg:col-end-4";
-      }
-    }
-
+    // Uklanjamo logiku za centriranje - svi blogovi trebaju biti iste veličine
     return (
       <div
         key={post.id}
-        className={`${columnSpan} ${isHidden ? "animate-slide-in" : "animate-fade-in"}`}
+        className={`${isHidden ? "animate-slide-in" : "animate-fade-in"}`}
         style={
           isHidden
             ? { animationDelay: `${index * 100}ms`, animationFillMode: "both" }
@@ -504,9 +491,6 @@ export const Blog = (props: BlogProps) => {
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-transparent resize-vertical"
                         placeholder="Napišite sadržaj vašeg bloga ovdje..."
                       />
-                      <p className="mt-2 text-sm text-blue-600">
-                        Osnovni text editor. Za napredni editor sa formatiranjem, dodajte VITE_TINYMCE_API_KEY u frontend/.env fajl.
-                      </p>
                     </div>
                   </form>
                 </div>

@@ -83,6 +83,33 @@ export async function updateMyProfile(req: Request, res: Response) {
     const body: any = req.body;
     const data: any = {};
 
+    // Email validacija
+    const email = body.email;
+    if (email !== undefined) {
+      if (typeof email !== "string" || !email.trim()) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+
+      // Provjeri da li email već postoji (osim za trenutnog korisnika)
+      const existingUser = await prisma.users.findFirst({
+        where: {
+          email: email.trim(),
+          id: { not: req.user.id }
+        }
+      });
+
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+
+      data.email = email.trim();
+    }
+
     // Ime: "ime" ili "first_name"
     const firstName = body.ime ?? body.first_name;
     if (typeof firstName === "string" && firstName.trim()) {
