@@ -128,4 +128,132 @@ npx ts-node src/scripts/create-admin-interactive.ts
 
     GET /api/health - Check API status
 
+### Backend Architecture
+    backend/
+    ├── prisma/            # Prisma schema and migrations
+    ├── src/
+    │   ├── controllers/  # Request handlers (no business logic)
+    │   ├── services/     # Core business logic
+    │   ├── routes/       # Express route definitions
+    │   ├── middlewares/  # Authentication and authorization
+    │   ├── config/       # Configuration files
+    │   ├── utils/        # Helper utilities
+    │   ├── types/        # Shared TypeScript types
+    │   ├── app.ts        # Express app setup
+    │   └── server.ts     # Server entry point
+    ├── uploads/           # User-uploaded files
+    └── testing/           # Jest and Supertest tests
+
+### Backend Rules
+
+    Controllers must remain thin
+
+    Business logic lives exclusively in services
+
+    All database access goes through Prisma
+
+    No raw SQL in application code
+
+    Core Backend Modules
+
+    Authentication and authorization
+
+    User profiles with visibility controls
+
+    Alumni directory with search and filtering
+
+    Blog system with admin approval
+
+    One-to-one inbox messaging
+
+    Event management with RSVP support
+
+    Contact and enrollment email workflows
+
+    Administrative control panel
+
+### Frontend Architecture
+    frontend/
+    ├── src/
+    │   ├── pages/        # Route-level pages
+    │   ├── components/   # Reusable UI components
+    │   ├── services/     # API communication layer
+    │   ├── context/      # Global state management
+    │   ├── assets/       # Static assets
+    │   └── App.tsx       # Route definitions
+
+### Frontend Rules
+
+    Pages contain presentation logic only
+
+    API calls are isolated in services/
+
+    Shared UI lives in components/
+
+    Role-based routing is enforced
+
+    Data Flow
+
+    User logs in
+
+    Backend issues a JWT token
+
+    Frontend stores the token
+
+    Token is attached to API requests
+
+    Backend validates token and role
+
+    JSON response is returned
+
+    UI updates accordingly
+
+### Testing
+### Backend
+
+    Jest and Supertest
+
+    Covers authentication, messages, blog, and profile visibility
+
+    npm test
+
+### Frontend
+
+    Manual QA
+
+    Browser DevTools
+
+    Role-based UI verification
+
+    Environment & Security Notes
+
+    .env files must never be committed
+
+    Prisma migrations should not be edited manually
+
+    Always update schema.prisma first
+
+    Upload directories are ignored by git
+
+    Extension Points
+
+    The architecture supports safe future extensions such as:
+
+    Notifications
+
+    Group messaging
+
+    Advanced admin analytics
+
+    Forum enhancements
+
+    Event reminders
+
+    Extended profile metadata
+
+### Project Status
+
+    The project is feature-complete, stable, and ready for handover.
+    All core systems are implemented, documented, and structured for continued development.
+
 
