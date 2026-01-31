@@ -1,4 +1,4 @@
-# Alumni Club Platform
+# Alumni Club Platform Guide 
 
 A full-stack alumni management platform built with React + TypeScript frontend and Node.js + Express + Prisma backend.
 
