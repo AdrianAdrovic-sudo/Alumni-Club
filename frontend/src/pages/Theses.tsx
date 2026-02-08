@@ -70,11 +70,13 @@ export default function DiplomskiRadovi() {
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
       {/* HERO */}
-      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white px-4 py-16 md:py-20 text-center">
-        <h1 className="text-3xl md:text-5xl font-bold mb-4">
+      <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white px-4 py-12 md:py-16 text-center">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4
+                       bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent
+                       drop-shadow-2xl">
           Diplomski radovi
         </h1>
-        <p className="text-base md:text-lg opacity-90 max-w-3xl mx-auto">
+        <p className="text-lg md:text-xl text-gray-200 leading-relaxed font-light max-w-3xl mx-auto">
           Pregledajte bazu diplomskih radova naših studenata. Koristite
           pretragu da biste brzo pronašli radove po imenu, prezimenu ili
           nazivu rada.
