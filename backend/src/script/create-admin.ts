@@ -4,11 +4,11 @@ async function createAdminUser() {
   console.log("👑 Creating Admin User...\n");
 
   const adminUser = {
-    username: "admin", // ili 'superadmin' - izaberite jedinstven username
-    email: "akurbardovic9@gmail.com", // promenite na vaš email
+    username: "zana.knezevic", // ili 'superadmin' - izaberite jedinstven username
+    email: "fit.alumni.club@gmail.com", // promenite na vaš email
     password: "admin123", // promenite na jaku šifru
-    firstName: "Ansar",
-    lastName: "Kurbardovic",
+    firstName: "Zana",
+    lastName: "Knezevic",
     enrollmentYear: 2025, // ili godina kada ste diplomirali
     role: "admin", // eksplicitno postavljamo admin role
     occupation: "",
