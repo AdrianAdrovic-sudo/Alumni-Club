@@ -1,4 +1,4 @@
-// Blog.tsx (FULL FIXED)
+// Blog.tsx (FIXED: uses VITE_API_URL like Login, no localhost, same UI)
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -24,20 +24,6 @@ type BlogPost = {
 };
 
 const POSTS_PER_PAGE = 4;
-const BACKEND_BASE_URL = import.meta.env.VITE_API_URL;
-
-function resolvePostImageSrc(imageUrl?: string | null) {
-  if (!imageUrl) return null;
-
-  // If already absolute (http/https), return as-is
-  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-
-  // If it's a relative path from backend (like /uploads/..), prefix it
-  if (BACKEND_BASE_URL) return `${BACKEND_BASE_URL}${imageUrl}`;
-
-  // Fallback (should not happen if env is configured)
-  return imageUrl;
-}
 
 export default function Blog() {
   const { user, token } = useAuth();
@@ -65,6 +51,24 @@ export default function Blog() {
   const canCreate = Boolean(user && token);
   const isAdmin = user?.role === "admin";
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL as string | undefined;
+
+  function ensureApiBaseUrl() {
+    if (!API_BASE_URL) throw new Error("VITE_API_URL is not configured.");
+    return API_BASE_URL;
+  }
+
+  function resolveBackendAsset(pathOrUrl?: string | null) {
+    if (!pathOrUrl) return null;
+
+    // absolute already
+    if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+
+    // backend relative path like /uploads/...
+    const base = ensureApiBaseUrl();
+    return `${base}${pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`}`;
+  }
+
   const paginatedPosts = useMemo(() => {
     const start = (page - 1) * POSTS_PER_PAGE;
     return posts.slice(start, start + POSTS_PER_PAGE);
@@ -76,29 +80,21 @@ export default function Blog() {
 
   async function loadPosts() {
     try {
-      if (!BACKEND_BASE_URL) {
-        throw new Error("VITE_API_URL is not configured.");
-      }
+      const base = ensureApiBaseUrl();
 
       setLoading(true);
 
-      const res = await fetch(`${BACKEND_BASE_URL}/api/posts?limit=100`);
-      if (!res.ok) {
-        throw new Error("Ne mogu da učitam postove.");
-      }
+      const res = await fetch(`${base}/api/posts?limit=100`);
+      if (!res.ok) throw new Error("Ne mogu da učitam postove.");
 
       const data = await res.json();
 
-      // If your backend returns { posts: [...] } adjust accordingly.
+      // backend may return [] or { posts: [] }
       const list: BlogPost[] = Array.isArray(data) ? data : data.posts ?? [];
 
-      // Filter out deleted if needed
       const visible = list.filter((p) => !p.is_deleted);
-
-      // If non-admin, show only approved
       const finalList = isAdmin ? visible : visible.filter((p) => p.is_approved);
 
-      // Sort newest first
       finalList.sort((a, b) => {
         const da = new Date(a.created_at ?? 0).getTime();
         const db = new Date(b.created_at ?? 0).getTime();
@@ -121,7 +117,7 @@ export default function Blog() {
 
   async function handleCreatePost() {
     try {
-      if (!BACKEND_BASE_URL) throw new Error("VITE_API_URL is not configured.");
+      const base = ensureApiBaseUrl();
       if (!token) throw new Error("Niste prijavljeni.");
 
       const formData = new FormData();
@@ -130,16 +126,11 @@ export default function Blog() {
       formData.append("short_desc", newShortDesc);
       formData.append("content", newContent);
       if (newReadTime) formData.append("read_time", newReadTime);
+      if (newImageFile) formData.append("image", newImageFile);
 
-      if (newImageFile) {
-        formData.append("image", newImageFile);
-      }
-
-      const res = await fetch(`${BACKEND_BASE_URL}/api/posts`, {
+      const res = await fetch(`${base}/api/posts`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
@@ -167,14 +158,13 @@ export default function Blog() {
 
   async function handleApprove(postId: number) {
     try {
-      if (!BACKEND_BASE_URL) throw new Error("VITE_API_URL is not configured.");
+      const base = ensureApiBaseUrl();
       if (!token) throw new Error("Niste prijavljeni.");
       if (!isAdmin) throw new Error("Nemate dozvolu.");
 
       setAdminBusyId(postId);
 
-      // If your backend uses a different approve endpoint, adjust here.
-      const res = await fetch(`${BACKEND_BASE_URL}/api/posts/${postId}/approve`, {
+      const res = await fetch(`${base}/api/posts/${postId}/approve`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -197,9 +187,7 @@ export default function Blog() {
     }
   }
 
-  if (loading) {
-    return <div className="p-6">Učitavanje...</div>;
-  }
+  if (loading) return <div className="p-6">Učitavanje...</div>;
 
   return (
     <div className="p-6">
@@ -269,11 +257,12 @@ export default function Blog() {
 
       <div className="mt-8 space-y-6">
         {paginatedPosts.map((post) => {
-          const img = resolvePostImageSrc(post.image_url);
-          const authorPfp =
-            post.users?.profile_picture && BACKEND_BASE_URL
-              ? `${BACKEND_BASE_URL}${post.users.profile_picture}?t=${Date.now()}`
-              : "https://d22po4pjz3o32e.cloudfront.net/p/0";
+          const img = resolveBackendAsset(post.image_url);
+
+          const authorPfpRaw = resolveBackendAsset(post.users?.profile_picture ?? null);
+          const authorPfp = authorPfpRaw
+            ? `${authorPfpRaw}${authorPfpRaw.includes("?") ? "&" : "?"}t=${Date.now()}`
+            : "https://d22po4pjz3o32e.cloudfront.net/p/0";
 
           return (
             <div key={post.id} className="p-5 rounded-2xl bg-white shadow-sm border">
