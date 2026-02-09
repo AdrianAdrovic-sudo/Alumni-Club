@@ -29,13 +29,15 @@ export default function Dashboard() {
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [uploadingPicture, setUploadingPicture] = useState(false);
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     if (!loading && !user) {
       navigate("/login");
     } else if (user?.profile_picture) {
-      setProfilePicture(`http://localhost:4000${user.profile_picture}?t=${Date.now()}`);
+      setProfilePicture(`${API_BASE_URL}${user.profile_picture}?t=${Date.now()}`);
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, API_BASE_URL]);
 
   useEffect(() => {
     if (user && user.role === "admin" && activeTab === "overview") {
@@ -56,55 +58,57 @@ export default function Dashboard() {
     }
   };
 
-  const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePictureUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Molimo odaberite sliku (JPG, PNG, GIF)');
+    if (!file.type.startsWith("image/")) {
+      alert("Molimo odaberite sliku (JPG, PNG, GIF)");
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Slika je prevelika. Maksimalna veličina je 5MB.');
+      alert("Slika je prevelika. Maksimalna veličina je 5MB.");
       return;
     }
 
     try {
       setUploadingPicture(true);
-      
-      const formData = new FormData();
-      formData.append('avatar', file);
 
-      const response = await fetch('http://localhost:4000/api/users/me/avatar', {
-        method: 'POST',
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const response = await fetch(`${API_BASE_URL}/api/users/me/avatar`, {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Greška pri upload-u slike');
+        throw new Error("Greška pri upload-u slike");
       }
 
       const data = await response.json();
-      
+
       // Update profile picture with cache busting
       if (data.profile_picture) {
-        const newPictureUrl = `http://localhost:4000${data.profile_picture}?t=${Date.now()}`;
+        const newPictureUrl = `${API_BASE_URL}${data.profile_picture}?t=${Date.now()}`;
         setProfilePicture(newPictureUrl);
-        
+
         // Force re-render by updating user context if possible
         window.location.reload(); // Simple solution to refresh user data
       }
 
-      alert('Profilna slika je uspješno ažurirana!');
+      alert("Profilna slika je uspješno ažurirana!");
     } catch (error) {
-      console.error('Greška pri upload-u:', error);
-      alert('Greška pri upload-u profilne slike');
+      console.error("Greška pri upload-u:", error);
+      alert("Greška pri upload-u profilne slike");
     } finally {
       setUploadingPicture(false);
     }
@@ -217,19 +221,20 @@ export default function Dashboard() {
           <h2 className="text-2xl font-semibold text-[#294a70] mb-4 border-b border-gray-200 pb-2">
             Vaš profil
           </h2>
-          
+
           <div className="flex items-start gap-6">
             {/* Profile Picture */}
             <div className="flex-shrink-0 relative group">
               <img
-                src={profilePicture || user.profile_picture 
-                  ? `http://localhost:4000${user.profile_picture}?t=${Date.now()}`
-                  : "https://via.placeholder.com/100x100?text=Admin"
+                src={
+                  profilePicture || user.profile_picture
+                    ? `${API_BASE_URL}${user.profile_picture}?t=${Date.now()}`
+                    : "https://via.placeholder.com/100x100?text=Admin"
                 }
                 alt="Profilna slika"
                 className="w-20 h-20 rounded-full object-cover border-4 border-gray-200 shadow-md"
               />
-              
+
               {/* Upload overlay */}
               <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                 <label htmlFor="profile-upload" className="cursor-pointer">
@@ -244,14 +249,14 @@ export default function Dashboard() {
                   />
                 </label>
               </div>
-              
+
               {uploadingPicture && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                 </div>
               )}
             </div>
-            
+
             {/* Profile Info */}
             <div className="flex-1 space-y-3 text-gray-700">
               <div className="flex justify-between">
