@@ -1,159 +1,235 @@
-// ResetPassword.tsx (FULL FIXED)
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-const API_BASE = `${API_BASE_URL}/api/auth`;
+const API_BASE = "http://localhost:4000/api/auth";
 
 export default function ResetPassword() {
-  const navigate = useNavigate();
+  const [step, setStep] = useState<1 | 2>(1);
 
-  const [step, setStep] = useState<"check" | "verify" | "reset">("check");
-  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [msg, setMsg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleCheck() {
-    try {
-      if (!API_BASE_URL) throw new Error("VITE_API_URL is not configured.");
+  const navigate = useNavigate();
 
+  async function handleCheck(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    setError(null);
+
+    if (!username || !email) {
+      setError("Unesite korisničko ime i email.");
+      return;
+    }
+
+    try {
       setLoading(true);
-      setMsg(null);
 
       const res = await fetch(`${API_BASE}/reset-check`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usernameOrEmail }),
+        body: JSON.stringify({ username, email }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || data?.error || "Greška");
 
-      setMsg("Kod je poslat na email (ako korisnik postoji).");
-      setStep("verify");
-    } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Greška");
+      if (!res.ok) {
+        throw new Error(data.message || "Provjera podataka nije uspjela.");
+      }
+
+      setMsg(
+        data.message ||
+          "Ako postoji nalog sa ovim podacima, kod je poslat na email."
+      );
+      setStep(2);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Provjera podataka nije uspjela.");
+      }
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleVerify() {
-    try {
-      if (!API_BASE_URL) throw new Error("VITE_API_URL is not configured.");
+  async function handleConfirm(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    setError(null);
 
-      setLoading(true);
-      setMsg(null);
-
-      const res = await fetch(`${API_BASE}/reset-verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usernameOrEmail, code }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || data?.error || "Greška");
-
-      setMsg("Kod je validan. Unesite novu šifru.");
-      setStep("reset");
-    } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Greška");
-    } finally {
-      setLoading(false);
+    if (!code) {
+      setError("Unesite kod koji ste dobili na email.");
+      return;
     }
-  }
 
-  async function handleReset() {
+    if (!newPassword || !confirmPassword) {
+      setError("Unesite novu šifru i potvrdu.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Šifre se ne poklapaju.");
+      return;
+    }
+
     try {
-      if (!API_BASE_URL) throw new Error("VITE_API_URL is not configured.");
-
       setLoading(true);
-      setMsg(null);
 
-      const res = await fetch(`${API_BASE}/reset-password`, {
+      const res = await fetch(`${API_BASE}/reset-confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usernameOrEmail, code, newPassword }),
+        body: JSON.stringify({ username, email, code, newPassword }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || data?.error || "Greška");
 
-      setMsg("Šifra je promijenjena. Možete se prijaviti.");
-      setTimeout(() => navigate("/login"), 1200);
-    } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Greška");
+      if (!res.ok) {
+        throw new Error(data.message || "Promjena šifre nije uspjela.");
+      }
+
+      setMsg(
+        data.message || "Šifra je uspješno promijenjena. Preusmjeravam na login."
+      );
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Promjena šifre nije uspjela.");
+      }
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white border rounded-2xl shadow-sm p-6">
-        <h1 className="text-2xl font-bold text-[#294a70]">Reset šifre</h1>
+    <div className="min-h-screen flex justify-center items-center p-5">
+      <div className="w-full max-w-md p-10 bg-gray-50 rounded-2xl shadow-lg flex flex-col items-center text-center">
+        <h2 className="text-4xl text-[#294a70] mb-3 font-bold">Reset šifre</h2>
+        <h4 className="text-lg md:text-xl text-gray-600 leading-relaxed font-light mb-8">
+          {step === 1
+            ? "Unesite korisničko ime i email naloga."
+            : "Unesite kod sa emaila i novu šifru."}
+        </h4>
 
-        {step === "check" && (
-          <>
-            <p className="text-gray-600 mt-2">Unesite korisničko ime ili email.</p>
+        {step === 1 && (
+          <form onSubmit={handleCheck} className="w-full flex flex-col">
+            <label htmlFor="username" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Korisničko ime:
+            </label>
             <input
-              className="mt-4 w-full border rounded-lg p-3"
-              value={usernameOrEmail}
-              onChange={(e) => setUsernameOrEmail(e.target.value)}
-              placeholder="username ili email"
+              id="username"
+              type="text"
+              placeholder="Korisničko ime"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
             />
-            <button
+
+            <label htmlFor="email" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Email:
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Email adresa"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
+            />
+
+            <button 
+              type="submit" 
               disabled={loading}
-              onClick={handleCheck}
-              className="mt-4 w-full px-4 py-3 rounded-lg bg-[#294a70] text-white font-semibold disabled:opacity-50"
+              className="mt-6 px-8 py-3.5 bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white border-none rounded-lg cursor-pointer text-base font-semibold w-full transition-all duration-300 hover:bg-gradient-to-br hover:from-[#ffab1f] hover:to-[#ff9500] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#ffab1f]/30"
             >
-              {loading ? "..." : "Pošalji kod"}
+              {loading ? "Provjeravam..." : "Dalje"}
             </button>
-          </>
+          </form>
         )}
 
-        {step === "verify" && (
-          <>
-            <p className="text-gray-600 mt-2">Unesite kod koji ste dobili.</p>
+        {step === 2 && (
+          <form onSubmit={handleConfirm} className="w-full flex flex-col">
+            <label htmlFor="code" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Kod sa emaila:
+            </label>
             <input
-              className="mt-4 w-full border rounded-lg p-3"
+              id="code"
+              type="text"
+              placeholder="Na primjer 123456"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="kod"
+              required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
             />
-            <button
-              disabled={loading}
-              onClick={handleVerify}
-              className="mt-4 w-full px-4 py-3 rounded-lg bg-[#294a70] text-white font-semibold disabled:opacity-50"
-            >
-              {loading ? "..." : "Verifikuj kod"}
-            </button>
-          </>
-        )}
 
-        {step === "reset" && (
-          <>
-            <p className="text-gray-600 mt-2">Unesite novu šifru.</p>
+            <label htmlFor="newPassword" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Nova šifra:
+            </label>
             <input
+              id="newPassword"
               type="password"
-              className="mt-4 w-full border rounded-lg p-3"
+              placeholder="Nova šifra"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="nova šifra"
+              required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
             />
-            <button
+
+            <label htmlFor="confirmPassword" className="block mt-4 mb-2 font-semibold text-left text-base text-[#294a70]">
+              Ponovite novu šifru:
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              placeholder="Ponovi šifru"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-inherit transition-colors duration-300 box-border text-gray-800 bg-white h-11 placeholder:text-gray-400 placeholder:text-base focus:outline-none focus:border-[#ffab1f]"
+            />
+
+            <button 
+              type="submit" 
               disabled={loading}
-              onClick={handleReset}
-              className="mt-4 w-full px-4 py-3 rounded-lg bg-[#ffab1f] text-black font-semibold disabled:opacity-50"
+              className="mt-6 px-8 py-3.5 bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white border-none rounded-lg cursor-pointer text-base font-semibold w-full transition-all duration-300 hover:bg-gradient-to-br hover:from-[#ffab1f] hover:to-[#ff9500] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#ffab1f]/30"
             >
-              {loading ? "..." : "Promijeni šifru"}
+              {loading ? "Snimam..." : "Sačuvaj šifru"}
             </button>
-          </>
+          </form>
         )}
 
-        {msg && <div className="mt-4 text-sm text-gray-700">{msg}</div>}
+        {msg && (
+          <div className="p-3 rounded-md mt-4 text-center font-medium bg-green-100 text-green-800 border border-green-200">
+            {msg}
+          </div>
+        )}
+        {error && (
+          <div className="p-3 rounded-md mt-4 text-center font-medium bg-red-100 text-red-800 border border-red-200">
+            {error}
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => navigate("/login")}
+          className="mt-3 px-8 py-3.5 bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white border-none rounded-lg cursor-pointer text-base font-semibold w-full transition-all duration-300 hover:bg-gradient-to-br hover:from-[#ffab1f] hover:to-[#ff9500] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#ffab1f]/30"
+        >
+          Vrati se na prijavu
+        </button>
       </div>
     </div>
   );
