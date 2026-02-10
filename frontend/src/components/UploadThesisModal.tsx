@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import api from '../services/api';
 
 interface UploadThesisFormData {
     thesisType: 'bachelors' | 'masters' | 'specialist' | '';
@@ -11,16 +12,11 @@ interface UploadThesisFormData {
 interface UploadThesisModalProps {
     isOpen: boolean;
     onClose: () => void;
-    thesisContext?: {
-        ime: string;
-        prezime: string;
-        naziv: string;
-        datum: string;
-        type: string;
-    };
+    onSuccess?: () => void;
+    thesisContext?: any;
 }
 
-const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, thesisContext }) => {
+const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, onSuccess, thesisContext }) => {
     const [formData, setFormData] = useState<UploadThesisFormData>({
         thesisType: '',
         file: null,
@@ -51,7 +47,7 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // Validate required fields
@@ -70,30 +66,43 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
             return;
         }
 
-        // Prepare data for console output
-        const outputData = {
-            thesisType: formData.thesisType,
-            file: formData.file,
-            fileName: formData.file?.name,
-            fileSize: formData.file?.size,
-            ...(formData.title && { title: formData.title }),
-            ...(formData.year && { year: parseInt(formData.year) }),
-            ...(thesisContext && { selectedThesis: thesisContext }),
-        };
+        try {
+            const uploadData = new FormData();
+            uploadData.append('thesis', formData.file as File);
+            uploadData.append('thesisType', formData.thesisType);
+            if (formData.title) uploadData.append('title', formData.title);
+            if (formData.year) uploadData.append('defenseDate', formData.year);
+            // If we have an ID from context, use it. Otherwise, this might be a profile upload (but here we're in admin context)
+            const userId = thesisContext?.id;
 
-        console.log('=== Slanje forme za otpremanje rada ===');
-        console.log(outputData);
-        console.log('=====================================');
+            if (!userId) {
+                alert("Greška: Nije odabran korisnik.");
+                return;
+            }
 
-        // Reset form and close modal
-        setFormData({
-            thesisType: '',
-            file: null,
-            title: '',
-            year: '',
-        });
-        setErrors({});
-        onClose();
+            const response = await api.post(`/theses/upload/${userId}`, uploadData);
+
+            console.log('Upload success:', response.data);
+
+            // Success!
+            if (onSuccess) onSuccess();
+
+            // Reset form and close modal
+            setFormData({
+                thesisType: '',
+                file: null,
+                title: '',
+                year: '',
+            });
+            setErrors({});
+            onClose();
+            alert("Rad je uspješno otpremljen!");
+
+        } catch (error: any) {
+            console.error('Upload error:', error);
+            const message = error.response?.data?.message || 'Greška prilikom otpremanja rada.';
+            alert(message);
+        }
     };
 
     const handleClose = () => {
@@ -133,17 +142,13 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
                 {thesisContext && (
                     <div className="px-6 pt-4 pb-2 bg-gray-50 border-b border-gray-200">
                         <p className="text-sm text-gray-600">
-                            <span className="font-semibold">Student:</span> {thesisContext.ime} {thesisContext.prezime}
+                            <span className="font-semibold">Student:</span> {thesisContext.first_name} {thesisContext.last_name}
                         </p>
-                        <p className="text-sm text-gray-600">
-                            <span className="font-semibold">Originalni rad:</span> {thesisContext.naziv}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                            <span className="font-semibold">Tip:</span>{' '}
-                            {thesisContext.type === 'bachelors' && 'Osnovne studije'}
-                            {thesisContext.type === 'masters' && 'Master studije'}
-                            {thesisContext.type === 'specialist' && 'Specijalističke studije'}
-                        </p>
+                        {thesisContext.thesis_title && thesisContext.thesis_title !== "/" && (
+                            <p className="text-sm text-gray-600">
+                                <span className="font-semibold">Trenutni rad:</span> {thesisContext.thesis_title}
+                            </p>
+                        )}
                     </div>
                 )}
 
