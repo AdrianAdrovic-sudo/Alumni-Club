@@ -172,7 +172,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.fax': 'Fax',
     'footer.email': 'E-mail',
     'footer.socialNetworks': 'Društvene mreže',
-    'footer.copyright': '© 2025 Alumni FIT. Zajedno gradimo budućnost.',
+    'footer.copyright': '© {year} Alumni FIT. Zajedno gradimo budućnost.',
     
     // Home page translations
     'home.tagline': 'Dobrodošli',
@@ -275,7 +275,7 @@ const translations: Record<Language, TranslationKeys> = {
     'footer.fax': 'Fax',
     'footer.email': 'E-mail',
     'footer.socialNetworks': 'Social Media',
-    'footer.copyright': '© 2025 Alumni FIT. Building the future together.',
+    'footer.copyright': '© {year} Alumni FIT. Building the future together.',
     
     // Home page translations
     'home.tagline': 'Welcome',
