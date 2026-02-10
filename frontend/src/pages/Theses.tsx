@@ -1,11 +1,26 @@
-import { FaSearch, FaFilter, FaUpload } from "react-icons/fa";
-import { useState } from "react";
+import { FaSearch, FaFilter, FaUpload, FaSpinner, FaTrash } from "react-icons/fa";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import UploadThesisModal from "../components/UploadThesisModal";
+import api from "../services/api";
+
+interface Thesis {
+  id: number;
+  first_name: string;
+  last_name: string;
+  thesis_title: string;
+  thesis_document_url: string;
+  thesis_type: string;
+  defense_date: string | null;
+}
 
 export default function DiplomskiRadovi() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+
+  const [theses, setTheses] = useState<Thesis[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("datum-desc");
@@ -14,37 +29,67 @@ export default function DiplomskiRadovi() {
   const [selectedThesis, setSelectedThesis] = useState<any>(null);
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
 
-  const handleDownload = (fileUrl: string, fileName: string) => {
-    // Create a temporary anchor element to trigger download
-    const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const fetchTheses = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/theses");
+      setTheses(response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching theses:", err);
+      setError("Greška prilikom učitavanja diplomskih radova. Molimo pokušajte ponovo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const podaci = [
-    { ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009.", fileUrl: "/theses/zizic-milos.pdf", type: "bachelors" },
-    { ime: "Tripo", prezime: "Matijević", naziv: "Prikupljanje činjenica za informacioni sistem studentske službe", datum: "10.07.2009.", fileUrl: "/theses/matijevic-tripo.pdf", type: "masters" },
-    { ime: "Zoran", prezime: "Ćorović", naziv: "Model, objekti i veze informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/corovic-zoran.pdf", type: "bachelors" },
-    { ime: "Dženan", prezime: "Strujić", naziv: "Relacioni model informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/strujic-dzenan.pdf", type: "specialist" },
-    { ime: "Novak", prezime: "Radulović", naziv: "Forme i izvještaj informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/radulovic-novak.pdf", type: "masters" },
-    { ime: "Igor", prezime: "Pekić", naziv: "Sigurnost informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/pekic-igor.pdf", type: "bachelors" },
-    { ime: "Ana", prezime: "Jovanović", naziv: "Web aplikacija za studentsku službu", datum: "10.07.2009.", fileUrl: "/theses/jovanovic-ana.pdf", type: "specialist" },
-    { ime: "Jelena", prezime: "Marković", naziv: "Implementacija informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/markovic-jelena.pdf", type: "masters" },
-    { ime: "Marko", prezime: "Nikolić", naziv: "Testiranje informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/nikolic-marko.pdf", type: "bachelors" },
-    { ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2009.", fileUrl: "/theses/stojanovic-ivana.pdf", type: "specialist" },
-  ];
+  useEffect(() => {
+    fetchTheses();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Da li ste sigurni da želite da obrišete ovaj diplomski rad? Dokument će biti trajno uklonjen, a naslov rada povezan sa studentom će biti postavljen na '/'.")) {
+      return;
+    }
+
+    try {
+      await api.delete(`/theses/${id}`);
+      await fetchTheses(); // Refresh the list
+    } catch (err) {
+      console.error("Error deleting thesis:", err);
+      alert("Greška prilikom brisanja diplomskog rada.");
+    }
+  };
+
+  const handleDownload = async (fileUrl: string, fileName: string) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
+      const fullUrl = fileUrl.startsWith("http") ? fileUrl : `${baseUrl}${fileUrl}`;
+
+      const response = await fetch(fullUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download error:", error);
+      alert("Greška prilikom preuzimanja fajla.");
+    }
+  };
 
   // Filtriranje
-  const filtrirani = podaci.filter((p) => {
+  const filtrirani = theses.filter((p) => {
     const matchesSearch =
-      p.ime.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.prezime.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.naziv.toLowerCase().includes(searchTerm.toLowerCase());
+      p.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.thesis_title || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
+    const matchesType = thesisTypeFilter === "all" || p.thesis_type === thesisTypeFilter;
 
     return matchesSearch && matchesType;
   });
@@ -53,15 +98,15 @@ export default function DiplomskiRadovi() {
   const sortirani = [...filtrirani].sort((a, b) => {
     switch (sortBy) {
       case "datum-asc":
-        return new Date(a.datum.split('.').reverse().join('-')).getTime() - new Date(b.datum.split('.').reverse().join('-')).getTime();
+        return new Date(a.defense_date || 0).getTime() - new Date(b.defense_date || 0).getTime();
       case "datum-desc":
-        return new Date(b.datum.split('.').reverse().join('-')).getTime() - new Date(a.datum.split('.').reverse().join('-')).getTime();
+        return new Date(b.defense_date || 0).getTime() - new Date(a.defense_date || 0).getTime();
       case "ime-asc":
-        return a.ime.localeCompare(b.ime);
+        return a.first_name.localeCompare(b.first_name);
       case "prezime-asc":
-        return a.prezime.localeCompare(b.prezime);
+        return a.last_name.localeCompare(b.last_name);
       case "naziv-asc":
-        return a.naziv.localeCompare(b.naziv);
+        return (a.thesis_title || "").localeCompare(b.thesis_title || "");
       default:
         return 0;
     }
@@ -178,83 +223,154 @@ export default function DiplomskiRadovi() {
         </div>
       </div>
 
-      <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8">
+      <div className="w-full flex-1 flex flex-col items-center justify-start px-4 md:px-8 py-8">
         <div className="w-full max-w-6xl">
-          {/* Info text - moved here above table */}
-          <div className="mb-4">
-            <p className="text-sm sm:text-base text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-              💡 <strong>Savjet:</strong> Kliknite na naziv diplomskog rada da ga preuzmete na svoj uređaj.
-            </p>
-          </div>
-          
-          <div className="shadow-md rounded-2xl overflow-hidden bg-white">
-            <div className="w-full overflow-x-auto">
-              <table className="w-full border-collapse table-auto min-w-[600px]">
-                <thead className="bg-[#294a70] text-white">
-                  <tr>
-                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
-                      Ime
-                    </th>
-                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
-                      Prezime
-                    </th>
-                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
-                      Naziv diplomskog rada
-                    </th>
-                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold hidden sm:table-cell">
-                      Datum diplomiranja
-                    </th>
-                    {isAdmin && (
-                      <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
-                        Akcije
-                      </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortirani.map((p, idx) => (
-                    <tr
-                      key={idx}
-                      className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                    >
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
-                        {p.ime}
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
-                        {p.prezime}
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
+
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <FaSpinner className="animate-spin text-4xl text-[#294a70] mb-4" />
+              <p className="text-gray-600">Učitavanje diplomskih radova...</p>
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg text-center">
+              {error}
+            </div>
+          ) : sortirani.length === 0 ? (
+            <div className="bg-gray-50 border border-gray-200 text-gray-600 px-6 py-12 rounded-lg text-center font-medium">
+              Nema pronađenih diplomskih radova.
+            </div>
+          ) : (
+            <>
+              {/* Desktop Table */}
+              <div className="hidden md:block shadow-md rounded-2xl overflow-hidden bg-white">
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full border-collapse table-auto min-w-[600px]">
+                    <thead className="bg-[#294a70] text-white">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-base font-semibold">Ime i prezime</th>
+                        <th className="px-6 py-4 text-left text-base font-semibold">Naziv diplomskog rada</th>
+                        <th className="px-6 py-4 text-left text-base font-semibold">Tip rada</th>
+                        <th className="px-6 py-4 text-center text-base font-semibold">Dokument</th>
+                        {isAdmin && <th className="px-6 py-4 text-center text-base font-semibold">Akcije</th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortirani.map((p, idx) => (
+                        <tr key={p.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50 hover:bg-gray-100 transition-colors"}>
+                          <td className="px-6 py-4 text-sm sm:text-base text-gray-800 border-b border-gray-200">
+                            {p.first_name} {p.last_name}
+                          </td>
+                          <td className="px-6 py-4 text-sm sm:text-base text-gray-800 border-b border-gray-200 font-medium">
+                            {p.thesis_title || "/"}
+                          </td>
+                          <td className="px-6 py-4 text-sm sm:text-base text-gray-800 border-b border-gray-200 font-medium">
+                            {p.thesis_type === 'bachelors' ? 'Osnovne studije' :
+                              p.thesis_type === 'masters' ? 'Master studije' :
+                                p.thesis_type === 'specialist' ? 'Specijalističke studije' :
+                                  p.thesis_type || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4 text-sm sm:text-base text-center border-b border-gray-200">
+                            {p.thesis_document_url ? (
+                              <button
+                                onClick={() => handleDownload(p.thesis_document_url, `${p.last_name}-${p.first_name}.pdf`)}
+                                className="inline-flex items-center px-4 py-2 bg-white border border-[#294a70] text-[#294a70] rounded-md hover:bg-[#294a70] hover:text-white transition-all text-sm font-medium"
+                              >
+                                Preuzmi PDF
+                              </button>
+                            ) : (
+                              <span className="text-gray-400 italic text-sm">Nema dokumenta</span>
+                            )}
+                          </td>
+                          {isAdmin && (
+                            <td className="px-6 py-4 text-sm sm:text-base text-center border-b border-gray-200">
+                              <div className="flex justify-center gap-2">
+                                <button
+                                  onClick={() => {
+                                    setSelectedThesis(p);
+                                    setShowUploadModal(true);
+                                  }}
+                                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium"
+                                  title="Dodaj/Izmijeni diplomski rad"
+                                >
+                                  <FaUpload size={12} />
+                                  Dodaj
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(p.id)}
+                                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors text-sm font-medium"
+                                  title="Obriši diplomski rad"
+                                >
+                                  <FaTrash size={12} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-4">
+                {sortirani.map((p) => (
+                  <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900">{p.first_name} {p.last_name}</h3>
+                      </div>
+                      <span className="text-xs font-bold text-[#294a70]">
+                        {p.thesis_type === 'bachelors' ? 'Osnovne studije' :
+                          p.thesis_type === 'masters' ? 'Master studije' :
+                            p.thesis_type === 'specialist' ? 'Specijalističke studije' :
+                              p.thesis_type || 'N/A'}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 font-medium text-sm leading-relaxed">
+                      {p.thesis_title || "/"}
+                    </p>
+                    <div className="pt-2 flex gap-2">
+                      {p.thesis_document_url ? (
                         <button
-                          onClick={() => handleDownload(p.fileUrl, `${p.prezime}-${p.ime}.pdf`)}
-                          className="text-gray-800 hover:text-[#294a70] cursor-pointer text-left bg-transparent border-none p-0 m-0 font-medium transition-colors hover:underline"
-                          title="Kliknite da preuzmete rad"
+                          onClick={() => handleDownload(p.thesis_document_url, `${p.last_name}-${p.first_name}.pdf`)}
+                          className="flex-1 flex justify-center items-center px-4 py-2.5 bg-[#294a70] text-white rounded-lg font-semibold text-sm shadow-sm"
                         >
-                          {p.naziv}
+                          Preuzmi PDF
                         </button>
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200 hidden sm:table-cell">
-                        {p.datum}
-                      </td>
+                      ) : (
+                        <div className="flex-1 flex justify-center items-center px-4 py-2.5 bg-gray-50 text-gray-400 rounded-lg font-medium text-sm border border-gray-100">
+                          Nema dokumenta
+                        </div>
+                      )}
                       {isAdmin && (
-                        <td className="px-2 sm:px-4 py-3 text-sm sm:text-base border-b border-gray-200">
+                        <>
                           <button
                             onClick={() => {
                               setSelectedThesis(p);
                               setShowUploadModal(true);
                             }}
-                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors text-sm font-medium"
+                            className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm"
+                            title="Dodaj"
                           >
-                            <FaUpload size={12} />
-                            <span className="hidden sm:inline">Otpremi</span>
+                            <FaUpload />
+                            Dodaj
                           </button>
-                        </td>
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            className="px-4 py-2.5 bg-red-50 text-red-600 rounded-lg font-semibold text-sm"
+                            title="Obriši"
+                          >
+                            <FaTrash />
+                          </button>
+                        </>
                       )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -266,6 +382,7 @@ export default function DiplomskiRadovi() {
           setSelectedThesis(null);
         }}
         thesisContext={selectedThesis}
+        onSuccess={fetchTheses}
       />
     </div>
   );
