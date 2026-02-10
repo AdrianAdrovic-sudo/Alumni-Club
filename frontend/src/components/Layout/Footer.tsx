@@ -3,12 +3,9 @@ import { useLanguage } from "../../context/LanguageContext";
 
 function Footer() {
   const { t } = useLanguage();
-
-  const getYear = () => new Date().getFullYear();
-
   return (
     <footer className="bg-[#294a70] text-white w-full relative overflow-hidden pt-0">
-
+     
       <div className="absolute inset-0 overflow-hidden opacity-10">
         <div className="absolute inset-0" style={{
           backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
@@ -17,7 +14,7 @@ function Footer() {
       </div>
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-12">
-
+      
         <div className="text-center mb-10 -mt-2">
           <div className="inline-block mb-4">
             <div className="relative">
@@ -30,9 +27,9 @@ function Footer() {
           <div className="mt-3 h-1 w-24 mx-auto bg-[#ffab1f]"></div>
         </div>
 
-
+      
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
-
+          
           <div className="space-y-6">
             <div className="group">
               <div className="relative">
@@ -101,7 +98,7 @@ function Footer() {
                   { icon: FaYoutube, color: '#ff0000', url: '#' }
                 ].map((social, index) => (
                   <a key={index} href={social.url} target="_blank" rel="noopener noreferrer" className="group relative">
-                    <div
+                    <div 
                       className="relative w-12 h-12 rounded-xl flex items-center justify-center transform group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 shadow-lg"
                       style={{ backgroundColor: social.color }}
                     >
@@ -118,7 +115,7 @@ function Footer() {
         <div className="pt-8 border-t border-gray-200">
           <div className="flex justify-center items-center">
             <div className="text-sm text-white">
-              {t('footer.copyright').replace('{year}', getYear().toString())}
+              {t('footer.copyright')}
             </div>
           </div>
         </div>
