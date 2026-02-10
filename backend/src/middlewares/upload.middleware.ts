@@ -66,32 +66,3 @@ export const uploadCv = multer({
     cb(null, true);
   },
 }).single("cv");
-
-const thesisStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dest = path.join(uploadsRoot, "theses");
-    if (!fs.existsSync(dest)) {
-      fs.mkdirSync(dest, { recursive: true });
-    }
-    cb(null, dest);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const base = path.basename(file.originalname, ext).replace(/\s+/g, "_");
-    const userId = req.params.id || "unknown";
-    cb(null, `${userId}_${Date.now()}_${base}${ext}`);
-  },
-});
-
-export const uploadThesis = multer({
-  storage: thesisStorage,
-  limits: {
-    fileSize: 20 * 1024 * 1024, // 20MB limit for theses
-  },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype !== "application/pdf") {
-      return cb(new Error("Only PDF files are allowed for theses"));
-    }
-    cb(null, true);
-  },
-}).single("thesis");

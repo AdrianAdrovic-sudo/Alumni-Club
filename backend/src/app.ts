@@ -13,7 +13,6 @@ import enrollRoutes from "./routes/enroll.routes";
 import eventsRoutes from "./routes/events.routes";
 import contactRoutes from "./routes/contact.routes";
 import adminInquiriesRoutes from "./routes/admin.inquiries.routes";
-import thesesRoutes from "./routes/theses.routes";
 
 import { getMyProfile, updateMyProfile } from "./controllers/users.controller";
 import { authenticate } from "./middlewares/auth.middleware";
@@ -76,7 +75,6 @@ app.use("/api/admin/inquiries", adminInquiriesRoutes);
 // Blog & enrollment routes
 app.use("/api", postsRoutes);
 app.use("/api", enrollRoutes);
-app.use("/api/theses", thesesRoutes);
 
 // Profile routes
 app.get("/api/profile", authenticate, getMyProfile);
