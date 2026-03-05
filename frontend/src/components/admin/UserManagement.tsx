@@ -163,6 +163,10 @@ export default function UserManagement() {
     }
   };
 
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleBulkImport = async (e: React.FormEvent) => {
   e.preventDefault();
 
@@ -194,6 +198,11 @@ export default function UserManagement() {
         lastName,
         [...existingUsernames, ...usersToCreate.map(u => u.username)]
       );
+
+      if (!isValidEmail(email)) {
+        alert(`Email nije validan: ${email}`);
+        return;
+      }
 
       usersToCreate.push({
         first_name: firstName,
