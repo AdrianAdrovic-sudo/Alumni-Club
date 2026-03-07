@@ -34,7 +34,7 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:4000/api/theses/upload-csv", {
+      const response = await fetch("/api/theses/upload-csv", {
         method: "POST",
         body: formData,
       });
