@@ -51,9 +51,11 @@ export default function DiplomskiRadovi() {
 
    const data = await response.json();
    alert("Uspješno dodato " + data.count + " radova");
+   window.location.reload();
 
   } catch (error) {
     console.error("Greška pri uploadu:", error);
+    window.location.reload();
   }
 
 
@@ -106,19 +108,19 @@ export default function DiplomskiRadovi() {
   switch (sortBy) {
 
     case "datum-asc":
-      return (a.datum || 0) - (b.datum || 0);
+      return new Date(a.year).getTime() - new Date(b.year).getTime();
 
     case "datum-desc":
-      return (b.datum || 0) - (a.datum || 0);
+      return new Date(b.year).getTime() - new Date(a.year).getTime();
 
     case "ime-asc":
-      return (a.ime || "").localeCompare(b.ime || "");
+      return (a.first_name || "").localeCompare(b.first_name || "");
 
     case "prezime-asc":
-      return (a.prezime || "").localeCompare(b.prezime || "");
+      return (a.last_name || "").localeCompare(b.last_name || "");
 
     case "naziv-asc":
-      return (a.naziv || "").localeCompare(b.naziv || "");
+      return (a.title || "").localeCompare(b.title || "");
 
     default:
       return 0;
@@ -320,18 +322,16 @@ export default function DiplomskiRadovi() {
     <tr key={idx} className="border-b hover:bg-gray-50">
       <td className="px-6 py-3">{p.first_name}</td>
       <td className="px-6 py-3">{p.last_name}</td>
-      <td className="px-6 py-3">{p.title}</td>
+      <td className="px-6 py-3 cursor-pointer hover:text-blue-600 hover:underline">{p.title}</td>
       <td className="px-6 py-3">{p.year}</td>
 
       {isAdmin && (
         <td className="px-6 py-3">
           <button
-            onClick={() =>
-              handleDownload(p.file_url, `${p.last_name}-${p.first_name}.pdf`)
-            }
+            onClick={() => setShowUploadModal(true)}
             className="bg-[#355070] text-white px-4 py-1 rounded-md hover:bg-[#2b4058]"
           >
-            ⬆ Otpremi
+            📤 Otpremi
           </button>
         </td>
       )}
