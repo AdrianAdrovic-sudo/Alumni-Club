@@ -12,10 +12,10 @@ interface UploadThesisModalProps {
     isOpen: boolean;
     onClose: () => void;
     thesisContext?: {
-        ime: string;
-        prezime: string;
-        naziv: string;
-        datum: string;
+        first_name: string;
+        last_name: string;
+        title: string;
+        date: string;
         type: string;
     };
 }
@@ -133,10 +133,10 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
                 {thesisContext && (
                     <div className="px-6 pt-4 pb-2 bg-gray-50 border-b border-gray-200">
                         <p className="text-sm text-gray-600">
-                            <span className="font-semibold">Student:</span> {thesisContext.ime} {thesisContext.prezime}
+                            <span className="font-semibold">Student:</span> {thesisContext.first_name} {thesisContext.last_name}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="font-semibold">Originalni rad:</span> {thesisContext.naziv}
+                            <span className="font-semibold">Originalni rad:</span> {thesisContext.title}
                         </p>
                         <p className="text-sm text-gray-600">
                             <span className="font-semibold">Tip:</span>{' '}

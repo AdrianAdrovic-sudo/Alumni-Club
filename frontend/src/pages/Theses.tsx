@@ -328,7 +328,10 @@ export default function DiplomskiRadovi() {
       {isAdmin && (
         <td className="px-6 py-3">
           <button
-            onClick={() => setShowUploadModal(true)}
+            onClick={() => {
+            setSelectedThesis(p);
+            setShowUploadModal(true);
+            }}
             className="bg-[#355070] text-white px-4 py-1 rounded-md hover:bg-[#2b4058]"
           >
             📤 Otpremi
