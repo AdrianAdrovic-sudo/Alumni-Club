@@ -1,7 +1,9 @@
 import { FaSearch, FaFilter, FaUpload } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import UploadThesisModal from "../components/UploadThesisModal";
+import UploadCSVModal from "../components/UploadCSVModal";
 
 export default function DiplomskiRadovi() {
   const { user } = useAuth();
@@ -16,15 +18,19 @@ export default function DiplomskiRadovi() {
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
   const [showCsvModal, setShowCsvModal] = useState(false);
 
-  useEffect(() => {
+  const fetchTheses = () => {
   fetch("http://localhost:4000/api/theses")
     .then(res => res.json())
     .then(data => {
-    console.log("API DATA:", data);
-    setPodaci(data);
-})
+      console.log("API DATA:", data);
+      setPodaci(data);
+    })
     .catch(err => console.error(err));
-}, []);
+  };
+
+  useEffect(() => {
+    fetchTheses();
+  }, []);
 
   const handleDownload = (fileUrl: string, fileName: string) => {
     // Create a temporary anchor element to trigger download
@@ -63,7 +69,7 @@ export default function DiplomskiRadovi() {
 
   const [podaci, setPodaci] = useState<any[]>([]);
 
-
+  const navigate = useNavigate();
 
   // Calculate statistics
   const getStatsByYear = () => {
@@ -267,12 +273,9 @@ export default function DiplomskiRadovi() {
               id="csvUpload"
             />
 
-            <button
-              onClick={() => document.getElementById("csvUpload")?.click()}
-              className="flex items-center gap-2 px-3 py-2 -ml-110 bg-[#50C878] text-white rounded-md hover:bg-[#e6951a] transition-colors"
-            >
-            <FaUpload />
-            <span>Upload CSV</span>
+            <button onClick={() => setShowCsvModal(true)}
+              className="flex items-center gap-2 px-3 py-2 -ml-110 bg-[#50C878] text-white rounded-md hover:bg-[#e6951a] transition-colors">
+              Upload CSV
             </button>
           </div>
         )}
@@ -574,6 +577,12 @@ export default function DiplomskiRadovi() {
           setSelectedThesis(null);
         }}
         thesisContext={selectedThesis}
+      />
+
+      <UploadCSVModal
+        isOpen={showCsvModal}
+        onClose={() => setShowCsvModal(false)}
+        onUploadSuccess={fetchTheses}
       />
     </div>
   );
