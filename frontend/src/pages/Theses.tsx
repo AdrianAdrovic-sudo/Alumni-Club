@@ -165,19 +165,21 @@ export default function DiplomskiRadovi() {
         <>
           {/* SEARCH & FILTER */}
           <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-4 md:px-16 mt-8">
-        {/* Filter Button */}
         
-        <div className="relative w-full sm:w-auto">
-          <button
-            onClick={() => setShowFilter(!showFilter)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors w-full sm:w-auto justify-center sm:justify-start"
-          >
-            <FaFilter />
-            <span>Sortiraj</span>
-          </button>
+        {/* Left side - Filter and CSV Upload buttons */}
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {/* Filter Button */}
+          <div className="relative flex-1 sm:flex-initial">
+            <button
+              onClick={() => setShowFilter(!showFilter)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors w-full sm:w-auto justify-center sm:justify-start"
+            >
+              <FaFilter />
+              <span>Sortiraj</span>
+            </button>
 
-          {showFilter && (
-            <div className="absolute top-full left-0 mt-2 w-full sm:w-56 bg-[#294a70] rounded-lg shadow-xl overflow-hidden z-50">
+            {showFilter && (
+              <div className="absolute top-full left-0 mt-2 w-full sm:w-56 bg-[#294a70] rounded-lg shadow-xl overflow-hidden z-50">
               {/* Sort Options */}
               <div className="border-b border-[#1f3a5a] pb-2">
                 <div className="px-4 py-2 text-xs text-gray-300 font-semibold uppercase">Sortiraj</div>
@@ -243,20 +245,20 @@ export default function DiplomskiRadovi() {
               </div>
             </div>
           )}
-        </div>
+          </div>
 
-        {/* CSV Upload Button (Admin only) */}
-        {isAdmin && (
-          <div>
+          {/* CSV Upload Button (Admin only) */}
+          {isAdmin && (
             <button 
               onClick={() => setShowCsvModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#50C878] text-white rounded-md hover:bg-[#3da860] transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-[#50C878] text-white rounded-md hover:bg-[#3da860] transition-colors shadow-sm whitespace-nowrap"
             >
               📄 Upload CSV
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
+        {/* Right side - Search */}
         <div className="flex items-center w-full sm:w-96">
           <div className="relative w-full">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
