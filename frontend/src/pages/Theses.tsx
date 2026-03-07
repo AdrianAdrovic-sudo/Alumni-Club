@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import UploadThesisModal from "../components/UploadThesisModal";
 import UploadCSVModal from "../components/UploadCSVModal";
+import axios from "axios";
 
 export default function DiplomskiRadovi() {
   const { user } = useAuth();
@@ -17,15 +18,21 @@ export default function DiplomskiRadovi() {
   const [selectedThesis, setSelectedThesis] = useState<any>(null);
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
   const [showCsvModal, setShowCsvModal] = useState(false);
+  const [podaci, setPodaci] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const fetchTheses = () => {
-  fetch("http://localhost:4000/api/theses")
-    .then(res => res.json())
-    .then(data => {
-      console.log("API DATA:", data);
-      setPodaci(data);
-    })
-    .catch(err => console.error(err));
+  const fetchTheses = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("/api/theses");
+      console.log("API DATA:", response.data);
+      setPodaci(response.data);
+    } catch (err) {
+      console.error("Greška pri učitavanju radova:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -43,33 +50,21 @@ export default function DiplomskiRadovi() {
   };
 
   const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const formData = new FormData();
-  formData.append("file", file);
+    const formData = new FormData();
+    formData.append("file", file);
 
-  try {
-    const response = await fetch("http://localhost:4000/api/theses/upload-csv", {
-      method: "POST",
-      body: formData
-    });
-
-   const data = await response.json();
-   alert("Uspješno dodato " + data.count + " radova");
-   window.location.reload();
-
-  } catch (error) {
-    console.error("Greška pri uploadu:", error);
-    window.location.reload();
-  }
-
-
-};
-
-  const [podaci, setPodaci] = useState<any[]>([]);
-
-  const navigate = useNavigate();
+    try {
+      const response = await axios.post("/api/theses/upload-csv", formData);
+      alert("Uspješno dodato " + response.data.count + " radova");
+      fetchTheses(); // Refresh data
+    } catch (error) {
+      console.error("Greška pri uploadu:", error);
+      alert("Greška pri uploadu CSV fajla");
+    }
+  };
 
   // Calculate statistics
   const getStatsByYear = () => {
@@ -368,8 +363,7 @@ export default function DiplomskiRadovi() {
                   <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Ukupno radova</h3>
                   <span className="text-3xl">📚</span>
                 </div>
-                <p className="text-5xl font-bold text-[#294a70] mb-2">{podaci.length}</p>
-                <p className="text-sm text-gray-500">Svi tipovi studija</p>
+                <p className="text-5xl font-bold text-[#294a70]">{podaci.length}</p>
               </div>
 
               {/* Bachelors */}
@@ -378,11 +372,8 @@ export default function DiplomskiRadovi() {
                   <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Osnovne studije</h3>
                   <span className="text-3xl">🎓</span>
                 </div>
-                <p className="text-5xl font-bold text-blue-600 mb-2">
+                <p className="text-5xl font-bold text-blue-600">
                   {podaci.filter(p => p.type === "bachelors").length}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {((podaci.filter(p => p.type === "bachelors").length / podaci.length) * 100).toFixed(1)}% od ukupno
                 </p>
               </div>
 
@@ -392,11 +383,8 @@ export default function DiplomskiRadovi() {
                   <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Master studije</h3>
                   <span className="text-3xl">🎯</span>
                 </div>
-                <p className="text-5xl font-bold text-green-600 mb-2">
+                <p className="text-5xl font-bold text-green-600">
                   {podaci.filter(p => p.type === "masters").length}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {((podaci.filter(p => p.type === "masters").length / podaci.length) * 100).toFixed(1)}% od ukupno
                 </p>
               </div>
 
@@ -406,11 +394,8 @@ export default function DiplomskiRadovi() {
                   <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Specijalističke</h3>
                   <span className="text-3xl">⭐</span>
                 </div>
-                <p className="text-5xl font-bold text-purple-600 mb-2">
+                <p className="text-5xl font-bold text-purple-600">
                   {podaci.filter(p => p.type === "specialist").length}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {((podaci.filter(p => p.type === "specialist").length / podaci.length) * 100).toFixed(1)}% od ukupno
                 </p>
               </div>
             </div>

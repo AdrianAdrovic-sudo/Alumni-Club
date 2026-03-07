@@ -25,19 +25,17 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
       try {
 
         const thesesData = results.map((row) => ({
-
           first_name: (row.first_name || "").trim(),
           last_name: (row.last_name || "").trim(),
           title: (row.title || "").trim(),
           type: (row.type || "").trim().toLowerCase(),
-
           year: row.year && !isNaN(Number(row.year))
             ? Number(row.year)
             : null,
-
           file_url: (row.file_url || "").trim(),
-
-          user_id: 1
+          user_id: row.user_id && !isNaN(Number(row.user_id))
+            ? Number(row.user_id)
+            : 1
         }));
 
         await prisma.theses.createMany({
@@ -68,13 +66,14 @@ router.get("/", async (req, res) => {
       }
     });
 
-    const formatted = theses.map(t => ({
-      ime: t.first_name ?? "",
-      prezime: t.last_name ?? "",
-      naziv: t.title ?? "",
-      datum: t.year ?? "",
-      type: t.type ?? "",
-      fileUrl: t.file_url ?? ""
+    const formatted = theses.map((t: any) => ({
+      ime: t.first_name,
+      prezime: t.last_name,
+      naziv: t.title,
+      datum: t.year ? `01.07.${t.year}.` : "",
+      type: t.type,
+      fileUrl: t.file_url,
+      year: t.year
     }));
 
     res.json(formatted);
