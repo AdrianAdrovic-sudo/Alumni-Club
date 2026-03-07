@@ -7,6 +7,7 @@ export default function DiplomskiRadovi() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
+  const [activeTab, setActiveTab] = useState<"search" | "statistics">("search");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("datum-desc");
   const [showFilter, setShowFilter] = useState(false);
@@ -83,8 +84,39 @@ export default function DiplomskiRadovi() {
         </p>
       </div>
 
-      {/* SEARCH & FILTER */}
-      <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-4 md:px-16 mt-8">
+      {/* TAB NAVIGATION */}
+      <div className="w-full bg-gradient-to-b from-gray-50 to-white py-6">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="bg-white rounded-xl shadow-lg p-2 flex gap-2 border border-gray-200">
+            <button
+              onClick={() => setActiveTab("search")}
+              className={`flex-1 px-6 py-3 text-sm md:text-base font-semibold rounded-lg transition-all duration-300 ${
+                activeTab === "search"
+                  ? "bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white shadow-md transform scale-105"
+                  : "bg-transparent text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              🔍 Pretraga
+            </button>
+            <button
+              onClick={() => setActiveTab("statistics")}
+              className={`flex-1 px-6 py-3 text-sm md:text-base font-semibold rounded-lg transition-all duration-300 ${
+                activeTab === "statistics"
+                  ? "bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white shadow-md transform scale-105"
+                  : "bg-transparent text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              📊 Statistika
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* SEARCH TAB CONTENT */}
+      {activeTab === "search" && (
+        <>
+          {/* SEARCH & FILTER */}
+          <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-4 md:px-16 mt-8">
         {/* Filter Button */}
         <div className="relative w-full sm:w-auto">
           <button
@@ -257,6 +289,69 @@ export default function DiplomskiRadovi() {
           </div>
         </div>
       </div>
+        </>
+      )}
+
+      {/* STATISTICS TAB CONTENT */}
+      {activeTab === "statistics" && (
+        <div className="w-full flex-1 px-4 md:px-8 py-8">
+          <div className="w-full max-w-6xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-semibold text-[#294a70] mb-6">
+              Statistika diplomskih radova
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Total Theses */}
+              <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-lg font-semibold mb-2">Ukupno radova</h3>
+                <p className="text-4xl font-bold text-[#ffab1f]">{podaci.length}</p>
+              </div>
+
+              {/* Bachelors */}
+              <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-lg font-semibold mb-2">Osnovne studije</h3>
+                <p className="text-4xl font-bold text-[#ffab1f]">
+                  {podaci.filter(p => p.type === "bachelors").length}
+                </p>
+              </div>
+
+              {/* Masters */}
+              <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-lg font-semibold mb-2">Master studije</h3>
+                <p className="text-4xl font-bold text-[#ffab1f]">
+                  {podaci.filter(p => p.type === "masters").length}
+                </p>
+              </div>
+
+              {/* Specialist */}
+              <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-lg font-semibold mb-2">Specijalističke studije</h3>
+                <p className="text-4xl font-bold text-[#ffab1f]">
+                  {podaci.filter(p => p.type === "specialist").length}
+                </p>
+              </div>
+
+              {/* Most Recent */}
+              <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow md:col-span-2">
+                <h3 className="text-lg font-semibold mb-2">Najnoviji rad</h3>
+                <p className="text-xl font-medium">
+                  {sortirani[0]?.naziv || "N/A"}
+                </p>
+                <p className="text-sm text-gray-300 mt-1">
+                  {sortirani[0]?.ime} {sortirani[0]?.prezime} - {sortirani[0]?.datum}
+                </p>
+              </div>
+            </div>
+
+            {/* Additional Info */}
+            <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-gray-700">
+                📊 Statistika se automatski ažurira na osnovu dostupnih diplomskih radova u bazi.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Upload Thesis Modal */}
       <UploadThesisModal
