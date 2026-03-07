@@ -392,18 +392,15 @@ export default function DiplomskiRadovi() {
                       {/* Year Header */}
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="text-xl font-bold text-[#294a70]">{year}. godina</h4>
-                        <span className="text-2xl font-bold text-[#ffab1f]">{stats.total} radova</span>
+                        <span className="text-2xl font-bold text-[#294a70]">{stats.total} radova</span>
                       </div>
                       
                       {/* Progress Bar */}
-                      <div className="w-full bg-gray-200 rounded-full h-8 mb-4 overflow-hidden shadow-inner">
+                      <div className="w-full bg-gray-200 rounded-full h-6 mb-4 overflow-hidden shadow-inner">
                         <div 
-                          className="bg-gradient-to-r from-[#294a70] via-[#3d5a7f] to-[#4a6b8f] h-full rounded-full flex items-center justify-end pr-3 transition-all duration-500"
+                          className="bg-gradient-to-r from-[#294a70] via-[#3d5a7f] to-[#4a6b8f] h-full rounded-full transition-all duration-500"
                           style={{ width: `${percentage}%` }}
                         >
-                          <span className="text-white text-xs font-semibold">
-                            {percentage.toFixed(0)}%
-                          </span>
                         </div>
                       </div>
                       
@@ -489,6 +486,78 @@ export default function DiplomskiRadovi() {
                   <div className="w-5 h-5 bg-purple-500 border-2 border-purple-700 rounded shadow-sm"></div>
                   <span className="text-sm font-semibold text-gray-700">Specijalističke studije</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Detailed Statistics Table */}
+            <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8">
+              <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                <span>📋</span> Detaljna tabela statistike
+              </h3>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-[#294a70] to-[#3d5a7f] text-white">
+                      <th className="px-4 py-3 text-left font-semibold border-r border-white/20">Godina</th>
+                      <th className="px-4 py-3 text-center font-semibold border-r border-white/20">Osnovne studije</th>
+                      <th className="px-4 py-3 text-center font-semibold border-r border-white/20">Master studije</th>
+                      <th className="px-4 py-3 text-center font-semibold border-r border-white/20">Specijalističke</th>
+                      <th className="px-4 py-3 text-center font-semibold">Ukupno</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {years.map((year, index) => {
+                      const stats = yearStats[year];
+                      return (
+                        <tr 
+                          key={year} 
+                          className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50 transition-colors`}
+                        >
+                          <td className="px-4 py-3 font-bold text-[#294a70] border-b border-gray-200">
+                            {year}. godina
+                          </td>
+                          <td className="px-4 py-3 text-center border-b border-gray-200">
+                            <span className="inline-block bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full">
+                              {stats.bachelors}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center border-b border-gray-200">
+                            <span className="inline-block bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full">
+                              {stats.masters}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center border-b border-gray-200">
+                            <span className="inline-block bg-purple-100 text-purple-700 font-semibold px-3 py-1 rounded-full">
+                              {stats.specialist}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center border-b border-gray-200">
+                            <span className="inline-block bg-[#294a70] text-white font-bold px-4 py-1 rounded-full">
+                              {stats.total}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {/* Total Row */}
+                    <tr className="bg-gradient-to-r from-[#294a70] to-[#3d5a7f] text-white font-bold">
+                      <td className="px-4 py-4 text-left">UKUPNO</td>
+                      <td className="px-4 py-4 text-center text-lg">
+                        {podaci.filter(p => p.type === "bachelors").length}
+                      </td>
+                      <td className="px-4 py-4 text-center text-lg">
+                        {podaci.filter(p => p.type === "masters").length}
+                      </td>
+                      <td className="px-4 py-4 text-center text-lg">
+                        {podaci.filter(p => p.type === "specialist").length}
+                      </td>
+                      <td className="px-4 py-4 text-center text-xl">
+                        {podaci.length}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
