@@ -302,9 +302,9 @@ export default function DiplomskiRadovi() {
 <tbody>
   {sortirani.map((p, idx) => (
     <tr key={idx} className="border-b hover:bg-gray-50">
-      <td className="px-6 py-3">{p.first_name}</td>
-      <td className="px-6 py-3">{p.last_name}</td>
-      <td className="px-6 py-3 cursor-pointer hover:text-blue-600 hover:underline">{p.title}</td>
+      <td className="px-6 py-3">{p.ime}</td>
+      <td className="px-6 py-3">{p.prezime}</td>
+      <td className="px-6 py-3 cursor-pointer hover:text-blue-600 hover:underline">{p.naziv}</td>
       <td className="px-6 py-3">{p.year}</td>
 
       {isAdmin && (
