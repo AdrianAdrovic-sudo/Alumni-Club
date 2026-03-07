@@ -324,53 +324,53 @@ export default function DiplomskiRadovi() {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
               {/* Total Theses */}
-              <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide opacity-90">Ukupno radova</h3>
-                  <span className="text-2xl">📚</span>
+              <div className="bg-white border-2 border-[#294a70] p-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Ukupno radova</h3>
+                  <span className="text-3xl">📚</span>
                 </div>
-                <p className="text-5xl font-bold text-[#ffab1f] mb-1">{podaci.length}</p>
-                <p className="text-xs text-gray-300">Svi tipovi studija</p>
+                <p className="text-5xl font-bold text-[#294a70] mb-2">{podaci.length}</p>
+                <p className="text-sm text-gray-500">Svi tipovi studija</p>
               </div>
 
               {/* Bachelors */}
-              <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide opacity-90">Osnovne</h3>
-                  <span className="text-2xl">🎓</span>
+              <div className="bg-white border-2 border-blue-400 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Osnovne studije</h3>
+                  <span className="text-3xl">🎓</span>
                 </div>
-                <p className="text-5xl font-bold text-[#ffab1f] mb-1">
+                <p className="text-5xl font-bold text-blue-600 mb-2">
                   {podaci.filter(p => p.type === "bachelors").length}
                 </p>
-                <p className="text-xs text-gray-300">
+                <p className="text-sm text-gray-500">
                   {((podaci.filter(p => p.type === "bachelors").length / podaci.length) * 100).toFixed(1)}% od ukupno
                 </p>
               </div>
 
               {/* Masters */}
-              <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide opacity-90">Master</h3>
-                  <span className="text-2xl">🎯</span>
+              <div className="bg-white border-2 border-green-400 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Master studije</h3>
+                  <span className="text-3xl">🎯</span>
                 </div>
-                <p className="text-5xl font-bold text-[#ffab1f] mb-1">
+                <p className="text-5xl font-bold text-green-600 mb-2">
                   {podaci.filter(p => p.type === "masters").length}
                 </p>
-                <p className="text-xs text-gray-300">
+                <p className="text-sm text-gray-500">
                   {((podaci.filter(p => p.type === "masters").length / podaci.length) * 100).toFixed(1)}% od ukupno
                 </p>
               </div>
 
               {/* Specialist */}
-              <div className="bg-gradient-to-br from-[#294a70] to-[#324D6B] text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide opacity-90">Specijalističke</h3>
-                  <span className="text-2xl">⭐</span>
+              <div className="bg-white border-2 border-purple-400 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Specijalističke</h3>
+                  <span className="text-3xl">⭐</span>
                 </div>
-                <p className="text-5xl font-bold text-[#ffab1f] mb-1">
+                <p className="text-5xl font-bold text-purple-600 mb-2">
                   {podaci.filter(p => p.type === "specialist").length}
                 </p>
-                <p className="text-xs text-gray-300">
+                <p className="text-sm text-gray-500">
                   {((podaci.filter(p => p.type === "specialist").length / podaci.length) * 100).toFixed(1)}% od ukupno
                 </p>
               </div>
@@ -398,7 +398,7 @@ export default function DiplomskiRadovi() {
                       {/* Progress Bar */}
                       <div className="w-full bg-gray-200 rounded-full h-8 mb-4 overflow-hidden shadow-inner">
                         <div 
-                          className="bg-gradient-to-r from-[#294a70] to-[#ffab1f] h-full rounded-full flex items-center justify-end pr-3 transition-all duration-500"
+                          className="bg-gradient-to-r from-[#294a70] via-[#3d5a7f] to-[#4a6b8f] h-full rounded-full flex items-center justify-end pr-3 transition-all duration-500"
                           style={{ width: `${percentage}%` }}
                         >
                           <span className="text-white text-xs font-semibold">
@@ -409,17 +409,17 @@ export default function DiplomskiRadovi() {
                       
                       {/* Breakdown by Type */}
                       <div className="grid grid-cols-3 gap-4">
-                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                          <p className="text-xs text-gray-600 mb-1">Osnovne studije</p>
-                          <p className="text-2xl font-bold text-[#294a70]">{stats.bachelors}</p>
+                        <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-300 hover:border-blue-500 transition-colors">
+                          <p className="text-xs font-semibold text-gray-600 mb-1">Osnovne studije</p>
+                          <p className="text-3xl font-bold text-blue-600">{stats.bachelors}</p>
                         </div>
-                        <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                          <p className="text-xs text-gray-600 mb-1">Master studije</p>
-                          <p className="text-2xl font-bold text-[#294a70]">{stats.masters}</p>
+                        <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300 hover:border-green-500 transition-colors">
+                          <p className="text-xs font-semibold text-gray-600 mb-1">Master studije</p>
+                          <p className="text-3xl font-bold text-green-600">{stats.masters}</p>
                         </div>
-                        <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
-                          <p className="text-xs text-gray-600 mb-1">Specijalističke</p>
-                          <p className="text-2xl font-bold text-[#294a70]">{stats.specialist}</p>
+                        <div className="bg-purple-50 rounded-lg p-4 border-2 border-purple-300 hover:border-purple-500 transition-colors">
+                          <p className="text-xs font-semibold text-gray-600 mb-1">Specijalističke</p>
+                          <p className="text-3xl font-bold text-purple-600">{stats.specialist}</p>
                         </div>
                       </div>
                     </div>
@@ -431,10 +431,10 @@ export default function DiplomskiRadovi() {
             {/* Visual Chart */}
             <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
               <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
-                <span>📈</span> Grafički prikaz
+                <span>📈</span> Grafički prikaz po godinama
               </h3>
               
-              <div className="flex items-end justify-between gap-4 h-80 border-l-2 border-b-2 border-gray-300 pl-4 pb-4">
+              <div className="flex items-end justify-between gap-3 md:gap-4 h-80 border-l-4 border-b-4 border-[#294a70] pl-4 pb-4 bg-gradient-to-t from-gray-50 to-white rounded-bl-lg">
                 {years.sort((a, b) => a - b).map(year => {
                   const stats = yearStats[year];
                   const heightPercentage = (stats.total / maxThesesInYear) * 100;
@@ -443,40 +443,51 @@ export default function DiplomskiRadovi() {
                     <div key={year} className="flex-1 flex flex-col items-center gap-2">
                       {/* Bar */}
                       <div className="w-full flex flex-col items-center">
-                        <span className="text-sm font-bold text-[#294a70] mb-2">{stats.total}</span>
+                        <span className="text-sm md:text-base font-bold text-[#294a70] mb-2 bg-white px-2 py-1 rounded shadow-sm">{stats.total}</span>
                         <div 
-                          className="w-full bg-gradient-to-t from-[#294a70] to-[#ffab1f] rounded-t-lg shadow-lg hover:shadow-xl transition-all hover:scale-105 cursor-pointer relative group"
-                          style={{ height: `${heightPercentage}%`, minHeight: '40px' }}
+                          className="w-full bg-gradient-to-t from-[#294a70] via-[#3d5a7f] to-[#5a7fa0] rounded-t-lg shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer relative group border-2 border-[#294a70]"
+                          style={{ height: `${heightPercentage}%`, minHeight: '50px' }}
                         >
                           {/* Tooltip on hover */}
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-2 px-3 whitespace-nowrap z-10">
-                            <div className="font-semibold mb-1">{year}. godina</div>
-                            <div>Osnovne: {stats.bachelors}</div>
-                            <div>Master: {stats.masters}</div>
-                            <div>Spec.: {stats.specialist}</div>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 hidden group-hover:block bg-[#294a70] text-white text-xs rounded-lg py-3 px-4 whitespace-nowrap z-10 shadow-xl border-2 border-white">
+                            <div className="font-bold mb-2 text-sm border-b border-white/30 pb-1">{year}. godina</div>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 bg-blue-400 rounded-full"></span>
+                                <span>Osnovne: {stats.bachelors}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 bg-green-400 rounded-full"></span>
+                                <span>Master: {stats.masters}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 bg-purple-400 rounded-full"></span>
+                                <span>Spec.: {stats.specialist}</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                       {/* Year Label */}
-                      <span className="text-sm font-semibold text-gray-700 mt-2">{year}</span>
+                      <span className="text-xs md:text-sm font-bold text-[#294a70] mt-2 bg-gray-100 px-3 py-1 rounded-full">{year}</span>
                     </div>
                   );
                 })}
               </div>
               
               {/* Legend */}
-              <div className="mt-6 flex flex-wrap gap-4 justify-center">
+              <div className="mt-8 flex flex-wrap gap-6 justify-center bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-200 border border-blue-400 rounded"></div>
-                  <span className="text-sm text-gray-700">Osnovne studije</span>
+                  <div className="w-5 h-5 bg-blue-500 border-2 border-blue-700 rounded shadow-sm"></div>
+                  <span className="text-sm font-semibold text-gray-700">Osnovne studije</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-200 border border-green-400 rounded"></div>
-                  <span className="text-sm text-gray-700">Master studije</span>
+                  <div className="w-5 h-5 bg-green-500 border-2 border-green-700 rounded shadow-sm"></div>
+                  <span className="text-sm font-semibold text-gray-700">Master studije</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-purple-200 border border-purple-400 rounded"></div>
-                  <span className="text-sm text-gray-700">Specijalističke studije</span>
+                  <div className="w-5 h-5 bg-purple-500 border-2 border-purple-700 rounded shadow-sm"></div>
+                  <span className="text-sm font-semibold text-gray-700">Specijalističke studije</span>
                 </div>
               </div>
             </div>
