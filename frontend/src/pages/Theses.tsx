@@ -1,5 +1,5 @@
 import { FaSearch, FaFilter, FaUpload } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import UploadThesisModal from "../components/UploadThesisModal";
 
@@ -15,6 +15,16 @@ export default function DiplomskiRadovi() {
   const [selectedThesis, setSelectedThesis] = useState<any>(null);
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
   const [showCsvModal, setShowCsvModal] = useState(false);
+
+  useEffect(() => {
+  fetch("http://localhost:4000/api/theses")
+    .then(res => res.json())
+    .then(data => {
+    console.log("API DATA:", data);
+    setPodaci(data);
+})
+    .catch(err => console.error(err));
+}, []);
 
   const handleDownload = (fileUrl: string, fileName: string) => {
     // Create a temporary anchor element to trigger download
@@ -34,31 +44,24 @@ export default function DiplomskiRadovi() {
   formData.append("file", file);
 
   try {
-    const response = await fetch("http://localhost:5000/api/theses/upload-csv", {
+    const response = await fetch("http://localhost:4000/api/theses/upload-csv", {
       method: "POST",
       body: formData
     });
 
-    const data = await response.json();
-    console.log("CSV upload uspješan:", data);
+   const data = await response.json();
+   alert("Uspješno dodato " + data.count + " radova");
 
   } catch (error) {
     console.error("Greška pri uploadu:", error);
   }
+
+
 };
 
-  const podaci = [
-    { ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009.", fileUrl: "/theses/zizic-milos.pdf", type: "bachelors", year: 2009 },
-    { ime: "Tripo", prezime: "Matijević", naziv: "Prikupljanje činjenica za informacioni sistem studentske službe", datum: "10.07.2010.", fileUrl: "/theses/matijevic-tripo.pdf", type: "masters", year: 2010 },
-    { ime: "Zoran", prezime: "Ćorović", naziv: "Model, objekti i veze informacionog sistema studentske službe", datum: "10.07.2010.", fileUrl: "/theses/corovic-zoran.pdf", type: "bachelors", year: 2010 },
-    { ime: "Dženan", prezime: "Strujić", naziv: "Relacioni model informacionog sistema studentske službe", datum: "10.07.2015.", fileUrl: "/theses/strujic-dzenan.pdf", type: "specialist", year: 2015 },
-    { ime: "Novak", prezime: "Radulović", naziv: "Forme i izvještaj informacionog sistema studentske službe", datum: "10.07.2015.", fileUrl: "/theses/radulovic-novak.pdf", type: "masters", year: 2015 },
-    { ime: "Igor", prezime: "Pekić", naziv: "Sigurnost informacionog sistema studentske službe", datum: "10.07.2018.", fileUrl: "/theses/pekic-igor.pdf", type: "bachelors", year: 2018 },
-    { ime: "Ana", prezime: "Jovanović", naziv: "Web aplikacija za studentsku službu", datum: "10.07.2020.", fileUrl: "/theses/jovanovic-ana.pdf", type: "specialist", year: 2020 },
-    { ime: "Jelena", prezime: "Marković", naziv: "Implementacija informacionog sistema studentske službe", datum: "10.07.2022.", fileUrl: "/theses/markovic-jelena.pdf", type: "masters", year: 2022 },
-    { ime: "Marko", prezime: "Nikolić", naziv: "Testiranje informacionog sistema studentske službe", datum: "10.07.2023.", fileUrl: "/theses/nikolic-marko.pdf", type: "bachelors", year: 2023 },
-    { ime: "Ivana", prezime: "Stojanović", naziv: "Održavanje informacionog sistema studentske službe", datum: "10.07.2024.", fileUrl: "/theses/stojanovic-ivana.pdf", type: "specialist", year: 2024 },
-  ];
+  const [podaci, setPodaci] = useState<any[]>([]);
+
+
 
   // Calculate statistics
   const getStatsByYear = () => {
@@ -83,10 +86,15 @@ export default function DiplomskiRadovi() {
 
   // Filtriranje
   const filtrirani = podaci.filter((p) => {
+
+    const ime = p.ime || "";
+    const prezime = p.prezime || "";
+    const naziv = p.naziv || "";
+
     const matchesSearch =
-      p.ime.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.prezime.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.naziv.toLowerCase().includes(searchTerm.toLowerCase());
+      ime.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      prezime.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      naziv.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
 
@@ -95,21 +103,27 @@ export default function DiplomskiRadovi() {
 
   // Sortiranje
   const sortirani = [...filtrirani].sort((a, b) => {
-    switch (sortBy) {
-      case "datum-asc":
-        return new Date(a.datum.split('.').reverse().join('-')).getTime() - new Date(b.datum.split('.').reverse().join('-')).getTime();
-      case "datum-desc":
-        return new Date(b.datum.split('.').reverse().join('-')).getTime() - new Date(a.datum.split('.').reverse().join('-')).getTime();
-      case "ime-asc":
-        return a.ime.localeCompare(b.ime);
-      case "prezime-asc":
-        return a.prezime.localeCompare(b.prezime);
-      case "naziv-asc":
-        return a.naziv.localeCompare(b.naziv);
-      default:
-        return 0;
-    }
-  });
+  switch (sortBy) {
+
+    case "datum-asc":
+      return (a.datum || 0) - (b.datum || 0);
+
+    case "datum-desc":
+      return (b.datum || 0) - (a.datum || 0);
+
+    case "ime-asc":
+      return (a.ime || "").localeCompare(b.ime || "");
+
+    case "prezime-asc":
+      return (a.prezime || "").localeCompare(b.prezime || "");
+
+    case "naziv-asc":
+      return (a.naziv || "").localeCompare(b.naziv || "");
+
+    default:
+      return 0;
+  }
+});
 
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
@@ -253,7 +267,7 @@ export default function DiplomskiRadovi() {
 
             <button
               onClick={() => document.getElementById("csvUpload")?.click()}
-              className="flex items-center gap-2 px-3 py-2 -ml-174 bg-[#50C878] text-white rounded-md hover:bg-[#e6951a] transition-colors"
+              className="flex items-center gap-2 px-3 py-2 -ml-110 bg-[#50C878] text-white rounded-md hover:bg-[#e6951a] transition-colors"
             >
             <FaUpload />
             <span>Upload CSV</span>
@@ -287,68 +301,43 @@ export default function DiplomskiRadovi() {
           <div className="shadow-md rounded-2xl overflow-hidden bg-white">
             <div className="w-full overflow-x-auto">
               <table className="w-full border-collapse table-auto min-w-[600px]">
-                <thead className="bg-[#294a70] text-white">
+                <thead className="bg-[#355070] text-white">
                   <tr>
-                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
-                      Ime
+                    <th className="px-6 py-3 text-left font-semibold">Ime</th>
+                    <th className="px-6 py-3 text-left font-semibold">Prezime</th>
+                    <th className="px-6 py-3 text-left font-semibold">Naziv diplomskog rada</th>
+                    <th className="px-6 py-3 text-left font-semibold">Datum diplomiranja</th>
+
+                  {isAdmin && (
+                    <th className="px-6 py-3 text-left font-semibold">
+                      Akcije
                     </th>
-                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
-                      Prezime
-                    </th>
-                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
-                      Naziv diplomskog rada
-                    </th>
-                    <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold hidden sm:table-cell">
-                      Datum diplomiranja
-                    </th>
-                    {isAdmin && (
-                      <th className="px-2 sm:px-4 py-3 text-left text-sm sm:text-base font-semibold">
-                        Akcije
-                      </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortirani.map((p, idx) => (
-                    <tr
-                      key={idx}
-                      className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                    >
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
-                        {p.ime}
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
-                        {p.prezime}
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200">
-                        <button
-                          onClick={() => handleDownload(p.fileUrl, `${p.prezime}-${p.ime}.pdf`)}
-                          className="text-gray-800 hover:text-[#294a70] cursor-pointer text-left bg-transparent border-none p-0 m-0 font-medium transition-colors hover:underline"
-                          title="Kliknite da preuzmete rad"
-                        >
-                          {p.naziv}
-                        </button>
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-sm sm:text-base text-gray-800 border-b border-gray-200 hidden sm:table-cell">
-                        {p.datum}
-                      </td>
-                      {isAdmin && (
-                        <td className="px-2 sm:px-4 py-3 text-sm sm:text-base border-b border-gray-200">
-                          <button
-                            onClick={() => {
-                              setSelectedThesis(p);
-                              setShowUploadModal(true);
-                            }}
-                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors text-sm font-medium"
-                          >
-                            <FaUpload size={12} />
-                            <span className="hidden sm:inline">Otpremi</span>
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
+                  )}
+                </tr>
+              </thead>
+<tbody>
+  {sortirani.map((p, idx) => (
+    <tr key={idx} className="border-b hover:bg-gray-50">
+      <td className="px-6 py-3">{p.first_name}</td>
+      <td className="px-6 py-3">{p.last_name}</td>
+      <td className="px-6 py-3">{p.title}</td>
+      <td className="px-6 py-3">{p.year}</td>
+
+      {isAdmin && (
+        <td className="px-6 py-3">
+          <button
+            onClick={() =>
+              handleDownload(p.file_url, `${p.last_name}-${p.first_name}.pdf`)
+            }
+            className="bg-[#355070] text-white px-4 py-1 rounded-md hover:bg-[#2b4058]"
+          >
+            ⬆ Otpremi
+          </button>
+        </td>
+      )}
+    </tr>
+  ))}
+</tbody>
               </table>
             </div>
           </div>
