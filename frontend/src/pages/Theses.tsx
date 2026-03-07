@@ -14,6 +14,7 @@ export default function DiplomskiRadovi() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedThesis, setSelectedThesis] = useState<any>(null);
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
+  const [showCsvModal, setShowCsvModal] = useState(false);
 
   const handleDownload = (fileUrl: string, fileName: string) => {
     // Create a temporary anchor element to trigger download
@@ -24,6 +25,27 @@ export default function DiplomskiRadovi() {
     link.click();
     document.body.removeChild(link);
   };
+
+  const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch("http://localhost:5000/api/theses/upload-csv", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+    console.log("CSV upload uspješan:", data);
+
+  } catch (error) {
+    console.error("Greška pri uploadu:", error);
+  }
+};
 
   const podaci = [
     { ime: "Miloš", prezime: "Žižić", naziv: "Informacioni sistem Rent-a cara", datum: "10.07.2009.", fileUrl: "/theses/zizic-milos.pdf", type: "bachelors", year: 2009 },
@@ -139,6 +161,7 @@ export default function DiplomskiRadovi() {
           {/* SEARCH & FILTER */}
           <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-4 md:px-16 mt-8">
         {/* Filter Button */}
+        
         <div className="relative w-full sm:w-auto">
           <button
             onClick={() => setShowFilter(!showFilter)}
@@ -216,6 +239,27 @@ export default function DiplomskiRadovi() {
             </div>
           )}
         </div>
+
+        {/* CSV Upload Button (Admin only) */}
+        {isAdmin && (
+          <div>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleCsvUpload}
+              className="hidden"
+              id="csvUpload"
+            />
+
+            <button
+              onClick={() => document.getElementById("csvUpload")?.click()}
+              className="flex items-center gap-2 px-3 py-2 -ml-174 bg-[#50C878] text-white rounded-md hover:bg-[#e6951a] transition-colors"
+            >
+            <FaUpload />
+            <span>Upload CSV</span>
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center w-full sm:w-96">
           <div className="relative w-full">
