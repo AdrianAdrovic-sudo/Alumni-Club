@@ -13,9 +13,11 @@ import enrollRoutes from "./routes/enroll.routes";
 import eventsRoutes from "./routes/events.routes";
 import contactRoutes from "./routes/contact.routes";
 import adminInquiriesRoutes from "./routes/admin.inquiries.routes";
+import thesesRoutes from "./routes/theses.routes";
 
 import { getMyProfile, updateMyProfile } from "./controllers/users.controller";
 import { authenticate } from "./middlewares/auth.middleware";
+
 
 const app = express();
 
@@ -71,10 +73,12 @@ app.use("/api/users", userRoutes);
 app.use("/api/events", eventsRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/admin/inquiries", adminInquiriesRoutes);
+app.use("/api/theses", thesesRoutes);
 
 // Blog & enrollment routes
 app.use("/api", postsRoutes);
 app.use("/api", enrollRoutes);
+
 
 // Profile routes
 app.get("/api/profile", authenticate, getMyProfile);
