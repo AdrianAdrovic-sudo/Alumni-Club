@@ -376,57 +376,8 @@ export default function DiplomskiRadovi() {
               </div>
             </div>
 
-            {/* Statistics by Year */}
-            <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8">
-              <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
-                <span>📅</span> Statistika po godinama
-              </h3>
-              
-              <div className="space-y-6">
-                {years.map(year => {
-                  const stats = yearStats[year];
-                  const percentage = (stats.total / maxThesesInYear) * 100;
-                  
-                  return (
-                    <div key={year} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
-                      {/* Year Header */}
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-xl font-bold text-[#294a70]">{year}. godina</h4>
-                        <span className="text-2xl font-bold text-[#294a70]">{stats.total} radova</span>
-                      </div>
-                      
-                      {/* Progress Bar */}
-                      <div className="w-full bg-gray-200 rounded-full h-6 mb-4 overflow-hidden shadow-inner">
-                        <div 
-                          className="bg-gradient-to-r from-[#294a70] via-[#3d5a7f] to-[#4a6b8f] h-full rounded-full transition-all duration-500"
-                          style={{ width: `${percentage}%` }}
-                        >
-                        </div>
-                      </div>
-                      
-                      {/* Breakdown by Type */}
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-300 hover:border-blue-500 transition-colors">
-                          <p className="text-xs font-semibold text-gray-600 mb-1">Osnovne studije</p>
-                          <p className="text-3xl font-bold text-blue-600">{stats.bachelors}</p>
-                        </div>
-                        <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300 hover:border-green-500 transition-colors">
-                          <p className="text-xs font-semibold text-gray-600 mb-1">Master studije</p>
-                          <p className="text-3xl font-bold text-green-600">{stats.masters}</p>
-                        </div>
-                        <div className="bg-purple-50 rounded-lg p-4 border-2 border-purple-300 hover:border-purple-500 transition-colors">
-                          <p className="text-xs font-semibold text-gray-600 mb-1">Specijalističke</p>
-                          <p className="text-3xl font-bold text-purple-600">{stats.specialist}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Visual Chart */}
-            <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8">
               <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
                 <span>📈</span> Grafički prikaz po godinama
               </h3>
