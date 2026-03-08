@@ -67,10 +67,11 @@ router.get("/", async (req, res) => {
     });
 
     const formatted = theses.map((t: any) => ({
-      ime: t.first_name,
-      prezime: t.last_name,
-      naziv: t.title,
-      datum: t.year ? `01.07.${t.year}.` : "",
+      id: t.id,
+      first_name: t.first_name,
+      last_name: t.last_name,
+      title: t.title,
+      date: t.year ? `01.07.${t.year}.` : "",
       type: t.type,
       fileUrl: t.file_url,
       year: t.year
@@ -83,6 +84,37 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Greška pri dohvatanju radova" });
   }
 
+});
+
+const pdfUpload = multer({ dest: "uploads/pdfs/" });
+
+router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
+  try {
+
+    const thesisId = Number(req.params.id);
+
+    if (!req.file) {
+      return res.status(400).json({ message: "PDF nije poslat" });
+    }
+
+    const fileUrl = `http://localhost:4000/uploads/pdfs/${req.file.filename}`;
+
+    await prisma.theses.update({
+      where: { id: thesisId },
+      data: {
+        file_url: fileUrl
+      }
+    });
+
+    res.json({
+      message: "PDF uspješno otpremljen",
+      fileUrl
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Greška pri uploadu PDF" });
+  }
 });
 
 export default router;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { Navigate } from 'react-router-dom';
 
 interface UploadThesisFormData {
     thesisType: 'bachelors' | 'masters' | 'specialist' | '';
@@ -12,6 +13,7 @@ interface UploadThesisModalProps {
     isOpen: boolean;
     onClose: () => void;
     thesisContext?: {
+        id: number;
         first_name: string;
         last_name: string;
         title: string;
@@ -51,50 +53,62 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        // Validate required fields
-        const newErrors: { thesisType?: string; file?: string } = {};
+    const newErrors: { thesisType?: string; file?: string } = {};
 
-        if (!formData.thesisType) {
-            newErrors.thesisType = 'Tip rada je obavezan';
+    if (!formData.thesisType) {
+        newErrors.thesisType = 'Tip rada je obavezan';
+    }
+
+    if (!formData.file) {
+        newErrors.file = 'PDF fajl je obavezan';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+    }
+
+    try {
+
+        const form = new FormData();
+        form.append("file", formData.file!);
+        form.append("type", formData.thesisType);
+
+        if (formData.title) form.append("title", formData.title);
+        if (formData.year) form.append("year", formData.year);
+
+        const response = await fetch(
+            `http://localhost:4000/api/theses/upload-pdf/${thesisContext?.id}`,
+            {
+                method: "POST",
+                body: form
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message);
         }
 
-        if (!formData.file) {
-            newErrors.file = 'PDF fajl je obavezan';
-        }
+        alert("Rad je uspješno otpremljen");
 
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
+    
 
-        // Prepare data for console output
-        const outputData = {
-            thesisType: formData.thesisType,
-            file: formData.file,
-            fileName: formData.file?.name,
-            fileSize: formData.file?.size,
-            ...(formData.title && { title: formData.title }),
-            ...(formData.year && { year: parseInt(formData.year) }),
-            ...(thesisContext && { selectedThesis: thesisContext }),
-        };
+        handleClose();
 
-        console.log('=== Slanje forme za otpremanje rada ===');
-        console.log(outputData);
-        console.log('=====================================');
+        
 
-        // Reset form and close modal
-        setFormData({
-            thesisType: '',
-            file: null,
-            title: '',
-            year: '',
-        });
-        setErrors({});
-        onClose();
-    };
+    } catch (error) {
+
+        console.error(error);
+        alert("Greška pri uploadu rada");
+
+    }
+};
 
     const handleClose = () => {
         // Reset form on close
@@ -107,6 +121,8 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({ isOpen, onClose, 
         setErrors({});
         onClose();
     };
+
+    
 
     return (
         <div
