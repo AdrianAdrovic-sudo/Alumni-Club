@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import UploadThesisModal from "../components/UploadThesisModal";
 import UploadCSVModal from "../components/UploadCSVModal";
+import axios from "axios";
 
 export default function DiplomskiRadovi() {
   const { user } = useAuth();
@@ -17,15 +18,22 @@ export default function DiplomskiRadovi() {
   const [selectedThesis, setSelectedThesis] = useState<any>(null);
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
   const [showCsvModal, setShowCsvModal] = useState(false);
+  const [podaci, setPodaci] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const fetchTheses = () => {
-  fetch("http://localhost:4000/api/theses")
-    .then(res => res.json())
-    .then(data => {
-      console.log("API DATA:", data);
-      setPodaci(data);
-    })
-    .catch(err => console.error(err));
+  const fetchTheses = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("/api/theses");
+      console.log("API DATA:", response.data);
+      console.log("Broj radova:", response.data.length);
+      setPodaci(response.data);
+    } catch (err) {
+      console.error("Greška pri učitavanju radova:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -42,35 +50,6 @@ export default function DiplomskiRadovi() {
     document.body.removeChild(link);
   };
 
-  const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    const response = await fetch("http://localhost:4000/api/theses/upload-csv", {
-      method: "POST",
-      body: formData
-    });
-
-   const data = await response.json();
-   alert("Uspješno dodato " + data.count + " radova");
-   window.location.reload();
-
-  } catch (error) {
-    console.error("Greška pri uploadu:", error);
-    window.location.reload();
-  }
-
-
-};
-
-  const [podaci, setPodaci] = useState<any[]>([]);
-
-  const navigate = useNavigate();
-
   // Calculate statistics
   const getStatsByYear = () => {
     const yearStats: { [key: number]: { total: number; bachelors: number; masters: number; specialist: number } } = {};
@@ -85,12 +64,16 @@ export default function DiplomskiRadovi() {
       if (thesis.type === 'specialist') yearStats[thesis.year].specialist++;
     });
     
+    console.log("📊 Year Stats:", yearStats);
     return yearStats;
   };
 
   const yearStats = getStatsByYear();
   const years = Object.keys(yearStats).map(Number).sort((a, b) => b - a);
-  const maxThesesInYear = Math.max(...Object.values(yearStats).map(stat => stat.total));
+  const maxThesesInYear = Math.max(...Object.values(yearStats).map(stat => stat.total), 1);
+  
+  console.log("📅 Years:", years);
+  console.log("📈 Max theses in year:", maxThesesInYear);
 
   // Filtriranje
   const filtrirani = podaci.filter((p) => {
@@ -182,19 +165,21 @@ export default function DiplomskiRadovi() {
         <>
           {/* SEARCH & FILTER */}
           <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-4 md:px-16 mt-8">
-        {/* Filter Button */}
         
-        <div className="relative w-full sm:w-auto">
-          <button
-            onClick={() => setShowFilter(!showFilter)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors w-full sm:w-auto justify-center sm:justify-start"
-          >
-            <FaFilter />
-            <span>Sortiraj</span>
-          </button>
+        {/* Left side - Filter and CSV Upload buttons */}
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {/* Filter Button */}
+          <div className="relative flex-1 sm:flex-initial">
+            <button
+              onClick={() => setShowFilter(!showFilter)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors w-full sm:w-auto justify-center sm:justify-start"
+            >
+              <FaFilter />
+              <span>Sortiraj</span>
+            </button>
 
-          {showFilter && (
-            <div className="absolute top-full left-0 mt-2 w-full sm:w-56 bg-[#294a70] rounded-lg shadow-xl overflow-hidden z-50">
+            {showFilter && (
+              <div className="absolute top-full left-0 mt-2 w-full sm:w-56 bg-[#294a70] rounded-lg shadow-xl overflow-hidden z-50">
               {/* Sort Options */}
               <div className="border-b border-[#1f3a5a] pb-2">
                 <div className="px-4 py-2 text-xs text-gray-300 font-semibold uppercase">Sortiraj</div>
@@ -260,26 +245,20 @@ export default function DiplomskiRadovi() {
               </div>
             </div>
           )}
+          </div>
+
+          {/* CSV Upload Button (Admin only) */}
+          {isAdmin && (
+            <button 
+              onClick={() => setShowCsvModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#50C878] text-white rounded-md hover:bg-[#3da860] transition-colors shadow-sm whitespace-nowrap"
+            >
+              📄 Upload CSV
+            </button>
+          )}
         </div>
 
-        {/* CSV Upload Button (Admin only) */}
-        {isAdmin && (
-          <div>
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleCsvUpload}
-              className="hidden"
-              id="csvUpload"
-            />
-
-            <button onClick={() => setShowCsvModal(true)}
-              className="flex items-center gap-2 px-3 py-2 -ml-110 bg-[#50C878] text-white rounded-md hover:bg-[#e6951a] transition-colors">
-              Upload CSV
-            </button>
-          </div>
-        )}
-
+        {/* Right side - Search */}
         <div className="flex items-center w-full sm:w-96">
           <div className="relative w-full">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -323,9 +302,9 @@ export default function DiplomskiRadovi() {
 <tbody>
   {sortirani.map((p, idx) => (
     <tr key={idx} className="border-b hover:bg-gray-50">
-      <td className="px-6 py-3">{p.first_name}</td>
-      <td className="px-6 py-3">{p.last_name}</td>
-      <td className="px-6 py-3 cursor-pointer hover:text-blue-600 hover:underline">{p.title}</td>
+      <td className="px-6 py-3">{p.ime}</td>
+      <td className="px-6 py-3">{p.prezime}</td>
+      <td className="px-6 py-3 cursor-pointer hover:text-blue-600 hover:underline">{p.naziv}</td>
       <td className="px-6 py-3">{p.year}</td>
 
       {isAdmin && (
@@ -359,6 +338,22 @@ export default function DiplomskiRadovi() {
             <h2 className="text-3xl md:text-4xl font-bold text-[#294a70] mb-8">
               📊 Statistika diplomskih radova
             </h2>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#294a70] mx-auto mb-4"></div>
+                  <p className="text-gray-600 text-lg">Učitavanje podataka...</p>
+                </div>
+              </div>
+            ) : podaci.length === 0 ? (
+              <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                <span className="text-6xl mb-4 block">📚</span>
+                <h3 className="text-2xl font-bold text-gray-700 mb-2">Nema podataka</h3>
+                <p className="text-gray-500">Trenutno nema diplomskih radova u bazi.</p>
+              </div>
+            ) : (
+              <>
             
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -368,8 +363,7 @@ export default function DiplomskiRadovi() {
                   <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Ukupno radova</h3>
                   <span className="text-3xl">📚</span>
                 </div>
-                <p className="text-5xl font-bold text-[#294a70] mb-2">{podaci.length}</p>
-                <p className="text-sm text-gray-500">Svi tipovi studija</p>
+                <p className="text-5xl font-bold text-[#294a70]">{podaci.length}</p>
               </div>
 
               {/* Bachelors */}
@@ -378,11 +372,8 @@ export default function DiplomskiRadovi() {
                   <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Osnovne studije</h3>
                   <span className="text-3xl">🎓</span>
                 </div>
-                <p className="text-5xl font-bold text-blue-600 mb-2">
+                <p className="text-5xl font-bold text-blue-600">
                   {podaci.filter(p => p.type === "bachelors").length}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {((podaci.filter(p => p.type === "bachelors").length / podaci.length) * 100).toFixed(1)}% od ukupno
                 </p>
               </div>
 
@@ -392,11 +383,8 @@ export default function DiplomskiRadovi() {
                   <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Master studije</h3>
                   <span className="text-3xl">🎯</span>
                 </div>
-                <p className="text-5xl font-bold text-green-600 mb-2">
+                <p className="text-5xl font-bold text-green-600">
                   {podaci.filter(p => p.type === "masters").length}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {((podaci.filter(p => p.type === "masters").length / podaci.length) * 100).toFixed(1)}% od ukupno
                 </p>
               </div>
 
@@ -406,11 +394,8 @@ export default function DiplomskiRadovi() {
                   <h3 className="text-xs font-bold uppercase tracking-wide text-gray-600">Specijalističke</h3>
                   <span className="text-3xl">⭐</span>
                 </div>
-                <p className="text-5xl font-bold text-purple-600 mb-2">
+                <p className="text-5xl font-bold text-purple-600">
                   {podaci.filter(p => p.type === "specialist").length}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {((podaci.filter(p => p.type === "specialist").length / podaci.length) * 100).toFixed(1)}% od ukupno
                 </p>
               </div>
             </div>
@@ -421,20 +406,31 @@ export default function DiplomskiRadovi() {
                 <span>📈</span> Grafički prikaz po godinama
               </h3>
               
-              <div className="flex items-end justify-between gap-3 md:gap-4 h-80 border-l-4 border-b-4 border-[#294a70] pl-4 pb-4 bg-gradient-to-t from-gray-50 to-white rounded-bl-lg">
+              {years.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <p>Nema podataka za prikaz grafikona</p>
+                </div>
+              ) : (
+              <div className="overflow-x-auto">
+              <div className="flex items-end justify-between gap-3 md:gap-4 h-96 border-l-4 border-b-4 border-[#294a70] pl-4 pb-4 bg-gradient-to-t from-gray-50 to-white rounded-bl-lg min-w-max"
+                   style={{ minWidth: years.length > 10 ? `${years.length * 80}px` : 'auto' }}
+              >
                 {years.sort((a, b) => a - b).map(year => {
                   const stats = yearStats[year];
-                  const heightPercentage = (stats.total / maxThesesInYear) * 100;
+                  const maxHeight = 320; // maksimalna visina u pikselima (povećano za više radova)
+                  const barHeight = (stats.total / Math.max(maxThesesInYear, 10)) * maxHeight;
                   
                   return (
                     <div key={year} className="flex-1 flex flex-col items-center gap-2">
                       {/* Bar */}
                       <div className="w-full flex flex-col items-center">
-                        <span className="text-sm md:text-base font-bold text-[#294a70] mb-2 bg-white px-2 py-1 rounded shadow-sm">{stats.total}</span>
                         <div 
-                          className="w-full bg-gradient-to-t from-[#294a70] via-[#3d5a7f] to-[#5a7fa0] rounded-t-lg shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer relative group border-2 border-[#294a70]"
-                          style={{ height: `${heightPercentage}%`, minHeight: '50px' }}
+                          className="w-full bg-gradient-to-t from-[#294a70] via-[#3d5a7f] to-[#5a7fa0] rounded-t-lg shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer relative group border-2 border-[#294a70] flex items-start justify-center pt-2"
+                          style={{ 
+                            height: `${Math.max(barHeight, 40)}px`
+                          }}
                         >
+                          <span className="text-sm md:text-base font-bold text-white">{stats.total}</span>
                           {/* Tooltip on hover */}
                           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 hidden group-hover:block bg-[#294a70] text-white text-xs rounded-lg py-3 px-4 whitespace-nowrap z-10 shadow-xl border-2 border-white">
                             <div className="font-bold mb-2 text-sm border-b border-white/30 pb-1">{year}. godina</div>
@@ -461,6 +457,8 @@ export default function DiplomskiRadovi() {
                   );
                 })}
               </div>
+              </div>
+              )}
               
               {/* Legend */}
               <div className="mt-8 flex flex-wrap gap-6 justify-center bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -565,6 +563,8 @@ export default function DiplomskiRadovi() {
                 </div>
               </div>
             </div>
+            </>
+            )}
           </div>
         </div>
       )}
