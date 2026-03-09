@@ -86,64 +86,102 @@ export default function DiplomskiRadovi() {
   console.log("📅 Years:", years);
   console.log("📈 Max theses in year:", maxThesesInYear);
 
-  // Test podaci za prikaz (privremeno)
-  const mentorStats: [string, number][] = [
-    ["Prof. Marković", 25],
-    ["Prof. Petrović", 18],
-    ["Prof. Jovanović", 10],
-    ["Prof. Nikolić", 8],
-    ["Prof. Đorđević", 6]
-  ];
+  // Statistika mentora - iz pravih podataka
+  const getMentorStats = () => {
+    const mentorStats: { [key: string]: number } = {};
+    podaci.forEach(thesis => {
+      if (thesis.mentor) {
+        mentorStats[thesis.mentor] = (mentorStats[thesis.mentor] || 0) + 1;
+      }
+    });
+    return Object.entries(mentorStats)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10); // Top 10 mentora
+  };
 
-  const committeeStats: [string, number][] = [
-    ["Prof. Nikolić", 20],
-    ["Prof. Marković", 15],
-    ["Prof. Jovanović", 12],
-    ["Prof. Petrović", 10],
-    ["Prof. Đorđević", 8]
-  ];
+  // Statistika članova komisija - iz pravih podataka
+  const getCommitteeStats = () => {
+    const committeeStats: { [key: string]: number } = {};
+    podaci.forEach(thesis => {
+      if (thesis.committee_members) {
+        const members = thesis.committee_members.split(',').map((m: string) => m.trim());
+        members.forEach((member: string) => {
+          if (member) {
+            committeeStats[member] = (committeeStats[member] || 0) + 1;
+          }
+        });
+      }
+    });
+    return Object.entries(committeeStats)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10); // Top 10 članova
+  };
 
-  const gradeStats = [
-    { grade: "A", count: 20 },
-    { grade: "B", count: 35 },
-    { grade: "C", count: 25 },
-    { grade: "D", count: 10 },
-    { grade: "E", count: 5 },
-    { grade: "F", count: 2 }
-  ];
+  // Statistika ocjena - iz pravih podataka
+  const getGradeStats = () => {
+    const gradeStats: { [key: string]: number } = {};
+    const gradeOrder = ['A', 'B', 'C', 'D', 'E', 'F'];
+    podaci.forEach(thesis => {
+      if (thesis.grade) {
+        gradeStats[thesis.grade] = (gradeStats[thesis.grade] || 0) + 1;
+      }
+    });
+    return gradeOrder
+      .filter(grade => gradeStats[grade])
+      .map(grade => ({ grade, count: gradeStats[grade] }));
+  };
 
-  const averageGrade = "8.45";
+  // Prosječna ocjena - iz pravih podataka
+  const getAverageGrade = () => {
+    const gradeValues: { [key: string]: number } = { 'A': 10, 'B': 9, 'C': 8, 'D': 7, 'E': 6, 'F': 5 };
+    let totalValue = 0;
+    let count = 0;
+    podaci.forEach(thesis => {
+      if (thesis.grade && gradeValues[thesis.grade]) {
+        totalValue += gradeValues[thesis.grade];
+        count++;
+      }
+    });
+    return count > 0 ? (totalValue / count).toFixed(2) : '0.00';
+  };
 
-  const topicStats: [string, number][] = [
-    ["Machine Learning", 15],
-    ["Data Science", 12],
-    ["Cybersecurity", 10],
-    ["Web Development", 8],
-    ["Mobile Development", 7],
-    ["Cloud Computing", 6],
-    ["Artificial Intelligence", 5],
-    ["Blockchain", 4],
-    ["IoT", 3],
-    ["DevOps", 2]
-  ];
+  // Statistika tema - iz pravih podataka
+  const getTopicStats = () => {
+    const topicStats: { [key: string]: number } = {};
+    podaci.forEach(thesis => {
+      if (thesis.topic) {
+        topicStats[thesis.topic] = (topicStats[thesis.topic] || 0) + 1;
+      }
+    });
+    return Object.entries(topicStats)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10); // Top 10 tema
+  };
 
-  const keywordStats: [string, number][] = [
-    ["AI", 30],
-    ["Data Mining", 20],
-    ["Machine Learning", 18],
-    ["Security", 15],
-    ["Blockchain", 10],
-    ["Cloud", 9],
-    ["Mobile", 8],
-    ["Web", 7],
-    ["IoT", 6],
-    ["DevOps", 5],
-    ["React", 4],
-    ["Node.js", 4],
-    ["Python", 3],
-    ["Java", 3],
-    ["Docker", 2]
-  ];
+  // Statistika ključnih riječi - iz pravih podataka
+  const getKeywordStats = () => {
+    const keywordStats: { [key: string]: number } = {};
+    podaci.forEach(thesis => {
+      if (thesis.keywords) {
+        const keywords = thesis.keywords.split(',').map((k: string) => k.trim());
+        keywords.forEach((keyword: string) => {
+          if (keyword) {
+            keywordStats[keyword] = (keywordStats[keyword] || 0) + 1;
+          }
+        });
+      }
+    });
+    return Object.entries(keywordStats)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15); // Top 15 ključnih riječi
+  };
+
+  const mentorStats: [string, number][] = getMentorStats();
+  const committeeStats: [string, number][] = getCommitteeStats();
+  const gradeStats = getGradeStats();
+  const averageGrade = getAverageGrade();
+  const topicStats: [string, number][] = getTopicStats();
+  const keywordStats: [string, number][] = getKeywordStats();
 
   // Filtriranje - napredna pretraga
   const filtrirani = podaci.filter((p) => {
