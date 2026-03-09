@@ -16,6 +16,7 @@ interface ThesisContext {
     date: string;
     type: string;
     year?: number | string | null;
+    fileUrl?: string | null;
 }
 
 interface UploadThesisModalProps {
@@ -32,6 +33,8 @@ const initialFormData: UploadThesisFormData = {
     year: '',
 };
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 const UploadThesisModal: React.FC<UploadThesisModalProps> = ({
     isOpen,
     onClose,
@@ -44,6 +47,12 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({
         file?: string;
     }>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const currentFileUrl = thesisContext?.fileUrl
+        ? (thesisContext.fileUrl.startsWith('http://') || thesisContext.fileUrl.startsWith('https://')
+            ? thesisContext.fileUrl
+            : `${BACKEND_URL}${thesisContext.fileUrl.startsWith('/') ? thesisContext.fileUrl : `/${thesisContext.fileUrl}`}`)
+        : '';
 
     useEffect(() => {
         if (!isOpen) {
@@ -95,7 +104,7 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({
             newErrors.thesisType = 'Tip rada je obavezan';
         }
 
-        if (!formData.file) {
+        if (!formData.file && !currentFileUrl) {
             newErrors.file = 'PDF fajl je obavezan';
         }
 
@@ -113,7 +122,9 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({
             setIsSubmitting(true);
 
             const form = new FormData();
-            form.append('file', formData.file!);
+            if (formData.file) {
+                form.append('file', formData.file);
+            }
             form.append('type', formData.thesisType);
 
             if (formData.title.trim()) {
@@ -214,8 +225,21 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({
 
                     <div>
                         <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-700 mb-2">
-                            Otpremi PDF <span className="text-red-500">*</span>
+                            Otpremi PDF {!currentFileUrl && <span className="text-red-500">*</span>}
                         </label>
+                        {currentFileUrl && !formData.file && (
+                            <p className="mb-2 text-sm text-gray-600">
+                                Trenutni PDF:{' '}
+                                <a
+                                    href={currentFileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-semibold text-[#294a70] hover:underline"
+                                >
+                                    Otvori trenutno otpremljeni fajl
+                                </a>
+                            </p>
+                        )}
                         <input
                             id="fileUpload"
                             type="file"
@@ -227,7 +251,12 @@ const UploadThesisModal: React.FC<UploadThesisModalProps> = ({
                         />
                         {formData.file && (
                             <p className="mt-1 text-sm text-green-600">
-                                Izabrano: {formData.file.name} ({(formData.file.size / 1024 / 1024).toFixed(2)} MB)
+                                Novi PDF: {formData.file.name} ({(formData.file.size / 1024 / 1024).toFixed(2)} MB)
+                            </p>
+                        )}
+                        {currentFileUrl && (
+                            <p className="mt-1 text-xs text-gray-500">
+                                Ako ne izaberes novi PDF, ostace sacuvan ovaj postojeci fajl.
                             </p>
                         )}
                         {errors.file && (

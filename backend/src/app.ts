@@ -18,8 +18,8 @@ import thesesRoutes from "./routes/theses.routes";
 import { getMyProfile, updateMyProfile } from "./controllers/users.controller";
 import { authenticate } from "./middlewares/auth.middleware";
 
-
 const app = express();
+const uploadsRoot = path.join(__dirname, "..", "uploads");
 
 /**
  * CORS CONFIGURATION
@@ -36,7 +36,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow non-browser requests (Postman, server-to-server)
       if (!origin) {
         return callback(null, true);
       }
@@ -53,17 +52,12 @@ app.use(
   })
 );
 
-// Handle preflight requests
 app.options("*", cors());
 
 app.use(express.json());
 
-// Static uploads
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(uploadsRoot));
 
-/**
- * ROUTES
- */
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/alumni", alumniRoutes);
@@ -75,12 +69,9 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/admin/inquiries", adminInquiriesRoutes);
 app.use("/api/theses", thesesRoutes);
 
-// Blog & enrollment routes
 app.use("/api", postsRoutes);
 app.use("/api", enrollRoutes);
 
-
-// Profile routes
 app.get("/api/profile", authenticate, getMyProfile);
 app.put("/api/profile", authenticate, updateMyProfile);
 

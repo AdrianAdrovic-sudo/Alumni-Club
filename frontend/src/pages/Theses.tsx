@@ -6,6 +6,8 @@ import UploadThesisModal from "../components/UploadThesisModal";
 import UploadCSVModal from "../components/UploadCSVModal";
 import axios from "axios";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
 export default function DiplomskiRadovi() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
@@ -60,7 +62,7 @@ export default function DiplomskiRadovi() {
       return fileUrl;
     }
 
-    return fileUrl.startsWith("/") ? fileUrl : `/${fileUrl}`;
+    return `${BACKEND_URL}${fileUrl.startsWith("/") ? fileUrl : `/${fileUrl}`}`;
   };
 
   // Calculate statistics

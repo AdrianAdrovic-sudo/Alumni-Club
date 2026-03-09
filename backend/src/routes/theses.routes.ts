@@ -6,11 +6,21 @@ import csv from "csv-parser";
 import prisma from "../prisma";
 
 const router = express.Router();
+const uploadsRoot = path.join(__dirname, "..", "..", "uploads");
+const csvUploadsDir = uploadsRoot;
+const pdfUploadsDir = path.join(uploadsRoot, "pdfs");
 
-const upload = multer({ dest: "uploads/" });
+if (!fs.existsSync(csvUploadsDir)) {
+  fs.mkdirSync(csvUploadsDir, { recursive: true });
+}
+
+if (!fs.existsSync(pdfUploadsDir)) {
+  fs.mkdirSync(pdfUploadsDir, { recursive: true });
+}
+
+const upload = multer({ dest: csvUploadsDir });
 
 router.post("/upload-csv", upload.single("file"), async (req, res) => {
-
   const results: any[] = [];
 
   if (!req.file) {
@@ -24,15 +34,12 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
     .on("data", (data) => results.push(data))
     .on("end", async () => {
       try {
-
         const thesesData = results.map((row) => ({
           first_name: (row.first_name || "").trim(),
           last_name: (row.last_name || "").trim(),
           title: (row.title || "").trim(),
           type: (row.type || "").trim().toLowerCase(),
-          year: row.year && !isNaN(Number(row.year))
-            ? Number(row.year)
-            : null,
+          year: row.year && !isNaN(Number(row.year)) ? Number(row.year) : null,
           file_url: (row.file_url || "").trim(),
           mentor: row.mentor ? (row.mentor || "").trim() : null,
           committee_members: row.committee_members ? (row.committee_members || "").trim() : null,
@@ -40,22 +47,19 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
           topic: row.topic ? (row.topic || "").trim() : null,
           keywords: row.keywords ? (row.keywords || "").trim() : null,
           abstract: row.abstract ? (row.abstract || "").trim() : null,
-          user_id: row.user_id && !isNaN(Number(row.user_id))
-            ? Number(row.user_id)
-            : 1
+          user_id: row.user_id && !isNaN(Number(row.user_id)) ? Number(row.user_id) : 1,
         }));
 
         await prisma.theses.createMany({
-          data: thesesData
+          data: thesesData,
         });
 
         fs.unlinkSync(filePath);
 
         res.json({
           message: "CSV uspjesno importovan",
-          count: thesesData.length
+          count: thesesData.length,
         });
-
       } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Greska pri importu CSV" });
@@ -64,13 +68,11 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-
   try {
-
     const theses = await prisma.theses.findMany({
       orderBy: {
-        year: "desc"
-      }
+        year: "desc",
+      },
     });
 
     const formatted = theses.map((t: any) => ({
@@ -87,23 +89,15 @@ router.get("/", async (req, res) => {
       grade: t.grade,
       topic: t.topic,
       keywords: t.keywords,
-      abstract: t.abstract
+      abstract: t.abstract,
     }));
 
     res.json(formatted);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Greska pri dohvatanju radova" });
   }
-
 });
-
-const pdfUploadsDir = path.join(process.cwd(), "uploads", "pdfs");
-
-if (!fs.existsSync(pdfUploadsDir)) {
-  fs.mkdirSync(pdfUploadsDir, { recursive: true });
-}
 
 const thesisPdfStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -112,10 +106,11 @@ const thesisPdfStorage = multer.diskStorage({
   filename: (req, file, cb) => {
     const originalExt = path.extname(file.originalname).toLowerCase();
     const ext = originalExt === ".pdf" ? originalExt : ".pdf";
-    const baseName = path
-      .basename(file.originalname, path.extname(file.originalname))
-      .replace(/[^a-zA-Z0-9_-]+/g, "_")
-      .replace(/^_+|_+$/g, "") || "thesis";
+    const baseName =
+      path
+        .basename(file.originalname, path.extname(file.originalname))
+        .replace(/[^a-zA-Z0-9_-]+/g, "_")
+        .replace(/^_+|_+$/g, "") || "thesis";
 
     cb(null, `${Date.now()}_${baseName}${ext}`);
   },
@@ -148,7 +143,16 @@ router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
       return res.status(400).json({ message: "Neispravan ID rada" });
     }
 
-    if (!req.file) {
+    const existingThesis = await prisma.theses.findUnique({
+      where: { id: thesisId },
+      select: { file_url: true },
+    });
+
+    if (!existingThesis) {
+      return res.status(404).json({ message: "Rad nije pronadjen" });
+    }
+
+    if (!req.file && !existingThesis.file_url) {
       return res.status(400).json({ message: "PDF nije poslat" });
     }
 
@@ -160,14 +164,17 @@ router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
     }
 
     const updateData: {
-      file_url: string;
+      file_url?: string;
       type: string;
       title?: string;
       year?: number;
     } = {
-      file_url: `/uploads/pdfs/${req.file.filename}`,
       type: normalizedType,
     };
+
+    if (req.file) {
+      updateData.file_url = `/uploads/pdfs/${req.file.filename}`;
+    }
 
     if (typeof title === "string" && title.trim()) {
       updateData.title = title.trim();
@@ -189,7 +196,7 @@ router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
     });
 
     res.json({
-      message: "PDF uspjesno otpremljen",
+      message: req.file ? "PDF uspjesno otpremljen" : "Podaci rada uspjesno azurirani",
       thesis: {
         id: updatedThesis.id,
         title: updatedThesis.title,
@@ -198,7 +205,6 @@ router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
         fileUrl: updatedThesis.file_url,
       },
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Greska pri uploadu PDF" });
