@@ -75,6 +75,65 @@ export default function DiplomskiRadovi() {
   console.log("📅 Years:", years);
   console.log("📈 Max theses in year:", maxThesesInYear);
 
+  // Test podaci za prikaz (privremeno)
+  const mentorStats = [
+    ["Prof. Marković", 25],
+    ["Prof. Petrović", 18],
+    ["Prof. Jovanović", 10],
+    ["Prof. Nikolić", 8],
+    ["Prof. Đorđević", 6]
+  ];
+
+  const committeeStats = [
+    ["Prof. Nikolić", 20],
+    ["Prof. Marković", 15],
+    ["Prof. Jovanović", 12],
+    ["Prof. Petrović", 10],
+    ["Prof. Đorđević", 8]
+  ];
+
+  const gradeStats = [
+    { grade: "A", count: 20 },
+    { grade: "B", count: 35 },
+    { grade: "C", count: 25 },
+    { grade: "D", count: 10 },
+    { grade: "E", count: 5 },
+    { grade: "F", count: 2 }
+  ];
+
+  const averageGrade = "8.45";
+
+  const topicStats = [
+    ["Machine Learning", 15],
+    ["Data Science", 12],
+    ["Cybersecurity", 10],
+    ["Web Development", 8],
+    ["Mobile Development", 7],
+    ["Cloud Computing", 6],
+    ["Artificial Intelligence", 5],
+    ["Blockchain", 4],
+    ["IoT", 3],
+    ["DevOps", 2]
+  ];
+
+  const keywordStats = [
+    ["AI", 30],
+    ["Data Mining", 20],
+    ["Machine Learning", 18],
+    ["Security", 15],
+    ["Blockchain", 10],
+    ["Cloud", 9],
+    ["Mobile", 8],
+    ["Web", 7],
+    ["IoT", 6],
+    ["DevOps", 5],
+    ["React", 4],
+    ["Node.js", 4],
+    ["Python", 3],
+    ["Java", 3],
+    ["Docker", 2]
+  ];
+
   // Filtriranje
   const filtrirani = podaci.filter((p) => {
 
@@ -560,6 +619,197 @@ export default function DiplomskiRadovi() {
                 </table>
               </div>
             </div>
+
+            {/* Statistika mentora */}
+            {mentorStats.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8 animate-fadeIn">
+                <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                  <span>👨‍🏫</span> Statistika mentora
+                </h3>
+                <div className="space-y-3">
+                  {mentorStats.map(([mentor, count], index) => {
+                    const maxCount = mentorStats[0][1];
+                    const percentage = (count / maxCount) * 100;
+                    return (
+                      <div key={mentor} className="flex items-center gap-4 group">
+                        <div className="w-8 h-8 bg-[#294a70] text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 group-hover:scale-110 transition-transform">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-semibold text-gray-700 group-hover:text-[#294a70] transition-colors">{mentor}</span>
+                            <span className="text-[#294a70] font-bold">{count} radova</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-[#294a70] to-[#3d5a7f] h-full rounded-full transition-all duration-500 group-hover:from-[#3d5a7f] group-hover:to-[#294a70]"
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Statistika članova komisija */}
+            {committeeStats.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8 animate-fadeIn">
+                <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                  <span>👥</span> Statistika članova komisija
+                </h3>
+                <div className="space-y-3">
+                  {committeeStats.map(([member, count], index) => {
+                    const maxCount = committeeStats[0][1];
+                    const percentage = (count / maxCount) * 100;
+                    return (
+                      <div key={member} className="flex items-center gap-4 group">
+                        <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 group-hover:scale-110 transition-transform">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-semibold text-gray-700 group-hover:text-green-600 transition-colors">{member}</span>
+                            <span className="text-green-600 font-bold">{count} radova</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-green-500 to-green-600 h-full rounded-full transition-all duration-500 group-hover:from-green-600 group-hover:to-green-500"
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Statistika ocjena i prosječna ocjena */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+              {/* Statistika ocjena */}
+              {gradeStats.length > 0 && (
+                <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 animate-fadeIn">
+                  <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                    <span>📊</span> Statistika ocjena
+                  </h3>
+                  <div className="space-y-4">
+                    {gradeStats.map(({ grade, count }) => {
+                      const totalGrades = gradeStats.reduce((sum, g) => sum + g.count, 0);
+                      const percentage = (count / totalGrades) * 100;
+                      const gradeColors: { [key: string]: string } = {
+                        'A': 'from-green-500 to-green-600',
+                        'B': 'from-blue-500 to-blue-600',
+                        'C': 'from-yellow-500 to-yellow-600',
+                        'D': 'from-orange-500 to-orange-600',
+                        'E': 'from-red-400 to-red-500',
+                        'F': 'from-red-600 to-red-700'
+                      };
+                      return (
+                        <div key={grade} className="group">
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl font-bold text-[#294a70] w-8 group-hover:scale-110 transition-transform">{grade}</span>
+                              <span className="text-gray-600">({percentage.toFixed(1)}%)</span>
+                            </div>
+                            <span className="font-bold text-[#294a70] group-hover:scale-110 transition-transform">{count}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                            <div 
+                              className={`bg-gradient-to-r ${gradeColors[grade]} h-full rounded-full transition-all duration-500`}
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Prosječna ocjena */}
+              <div className="bg-gradient-to-br from-[#294a70] to-[#3d5a7f] rounded-xl shadow-lg p-6 md:p-8 flex flex-col justify-center items-center text-white animate-fadeIn">
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <span>⭐</span> Prosječna ocjena
+                </h3>
+                <div className="text-center">
+                  <div className="text-8xl font-bold mb-4 drop-shadow-lg">{averageGrade}</div>
+                  <p className="text-gray-200 text-lg mb-2">od 10.00</p>
+                  <div className="mt-6 flex justify-center gap-2">
+                    {[...Array(10)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`w-3 h-12 rounded-full transition-all duration-300 ${
+                          i < Math.floor(parseFloat(averageGrade)) 
+                            ? 'bg-white shadow-lg' 
+                            : 'bg-white/30'
+                        }`}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Statistika tema */}
+            {topicStats.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8 animate-fadeIn">
+                <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                  <span>🎯</span> Statistika tema rada
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {topicStats.map(([topic, count], index) => {
+                    const maxCount = topicStats[0][1];
+                    const percentage = (count / maxCount) * 100;
+                    return (
+                      <div key={topic} className="bg-gradient-to-r from-gray-50 to-white p-4 rounded-lg border border-gray-200 hover:shadow-lg hover:border-purple-300 transition-all group">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 group-hover:scale-110 transition-transform">
+                            {index + 1}
+                          </div>
+                          <span className="font-semibold text-gray-700 flex-1 group-hover:text-purple-600 transition-colors">{topic}</span>
+                          <span className="text-purple-600 font-bold group-hover:scale-110 transition-transform">{count}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-purple-500 to-purple-600 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Statistika ključnih riječi */}
+            {keywordStats.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8 animate-fadeIn">
+                <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                  <span>🔑</span> Statistika ključnih riječi
+                </h3>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  {keywordStats.map(([keyword, count]) => {
+                    const maxCount = keywordStats[0][1];
+                    const size = Math.max(14, Math.min(32, (count / maxCount) * 32));
+                    return (
+                      <div 
+                        key={keyword}
+                        className="bg-gradient-to-r from-[#294a70] to-[#3d5a7f] text-white px-4 py-2 rounded-full hover:shadow-xl transition-all hover:scale-110 cursor-pointer hover:from-[#3d5a7f] hover:to-[#294a70]"
+                        style={{ fontSize: `${size}px` }}
+                      >
+                        <span className="font-semibold">{keyword}</span>
+                        <span className="ml-2 text-xs opacity-80">({count})</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Additional Info */}
             <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-[#294a70] rounded-lg p-6 shadow-md">
