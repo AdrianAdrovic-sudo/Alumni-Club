@@ -22,6 +22,10 @@ export default function DiplomskiRadovi() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Paginacija
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+
   const fetchTheses = async () => {
     try {
       setLoading(true);
@@ -39,6 +43,13 @@ export default function DiplomskiRadovi() {
   useEffect(() => {
     fetchTheses();
   }, []);
+
+  // Ako korisnik nije admin i pokušava da pristupi statistici, vrati ga na pretragu
+  useEffect(() => {
+    if (activeTab === "statistics" && !isAdmin) {
+      setActiveTab("search");
+    }
+  }, [activeTab, isAdmin]);
 
   const handleDownload = (fileUrl: string, fileName: string) => {
     // Create a temporary anchor element to trigger download
@@ -76,7 +87,7 @@ export default function DiplomskiRadovi() {
   console.log("📈 Max theses in year:", maxThesesInYear);
 
   // Test podaci za prikaz (privremeno)
-  const mentorStats = [
+  const mentorStats: [string, number][] = [
     ["Prof. Marković", 25],
     ["Prof. Petrović", 18],
     ["Prof. Jovanović", 10],
@@ -84,7 +95,7 @@ export default function DiplomskiRadovi() {
     ["Prof. Đorđević", 6]
   ];
 
-  const committeeStats = [
+  const committeeStats: [string, number][] = [
     ["Prof. Nikolić", 20],
     ["Prof. Marković", 15],
     ["Prof. Jovanović", 12],
@@ -103,7 +114,7 @@ export default function DiplomskiRadovi() {
 
   const averageGrade = "8.45";
 
-  const topicStats = [
+  const topicStats: [string, number][] = [
     ["Machine Learning", 15],
     ["Data Science", 12],
     ["Cybersecurity", 10],
@@ -116,7 +127,7 @@ export default function DiplomskiRadovi() {
     ["DevOps", 2]
   ];
 
-  const keywordStats = [
+  const keywordStats: [string, number][] = [
     ["AI", 30],
     ["Data Mining", 20],
     ["Machine Learning", 18],
@@ -134,18 +145,30 @@ export default function DiplomskiRadovi() {
     ["Docker", 2]
   ];
 
-  // Filtriranje
+  // Filtriranje - napredna pretraga
   const filtrirani = podaci.filter((p) => {
+    // Priprema podataka za pretragu
+    const firstName = (p.first_name || "").toLowerCase();
+    const lastName = (p.last_name || "").toLowerCase();
+    const title = (p.title || "").toLowerCase();
+    const mentor = (p.mentor || "").toLowerCase();
+    const keywords = (p.keywords || "").toLowerCase();
+    const committeeMembers = (p.committee_members || "").toLowerCase();
+    const topic = (p.topic || "").toLowerCase();
+    
+    const searchLower = searchTerm.toLowerCase();
 
-    const ime = p.ime || "";
-    const prezime = p.prezime || "";
-    const naziv = p.naziv || "";
+    // Pretraga po svim poljima
+    const matchesSearch = searchTerm === "" || 
+      firstName.includes(searchLower) ||
+      lastName.includes(searchLower) ||
+      title.includes(searchLower) ||
+      mentor.includes(searchLower) ||
+      keywords.includes(searchLower) ||
+      committeeMembers.includes(searchLower) ||
+      topic.includes(searchLower);
 
-    const matchesSearch =
-      ime.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      prezime.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      naziv.toLowerCase().includes(searchTerm.toLowerCase());
-
+    // Filter po tipu rada
     const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
 
     return matchesSearch && matchesType;
@@ -175,6 +198,17 @@ export default function DiplomskiRadovi() {
   }
 });
 
+  // Paginacija
+  const totalPages = Math.ceil(sortirani.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = sortirani.slice(startIndex, endIndex);
+
+  // Reset na prvu stranicu kada se promeni pretraga ili filter
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, thesisTypeFilter, sortBy]);
+
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
       {/* HERO */}
@@ -192,50 +226,54 @@ export default function DiplomskiRadovi() {
       </div>
 
       {/* TAB NAVIGATION */}
-      <div className="w-full bg-gradient-to-b from-gray-50 to-white py-6">
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <div className="bg-white rounded-xl shadow-lg p-2 flex gap-2 border border-gray-200">
-            <button
-              onClick={() => setActiveTab("search")}
-              className={`flex-1 px-6 py-3 text-sm md:text-base font-semibold rounded-lg transition-all duration-300 ${
-                activeTab === "search"
-                  ? "bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white shadow-md transform scale-105"
-                  : "bg-transparent text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              🔍 Pretraga
-            </button>
-            <button
-              onClick={() => setActiveTab("statistics")}
-              className={`flex-1 px-6 py-3 text-sm md:text-base font-semibold rounded-lg transition-all duration-300 ${
-                activeTab === "statistics"
-                  ? "bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white shadow-md transform scale-105"
-                  : "bg-transparent text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              📊 Statistika
-            </button>
+      {isAdmin && (
+        <div className="w-full bg-gradient-to-b from-gray-50 to-white py-6">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <div className="bg-white rounded-xl shadow-lg p-2 flex gap-2 border border-gray-200">
+              <button
+                onClick={() => setActiveTab("search")}
+                className={`flex-1 px-6 py-3 text-sm md:text-base font-semibold rounded-lg transition-all duration-300 ${
+                  activeTab === "search"
+                    ? "bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white shadow-md transform scale-105"
+                    : "bg-transparent text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                🔍 Pretraga
+              </button>
+              <button
+                onClick={() => setActiveTab("statistics")}
+                className={`flex-1 px-6 py-3 text-sm md:text-base font-semibold rounded-lg transition-all duration-300 ${
+                  activeTab === "statistics"
+                    ? "bg-gradient-to-r from-[#294a70] to-[#324D6B] text-white shadow-md transform scale-105"
+                    : "bg-transparent text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                📊 Statistika
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* SEARCH TAB CONTENT */}
       {activeTab === "search" && (
         <>
           {/* SEARCH & FILTER */}
-          <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-4 md:px-16 mt-8">
+          <div className="w-full bg-gradient-to-b from-gray-50 to-white py-8">
+            <div className="max-w-6xl mx-auto px-4 md:px-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         
-        {/* Left side - Filter and CSV Upload buttons */}
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* Filter Button */}
-          <div className="relative flex-1 sm:flex-initial">
-            <button
-              onClick={() => setShowFilter(!showFilter)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-md hover:bg-[#1f3a5a] transition-colors w-full sm:w-auto justify-center sm:justify-start"
-            >
-              <FaFilter />
-              <span>Sortiraj</span>
-            </button>
+                {/* Left side - Filter and CSV Upload buttons */}
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  {/* Filter Button */}
+                  <div className="relative flex-1 sm:flex-initial">
+                    <button
+                      onClick={() => setShowFilter(!showFilter)}
+                      className="flex items-center gap-2 px-5 py-3 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg w-full sm:w-auto justify-center sm:justify-start"
+                    >
+                      <FaFilter />
+                      <span className="font-semibold">Sortiraj</span>
+                    </button>
 
             {showFilter && (
               <div className="absolute top-full left-0 mt-2 w-full sm:w-56 bg-[#294a70] rounded-lg shadow-xl overflow-hidden z-50">
@@ -310,7 +348,7 @@ export default function DiplomskiRadovi() {
           {isAdmin && (
             <button 
               onClick={() => setShowCsvModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#50C878] text-white rounded-md hover:bg-[#3da860] transition-colors shadow-sm whitespace-nowrap"
+              className="flex items-center gap-2 px-5 py-3 bg-[#50C878] text-white rounded-lg hover:bg-[#3da860] transition-all shadow-md hover:shadow-lg whitespace-nowrap font-semibold"
             >
               📄 Upload CSV
             </button>
@@ -320,83 +358,157 @@ export default function DiplomskiRadovi() {
         {/* Right side - Search */}
         <div className="flex items-center w-full sm:w-96">
           <div className="relative w-full">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Pretraga po imenu, prezimenu ili nazivu rada..."
+              placeholder="Pretraži po imenu, prezimenu, nazivu, mentoru, ključnim riječima..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#ffab1f] focus:border-[#ffab1f] shadow-sm"
+              className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-[#294a70] shadow-sm hover:border-gray-400 transition-all"
             />
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8">
+      <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8 bg-white">
         <div className="w-full max-w-6xl">
           {/* Info text - moved here above table */}
-          <div className="mb-4">
-            <p className="text-sm sm:text-base text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+          <div className="mb-6">
+            <p className="text-sm sm:text-base text-gray-700 bg-blue-50 border-l-4 border-[#294a70] rounded-r-lg p-4 shadow-sm">
               💡 <strong>Savjet:</strong> Kliknite na naziv diplomskog rada da ga preuzmete na svoj uređaj.
             </p>
           </div>
           
-          <div className="shadow-md rounded-2xl overflow-hidden bg-white">
+          <div className="shadow-xl rounded-2xl overflow-hidden bg-white border border-gray-200">
             <div className="w-full overflow-x-auto">
               <table className="w-full border-collapse table-auto min-w-[600px]">
-                <thead className="bg-[#355070] text-white">
+                <thead className="bg-gradient-to-r from-[#294a70] to-[#3d5a7f] text-white">
                   <tr>
-                    <th className="px-6 py-3 text-left font-semibold">Ime</th>
-                    <th className="px-6 py-3 text-left font-semibold">Prezime</th>
-                    <th className="px-6 py-3 text-left font-semibold">Naziv diplomskog rada</th>
-                    <th className="px-6 py-3 text-left font-semibold">Datum diplomiranja</th>
+                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Ime</th>
+                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Prezime</th>
+                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Naziv diplomskog rada</th>
+                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Datum diplomiranja</th>
 
                   {isAdmin && (
-                    <th className="px-6 py-3 text-left font-semibold">
+                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">
                       Akcije
                     </th>
                   )}
                 </tr>
               </thead>
-<tbody>
-  {sortirani.map((p, idx) => (
-    <tr key={idx} className="border-b hover:bg-gray-50">
-      <td className="px-6 py-3">{p.first_name}</td>
-      <td className="px-6 py-3">{p.last_name}</td>
-      <td className="px-6 py-3">
-        {p.fileUrl ? (
-          <a
-            href={p.fileUrl}
-            download
-            className="hover:underline cursor-pointer"
-          >
-            {p.title}
-          </a>
-          ) : (
-          <span>{p.title}</span>
-          )}
-      </td>
-      <td className="px-6 py-3">{p.year}</td>
+              <tbody>
+                {currentItems.map((p, idx) => (
+                  <tr key={idx} className="border-b border-gray-200 hover:bg-blue-50 transition-colors">
+                    <td className="px-6 py-4 text-gray-800 font-medium">{p.first_name}</td>
+                    <td className="px-6 py-4 text-gray-800 font-medium">{p.last_name}</td>
+                    <td className="px-6 py-4">
+                      {p.fileUrl ? (
+                        <a
+                          href={p.fileUrl}
+                          download
+                          className="text-[#294a70] hover:text-[#1f3a5a] hover:underline cursor-pointer font-semibold transition-colors"
+                        >
+                          {p.title}
+                        </a>
+                      ) : (
+                        <span className="text-gray-700">{p.title}</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{p.year}</td>
 
-      {isAdmin && (
-        <td className="px-6 py-3">
-          <button
-            onClick={() => {
-            setSelectedThesis(p);
-            setShowUploadModal(true);
-            }}
-            className="bg-[#355070] text-white px-4 py-1 rounded-md hover:bg-[#2b4058]"
-          >
-            📤 Otpremi
-          </button>
-        </td>
-      )}
-    </tr>
-  ))}
-</tbody>
+                    {isAdmin && (
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => {
+                            setSelectedThesis(p);
+                            setShowUploadModal(true);
+                          }}
+                          className="bg-[#294a70] text-white px-4 py-2 rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold"
+                        >
+                          📤 Otpremi
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
               </table>
             </div>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Info text */}
+              <div className="text-sm text-gray-600">
+                Prikazano <span className="font-semibold text-[#294a70]">{startIndex + 1}</span> - <span className="font-semibold text-[#294a70]">{Math.min(endIndex, sortirani.length)}</span> od <span className="font-semibold text-[#294a70]">{sortirani.length}</span> radova
+              </div>
+
+              {/* Page numbers */}
+              <div className="flex items-center gap-2">
+                {/* Previous button */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                    currentPage === 1
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-[#294a70] text-white hover:bg-[#1f3a5a] shadow-md hover:shadow-lg'
+                  }`}
+                >
+                  ← Prethodna
+                </button>
+
+                {/* Page numbers */}
+                <div className="flex items-center gap-1">
+                  {[...Array(totalPages)].map((_, index) => {
+                    const pageNumber = index + 1;
+                    // Prikaži prvu, poslednju, trenutnu i 2 oko trenutne
+                    if (
+                      pageNumber === 1 ||
+                      pageNumber === totalPages ||
+                      (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => setCurrentPage(pageNumber)}
+                          className={`w-10 h-10 rounded-lg font-semibold transition-all ${
+                            currentPage === pageNumber
+                              ? 'bg-[#294a70] text-white shadow-lg scale-110'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    } else if (
+                      pageNumber === currentPage - 2 ||
+                      pageNumber === currentPage + 2
+                    ) {
+                      return <span key={pageNumber} className="text-gray-400 px-1">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                {/* Next button */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                    currentPage === totalPages
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-[#294a70] text-white hover:bg-[#1f3a5a] shadow-md hover:shadow-lg'
+                  }`}
+                >
+                  Sledeća →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
         </>
