@@ -53,6 +53,19 @@ async function seedExtendedTheses() {
       "CI/CD, Docker, Kubernetes"
     ];
 
+    const abstracts = [
+      "Ovaj rad istražuje primenu mašinskog učenja u analizi velikih skupova podataka. Fokus je na razvoju algoritama koji mogu efikasno procesirati i analizirati podatke u realnom vremenu.",
+      "Rad se bavi sigurnošću web aplikacija i metodama zaštite od najčešćih napada. Analizirane su moderne tehnike enkripcije i njihova primena u praksi.",
+      "Istraživanje obuhvata analizu podataka u sportu koristeći napredne statističke metode. Razvijen je sistem za predviđanje rezultata na osnovu istorijskih podataka.",
+      "Rad predstavlja razvoj moderne web aplikacije koristeći React i Node.js. Fokus je na performansama i korisničkom iskustvu.",
+      "Istraživanje mobilnih aplikacija za zdravstvo sa naglaskom na privatnost podataka i sigurnost komunikacije između pacijenata i lekara.",
+      "Analiza cloud arhitekture i najboljih praksi za skalabilne aplikacije. Upoređene su različite cloud platforme i njihove mogućnosti.",
+      "Rad istražuje primenu veštačke inteligencije u obrazovanju, sa fokusom na personalizovano učenje i adaptivne sisteme.",
+      "Blockchain tehnologija i njena primena u finansijskom sektoru. Analizirani su pametni ugovori i njihova sigurnost.",
+      "Razvoj IoT sistema za pametnu kuću sa naglaskom na energetsku efikasnost i automatizaciju.",
+      "DevOps praksa i automatizacija procesa razvoja softvera. Implementacija CI/CD pipeline-a koristeći moderne alate."
+    ];
+
     const thesesData = [];
 
     for (let i = 0; i < 30; i++) {
@@ -68,6 +81,7 @@ async function seedExtendedTheses() {
         grade: grades[i % grades.length],
         topic: topics[i % topics.length],
         keywords: keywordsList[i % keywordsList.length],
+        abstract: abstracts[i % abstracts.length],
         user_id: users[0].id
       });
     }

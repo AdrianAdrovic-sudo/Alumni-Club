@@ -235,12 +235,15 @@ model theses {
   file_url          String   @db.VarChar(255)
   year              Int?
   
-  // Novi podaci za statistiku
+  // Podaci za statistiku
   mentor            String?  @db.VarChar(255)
   committee_members String?  @db.Text // JSON array ili comma-separated
   grade             String?  @db.VarChar(10) // A, B, C, D, E, F
   topic             String?  @db.VarChar(255)
   keywords          String?  @db.Text // JSON array ili comma-separated
+  
+  // Abstract (sažetak)
+  abstract          String?  @db.Text
   
   created_at        DateTime @default(now())
   user_id           Int

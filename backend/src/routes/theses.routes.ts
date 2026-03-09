@@ -33,6 +33,13 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
             ? Number(row.year)
             : null,
           file_url: (row.file_url || "").trim(),
+          // Novi podaci za statistiku
+          mentor: row.mentor ? (row.mentor || "").trim() : null,
+          committee_members: row.committee_members ? (row.committee_members || "").trim() : null,
+          grade: row.grade ? (row.grade || "").trim().toUpperCase() : null,
+          topic: row.topic ? (row.topic || "").trim() : null,
+          keywords: row.keywords ? (row.keywords || "").trim() : null,
+          abstract: row.abstract ? (row.abstract || "").trim() : null,
           user_id: row.user_id && !isNaN(Number(row.user_id))
             ? Number(row.user_id)
             : 1
@@ -75,12 +82,13 @@ router.get("/", async (req, res) => {
       type: t.type,
       fileUrl: t.file_url,
       year: t.year,
-      // Novi podaci za statistiku
+      // Podaci za statistiku
       mentor: t.mentor,
       committee_members: t.committee_members,
       grade: t.grade,
       topic: t.topic,
-      keywords: t.keywords
+      keywords: t.keywords,
+      abstract: t.abstract
     }));
 
     res.json(formatted);
