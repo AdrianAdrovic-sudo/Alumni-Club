@@ -74,7 +74,13 @@ router.get("/", async (req, res) => {
       date: t.year ? `01.07.${t.year}.` : "",
       type: t.type,
       fileUrl: t.file_url,
-      year: t.year
+      year: t.year,
+      // Novi podaci za statistiku
+      mentor: t.mentor,
+      committee_members: t.committee_members,
+      grade: t.grade,
+      topic: t.topic,
+      keywords: t.keywords
     }));
 
     res.json(formatted);

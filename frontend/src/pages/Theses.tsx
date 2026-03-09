@@ -75,6 +75,103 @@ export default function DiplomskiRadovi() {
   console.log("📅 Years:", years);
   console.log("📈 Max theses in year:", maxThesesInYear);
 
+  // Statistika mentora
+  const getMentorStats = () => {
+    const mentorStats: { [key: string]: number } = {};
+    podaci.forEach(thesis => {
+      if (thesis.mentor) {
+        mentorStats[thesis.mentor] = (mentorStats[thesis.mentor] || 0) + 1;
+      }
+    });
+    return Object.entries(mentorStats)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10); // Top 10 mentora
+  };
+
+  // Statistika članova komisija
+  const getCommitteeStats = () => {
+    const committeeStats: { [key: string]: number } = {};
+    podaci.forEach(thesis => {
+      if (thesis.committee_members) {
+        const members = thesis.committee_members.split(',').map((m: string) => m.trim());
+        members.forEach((member: string) => {
+          if (member) {
+            committeeStats[member] = (committeeStats[member] || 0) + 1;
+          }
+        });
+      }
+    });
+    return Object.entries(committeeStats)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10); // Top 10 članova
+  };
+
+  // Statistika ocjena
+  const getGradeStats = () => {
+    const gradeStats: { [key: string]: number } = {};
+    const gradeOrder = ['A', 'B', 'C', 'D', 'E', 'F'];
+    podaci.forEach(thesis => {
+      if (thesis.grade) {
+        gradeStats[thesis.grade] = (gradeStats[thesis.grade] || 0) + 1;
+      }
+    });
+    return gradeOrder
+      .filter(grade => gradeStats[grade])
+      .map(grade => ({ grade, count: gradeStats[grade] }));
+  };
+
+  // Prosječna ocjena
+  const getAverageGrade = () => {
+    const gradeValues: { [key: string]: number } = { 'A': 10, 'B': 9, 'C': 8, 'D': 7, 'E': 6, 'F': 5 };
+    let totalValue = 0;
+    let count = 0;
+    podaci.forEach(thesis => {
+      if (thesis.grade && gradeValues[thesis.grade]) {
+        totalValue += gradeValues[thesis.grade];
+        count++;
+      }
+    });
+    return count > 0 ? (totalValue / count).toFixed(2) : '0.00';
+  };
+
+  // Statistika tema
+  const getTopicStats = () => {
+    const topicStats: { [key: string]: number } = {};
+    podaci.forEach(thesis => {
+      if (thesis.topic) {
+        topicStats[thesis.topic] = (topicStats[thesis.topic] || 0) + 1;
+      }
+    });
+    return Object.entries(topicStats)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10); // Top 10 tema
+  };
+
+  // Statistika ključnih riječi
+  const getKeywordStats = () => {
+    const keywordStats: { [key: string]: number } = {};
+    podaci.forEach(thesis => {
+      if (thesis.keywords) {
+        const keywords = thesis.keywords.split(',').map((k: string) => k.trim());
+        keywords.forEach((keyword: string) => {
+          if (keyword) {
+            keywordStats[keyword] = (keywordStats[keyword] || 0) + 1;
+          }
+        });
+      }
+    });
+    return Object.entries(keywordStats)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15); // Top 15 ključnih riječi
+  };
+
+  const mentorStats = getMentorStats();
+  const committeeStats = getCommitteeStats();
+  const gradeStats = getGradeStats();
+  const averageGrade = getAverageGrade();
+  const topicStats = getTopicStats();
+  const keywordStats = getKeywordStats();
+
   // Filtriranje
   const filtrirani = podaci.filter((p) => {
 
@@ -560,6 +657,197 @@ export default function DiplomskiRadovi() {
                 </table>
               </div>
             </div>
+
+            {/* Statistika mentora */}
+            {mentorStats.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8">
+                <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                  <span>👨‍🏫</span> Statistika mentora
+                </h3>
+                <div className="space-y-3">
+                  {mentorStats.map(([mentor, count], index) => {
+                    const maxCount = mentorStats[0][1];
+                    const percentage = (count / maxCount) * 100;
+                    return (
+                      <div key={mentor} className="flex items-center gap-4">
+                        <div className="w-8 h-8 bg-[#294a70] text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-semibold text-gray-700">{mentor}</span>
+                            <span className="text-[#294a70] font-bold">{count} radova</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-[#294a70] to-[#3d5a7f] h-full rounded-full transition-all duration-500"
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Statistika članova komisija */}
+            {committeeStats.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8">
+                <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                  <span>👥</span> Statistika članova komisija
+                </h3>
+                <div className="space-y-3">
+                  {committeeStats.map(([member, count], index) => {
+                    const maxCount = committeeStats[0][1];
+                    const percentage = (count / maxCount) * 100;
+                    return (
+                      <div key={member} className="flex items-center gap-4">
+                        <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-semibold text-gray-700">{member}</span>
+                            <span className="text-green-600 font-bold">{count} radova</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-green-500 to-green-600 h-full rounded-full transition-all duration-500"
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Statistika ocjena i prosječna ocjena */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+              {/* Statistika ocjena */}
+              {gradeStats.length > 0 && (
+                <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                  <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                    <span>📊</span> Statistika ocjena
+                  </h3>
+                  <div className="space-y-4">
+                    {gradeStats.map(({ grade, count }) => {
+                      const totalGrades = gradeStats.reduce((sum, g) => sum + g.count, 0);
+                      const percentage = (count / totalGrades) * 100;
+                      const gradeColors: { [key: string]: string } = {
+                        'A': 'from-green-500 to-green-600',
+                        'B': 'from-blue-500 to-blue-600',
+                        'C': 'from-yellow-500 to-yellow-600',
+                        'D': 'from-orange-500 to-orange-600',
+                        'E': 'from-red-400 to-red-500',
+                        'F': 'from-red-600 to-red-700'
+                      };
+                      return (
+                        <div key={grade}>
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl font-bold text-[#294a70] w-8">{grade}</span>
+                              <span className="text-gray-600">({percentage.toFixed(1)}%)</span>
+                            </div>
+                            <span className="font-bold text-[#294a70]">{count}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                            <div 
+                              className={`bg-gradient-to-r ${gradeColors[grade]} h-full rounded-full transition-all duration-500`}
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Prosječna ocjena */}
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col justify-center items-center">
+                <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                  <span>⭐</span> Prosječna ocjena
+                </h3>
+                <div className="text-center">
+                  <div className="text-8xl font-bold text-[#294a70] mb-4">{averageGrade}</div>
+                  <p className="text-gray-600 text-lg">od 10.00</p>
+                  <div className="mt-6 flex justify-center gap-2">
+                    {[...Array(10)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`w-3 h-12 rounded-full ${
+                          i < Math.floor(parseFloat(averageGrade)) 
+                            ? 'bg-gradient-to-t from-[#294a70] to-[#3d5a7f]' 
+                            : 'bg-gray-200'
+                        }`}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Statistika tema */}
+            {topicStats.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8">
+                <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                  <span>🎯</span> Statistika tema rada
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {topicStats.map(([topic, count], index) => {
+                    const maxCount = topicStats[0][1];
+                    const percentage = (count / maxCount) * 100;
+                    return (
+                      <div key={topic} className="bg-gradient-to-r from-gray-50 to-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+                            {index + 1}
+                          </div>
+                          <span className="font-semibold text-gray-700 flex-1">{topic}</span>
+                          <span className="text-purple-600 font-bold">{count}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-purple-500 to-purple-600 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Statistika ključnih riječi */}
+            {keywordStats.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8">
+                <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
+                  <span>🔑</span> Statistika ključnih riječi
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {keywordStats.map(([keyword, count]) => {
+                    const maxCount = keywordStats[0][1];
+                    const size = Math.max(14, Math.min(32, (count / maxCount) * 32));
+                    return (
+                      <div 
+                        key={keyword}
+                        className="bg-gradient-to-r from-[#294a70] to-[#3d5a7f] text-white px-4 py-2 rounded-full hover:shadow-lg transition-all hover:scale-110 cursor-pointer"
+                        style={{ fontSize: `${size}px` }}
+                      >
+                        <span className="font-semibold">{keyword}</span>
+                        <span className="ml-2 text-xs opacity-80">({count})</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Additional Info */}
             <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-[#294a70] rounded-lg p-6 shadow-md">
