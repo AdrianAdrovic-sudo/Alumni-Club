@@ -51,14 +51,16 @@ export default function DiplomskiRadovi() {
     }
   }, [activeTab, isAdmin]);
 
-  const handleDownload = (fileUrl: string, fileName: string) => {
-    // Create a temporary anchor element to trigger download
-    const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const getFileUrl = (fileUrl?: string | null) => {
+    if (!fileUrl) {
+      return "";
+    }
+
+    if (fileUrl.startsWith("http://") || fileUrl.startsWith("https://")) {
+      return fileUrl;
+    }
+
+    return fileUrl.startsWith("/") ? fileUrl : `/${fileUrl}`;
   };
 
   // Calculate statistics
@@ -437,14 +439,16 @@ export default function DiplomskiRadovi() {
                 </tr>
               </thead>
               <tbody>
-                {currentItems.map((p, idx) => (
-                  <tr key={idx} className="border-b border-gray-200 hover:bg-blue-50 transition-colors">
+                {currentItems.map((p) => (
+                  <tr key={p.id} className="border-b border-gray-200 hover:bg-blue-50 transition-colors">
                     <td className="px-6 py-4 text-gray-800 font-medium">{p.first_name}</td>
                     <td className="px-6 py-4 text-gray-800 font-medium">{p.last_name}</td>
                     <td className="px-6 py-4">
                       {p.fileUrl ? (
                         <a
-                          href={p.fileUrl}
+                          href={getFileUrl(p.fileUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           download
                           className="text-[#294a70] hover:text-[#1f3a5a] hover:underline cursor-pointer font-semibold transition-colors"
                         >
@@ -988,6 +992,7 @@ export default function DiplomskiRadovi() {
           setShowUploadModal(false);
           setSelectedThesis(null);
         }}
+        onUploadSuccess={fetchTheses}
         thesisContext={selectedThesis}
       />
 

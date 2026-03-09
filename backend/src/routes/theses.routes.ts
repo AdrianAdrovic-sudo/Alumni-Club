@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import fs from "fs";
+import path from "path";
 import csv from "csv-parser";
 import prisma from "../prisma";
 
@@ -33,7 +34,6 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
             ? Number(row.year)
             : null,
           file_url: (row.file_url || "").trim(),
-          // Novi podaci za statistiku
           mentor: row.mentor ? (row.mentor || "").trim() : null,
           committee_members: row.committee_members ? (row.committee_members || "").trim() : null,
           grade: row.grade ? (row.grade || "").trim().toUpperCase() : null,
@@ -52,13 +52,13 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
         fs.unlinkSync(filePath);
 
         res.json({
-          message: "CSV uspješno importovan",
+          message: "CSV uspjesno importovan",
           count: thesesData.length
         });
 
       } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Greška pri importu CSV" });
+        res.status(500).json({ message: "Greska pri importu CSV" });
       }
     });
 });
@@ -82,7 +82,6 @@ router.get("/", async (req, res) => {
       type: t.type,
       fileUrl: t.file_url,
       year: t.year,
-      // Podaci za statistiku
       mentor: t.mentor,
       committee_members: t.committee_members,
       grade: t.grade,
@@ -95,39 +94,114 @@ router.get("/", async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Greška pri dohvatanju radova" });
+    res.status(500).json({ message: "Greska pri dohvatanju radova" });
   }
 
 });
 
-const pdfUpload = multer({ dest: "uploads/pdfs/" });
+const pdfUploadsDir = path.join(process.cwd(), "uploads", "pdfs");
+
+if (!fs.existsSync(pdfUploadsDir)) {
+  fs.mkdirSync(pdfUploadsDir, { recursive: true });
+}
+
+const thesisPdfStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, pdfUploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const originalExt = path.extname(file.originalname).toLowerCase();
+    const ext = originalExt === ".pdf" ? originalExt : ".pdf";
+    const baseName = path
+      .basename(file.originalname, path.extname(file.originalname))
+      .replace(/[^a-zA-Z0-9_-]+/g, "_")
+      .replace(/^_+|_+$/g, "") || "thesis";
+
+    cb(null, `${Date.now()}_${baseName}${ext}`);
+  },
+});
+
+const pdfUpload = multer({
+  storage: thesisPdfStorage,
+  limits: {
+    fileSize: 20 * 1024 * 1024,
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== "application/pdf") {
+      return cb(new Error("Dozvoljeni su samo PDF fajlovi"));
+    }
+
+    cb(null, true);
+  },
+});
 
 router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
   try {
-
     const thesisId = Number(req.params.id);
+    const { type, title, year } = req.body as {
+      type?: string;
+      title?: string;
+      year?: string;
+    };
+
+    if (!thesisId || Number.isNaN(thesisId)) {
+      return res.status(400).json({ message: "Neispravan ID rada" });
+    }
 
     if (!req.file) {
       return res.status(400).json({ message: "PDF nije poslat" });
     }
 
-    const fileUrl = `http://localhost:4000/uploads/pdfs/${req.file.filename}`;
+    const allowedTypes = ["bachelors", "masters", "specialist"];
+    const normalizedType = (type || "").trim().toLowerCase();
 
-    await prisma.theses.update({
-      where: { id: thesisId },
-      data: {
-        file_url: fileUrl
+    if (!allowedTypes.includes(normalizedType)) {
+      return res.status(400).json({ message: "Neispravan tip studija" });
+    }
+
+    const updateData: {
+      file_url: string;
+      type: string;
+      title?: string;
+      year?: number;
+    } = {
+      file_url: `/uploads/pdfs/${req.file.filename}`,
+      type: normalizedType,
+    };
+
+    if (typeof title === "string" && title.trim()) {
+      updateData.title = title.trim();
+    }
+
+    if (typeof year === "string" && year.trim()) {
+      const parsedYear = Number(year);
+
+      if (Number.isNaN(parsedYear) || parsedYear < 1900 || parsedYear > 2100) {
+        return res.status(400).json({ message: "Godina mora biti izmedju 1900 i 2100" });
       }
+
+      updateData.year = parsedYear;
+    }
+
+    const updatedThesis = await prisma.theses.update({
+      where: { id: thesisId },
+      data: updateData,
     });
 
     res.json({
-      message: "PDF uspješno otpremljen",
-      fileUrl
+      message: "PDF uspjesno otpremljen",
+      thesis: {
+        id: updatedThesis.id,
+        title: updatedThesis.title,
+        type: updatedThesis.type,
+        year: updatedThesis.year,
+        fileUrl: updatedThesis.file_url,
+      },
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Greška pri uploadu PDF" });
+    res.status(500).json({ message: "Greska pri uploadu PDF" });
   }
 });
 
