@@ -55,8 +55,8 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-[400px] p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
 
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Upload CSV</h2>
@@ -69,22 +69,29 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
           <p className="font-semibold mb-1">Napomena:</p>
         <p>CSV fajl mora imati sljedeće kolone:</p>
 
-        <div className="bg-gray-100 p-3 mt-2 rounded text-sm leading-6">
+        <div className="bg-gray-100 p-3 mt-2 rounded text-sm leading-6 max-h-64 overflow-y-auto">
+          <div className="mb-2 font-bold text-[#294a70]">Obavezne kolone:</div>
           <div><b>first_name</b> – ime studenta</div>
           <div><b>last_name</b> – prezime studenta</div>
           <div><b>title</b> – naziv rada</div>
-          <div><b>type</b> – bachelors / masters</div>
+          <div><b>type</b> – bachelors / masters / specialist</div>
           <div><b>year</b> – godina</div>
           <div><b>file_url</b> – link na rad</div>
+          
+          <div className="mt-3 mb-2 font-bold text-[#294a70]">Opcione kolone (za statistiku):</div>
+          <div><b>mentor</b> – mentor (npr. "Prof. dr Ivan Petrović")</div>
+          <div><b>committee_members</b> – članovi komisije, odvojeni zarezom</div>
+          <div><b>grade</b> – ocjena (A, B, C, D, E, F)</div>
+          <div><b>topic</b> – tema rada</div>
+          <div><b>keywords</b> – ključne riječi, odvojene zarezom</div>
+          <div><b>abstract</b> – sažetak rada</div>
         </div>
 
         <p className="mt-2">Primjer:</p>
 
-        <pre className="bg-gray-100 p-3 rounded text-xs mt-3 whitespace-pre-wrap">
-          first_name,last_name,title,type,year,file_url
-          Marko,Markovic,Informacioni sistem biblioteke,bachelors,2021,https://example.com/rad1.pdf
-          Ana,Petrovic,Web aplikacija za ucenje,masters,2022,https://example.com/rad2.pdf
-          Ivan,Jovanovic,Sistem za upravljanje projektima,bachelors,2020,https://example.com/rad3.pdf
+        <pre className="bg-gray-100 p-3 rounded text-xs mt-3 whitespace-pre-wrap overflow-x-auto">
+first_name,last_name,title,type,year,file_url,mentor,committee_members,grade,topic,keywords,abstract
+Marko,Markovic,Primena masinskog ucenja,bachelors,2024,https://example.com/rad1.pdf,Prof. dr Ivan Petrovic,"Prof. dr Ivan Petrovic, Doc. dr Ana Jovanovic",A,Machine Learning,"AI, Machine Learning","Ovaj rad istrazuje primenu..."
         </pre>
         </div>
 
