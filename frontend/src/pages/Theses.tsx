@@ -26,7 +26,15 @@ export default function DiplomskiRadovi() {
 
   // Paginacija
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 20;
+
+  // Napredni filteri
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState<string>("all");
+  const [selectedGrade, setSelectedGrade] = useState<string>("all");
+  const [selectedTopic, setSelectedTopic] = useState<string>("all");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
 
   const fetchTheses = async () => {
     try {
@@ -187,6 +195,19 @@ export default function DiplomskiRadovi() {
   const topicStats: [string, number][] = getTopicStats();
   const keywordStats: [string, number][] = getKeywordStats();
 
+  // Dobijanje jedinstvenih vrednosti za filtere
+  const uniqueMentors = Array.from(new Set(podaci.map(p => p.mentor).filter(Boolean))).sort();
+  const uniqueGrades = Array.from(new Set(podaci.map(p => p.grade).filter(Boolean))).sort();
+  const uniqueTopics = Array.from(new Set(podaci.map(p => p.topic).filter(Boolean))).sort();
+  const uniqueYears = Array.from(new Set(podaci.map(p => p.year).filter(Boolean))).sort((a, b) => b - a);
+  const uniqueLanguages = Array.from(new Set(podaci.map(p => p.language).filter(Boolean))).sort();
+
+  // Mapiranje jezika na puni naziv
+  const languageNames: { [key: string]: string } = {
+    'en': 'English',
+    'cg': 'Crna Gora'
+  };
+
   // Filtriranje - napredna pretraga
   const filtrirani = podaci.filter((p) => {
     // Priprema podataka za pretragu
@@ -197,10 +218,13 @@ export default function DiplomskiRadovi() {
     const keywords = (p.keywords || "").toLowerCase();
     const committeeMembers = (p.committee_members || "").toLowerCase();
     const topic = (p.topic || "").toLowerCase();
+    const abstract = (p.abstract || "").toLowerCase();
+    const grade = (p.grade || "").toLowerCase();
+    const language = (p.language || "").toLowerCase();
     
     const searchLower = searchTerm.toLowerCase();
 
-    // Pretraga po svim poljima
+    // Pretraga po SVIM poljima
     const matchesSearch = searchTerm === "" || 
       firstName.includes(searchLower) ||
       lastName.includes(searchLower) ||
@@ -208,12 +232,22 @@ export default function DiplomskiRadovi() {
       mentor.includes(searchLower) ||
       keywords.includes(searchLower) ||
       committeeMembers.includes(searchLower) ||
-      topic.includes(searchLower);
+      topic.includes(searchLower) ||
+      abstract.includes(searchLower) ||
+      grade.includes(searchLower) ||
+      language.includes(searchLower);
 
     // Filter po tipu rada
     const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
+    
+    // Napredni filteri
+    const matchesMentor = selectedMentor === "all" || p.mentor === selectedMentor;
+    const matchesGrade = selectedGrade === "all" || p.grade === selectedGrade;
+    const matchesTopic = selectedTopic === "all" || p.topic === selectedTopic;
+    const matchesYear = selectedYear === "all" || p.year?.toString() === selectedYear;
+    const matchesLanguage = selectedLanguage === "all" || p.language === selectedLanguage;
 
-    return matchesSearch && matchesType;
+    return matchesSearch && matchesType && matchesMentor && matchesGrade && matchesTopic && matchesYear && matchesLanguage;
   });
 
   // Sortiranje
@@ -240,6 +274,15 @@ export default function DiplomskiRadovi() {
   }
 });
 
+  // Provera da li korisnik aktivno pretražuje
+  const isSearching = searchTerm !== "" || 
+                      thesisTypeFilter !== "all" || 
+                      selectedMentor !== "all" || 
+                      selectedGrade !== "all" || 
+                      selectedTopic !== "all" || 
+                      selectedYear !== "all" ||
+                      selectedLanguage !== "all";
+
   // Paginacija
   const totalPages = Math.ceil(sortirani.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -249,7 +292,7 @@ export default function DiplomskiRadovi() {
   // Reset na prvu stranicu kada se promeni pretraga ili filter
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, thesisTypeFilter, sortBy]);
+  }, [searchTerm, thesisTypeFilter, sortBy, selectedMentor, selectedGrade, selectedTopic, selectedYear, selectedLanguage]);
 
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
@@ -403,7 +446,7 @@ export default function DiplomskiRadovi() {
             <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Pretraži po imenu, prezimenu, nazivu, mentoru, ključnim riječima..."
+              placeholder="Pretraži po imenu, prezimenu, nazivu, mentoru, jeziku, ključnim riječima..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-[#294a70] shadow-sm hover:border-gray-400 transition-all"
@@ -416,70 +459,290 @@ export default function DiplomskiRadovi() {
 
       <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8 bg-white">
         <div className="w-full max-w-6xl">
-          {/* Info text - moved here above table */}
+          {/* Info text */}
           <div className="mb-6">
             <p className="text-sm sm:text-base text-gray-700 bg-blue-50 border-l-4 border-[#294a70] rounded-r-lg p-4 shadow-sm">
-              💡 <strong>Savjet:</strong> Kliknite na naziv diplomskog rada da ga preuzmete na svoj uređaj.
+              💡 <strong>Savjet:</strong> Kliknite na "Abstract" da pročitate sažetak rada.
             </p>
           </div>
           
-          <div className="shadow-xl rounded-2xl overflow-hidden bg-white border border-gray-200">
-            <div className="w-full overflow-x-auto">
-              <table className="w-full border-collapse table-auto min-w-[600px]">
-                <thead className="bg-gradient-to-r from-[#294a70] to-[#3d5a7f] text-white">
-                  <tr>
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Ime</th>
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Prezime</th>
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Naziv diplomskog rada</th>
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Datum diplomiranja</th>
+          {/* Glavni kontejner sa filterima i listom */}
+          <div className="flex gap-6">
+            {/* Levi sidebar - Napredni filteri */}
+            <div className="w-64 flex-shrink-0">
+              <div className="bg-white rounded-lg shadow-md p-4 sticky top-4">
+                <h3 className="font-bold text-lg text-[#294a70] mb-4">Refine search result</h3>
+                
+                {/* Tip rada */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Tip rada</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="type"
+                        checked={thesisTypeFilter === "all"}
+                        onChange={() => setThesisTypeFilter("all")}
+                        className="text-[#294a70]"
+                      />
+                      <span className="text-sm">Sve ({podaci.length})</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="type"
+                        checked={thesisTypeFilter === "bachelors"}
+                        onChange={() => setThesisTypeFilter("bachelors")}
+                        className="text-[#294a70]"
+                      />
+                      <span className="text-sm">Osnovne ({podaci.filter(p => p.type === "bachelors").length})</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="type"
+                        checked={thesisTypeFilter === "masters"}
+                        onChange={() => setThesisTypeFilter("masters")}
+                        className="text-[#294a70]"
+                      />
+                      <span className="text-sm">Master ({podaci.filter(p => p.type === "masters").length})</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="type"
+                        checked={thesisTypeFilter === "specialist"}
+                        onChange={() => setThesisTypeFilter("specialist")}
+                        className="text-[#294a70]"
+                      />
+                      <span className="text-sm">Specijalističke ({podaci.filter(p => p.type === "specialist").length})</span>
+                    </label>
+                  </div>
+                </div>
 
-                  {isAdmin && (
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">
-                      Akcije
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((p) => (
-                  <tr key={p.id} className="border-b border-gray-200 hover:bg-blue-50 transition-colors">
-                    <td className="px-6 py-4 text-gray-800 font-medium">{p.first_name}</td>
-                    <td className="px-6 py-4 text-gray-800 font-medium">{p.last_name}</td>
-                    <td className="px-6 py-4">
+                {/* Mentor */}
+                {uniqueMentors.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Mentor</h4>
+                    <select
+                      value={selectedMentor}
+                      onChange={(e) => setSelectedMentor(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Svi mentori</option>
+                      {uniqueMentors.map(mentor => (
+                        <option key={mentor} value={mentor}>{mentor}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Ocjena */}
+                {uniqueGrades.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Ocjena</h4>
+                    <select
+                      value={selectedGrade}
+                      onChange={(e) => setSelectedGrade(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Sve ocjene</option>
+                      {uniqueGrades.map(grade => (
+                        <option key={grade} value={grade}>{grade}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Tema */}
+                {uniqueTopics.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Tema</h4>
+                    <select
+                      value={selectedTopic}
+                      onChange={(e) => setSelectedTopic(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Sve teme</option>
+                      {uniqueTopics.map(topic => (
+                        <option key={topic} value={topic}>{topic}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Godina */}
+                {uniqueYears.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Godina</h4>
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Sve godine</option>
+                      {uniqueYears.map(year => (
+                        <option key={year} value={year.toString()}>{year}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Jezik */}
+                {uniqueLanguages.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Jezik</h4>
+                    <select
+                      value={selectedLanguage}
+                      onChange={(e) => setSelectedLanguage(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Svi jezici</option>
+                      {uniqueLanguages.map(language => (
+                        <option key={language} value={language}>
+                          {languageNames[language] || language}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Reset dugme */}
+                <button
+                  onClick={() => {
+                    setThesisTypeFilter("all");
+                    setSelectedMentor("all");
+                    setSelectedGrade("all");
+                    setSelectedTopic("all");
+                    setSelectedYear("all");
+                    setSelectedLanguage("all");
+                    setSearchTerm("");
+                  }}
+                  className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-semibold"
+                >
+                  Resetuj filtere
+                </button>
+              </div>
+            </div>
+
+            {/* Desna strana - Lista radova */}
+            <div className="flex-1">
+          
+          {/* Ako nema pretrage, prikaži poruku */}
+          {!isSearching ? (
+            <div className="bg-white rounded-lg shadow-md p-12 text-center">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-2xl font-bold text-[#294a70] mb-2">Pretražite diplomske radove</h3>
+              <p className="text-gray-600">Koristite search ili filtere sa leve strane da pronađete radove.</p>
+            </div>
+          ) : currentItems.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-md p-12 text-center">
+              <div className="text-6xl mb-4">📭</div>
+              <h3 className="text-2xl font-bold text-[#294a70] mb-2">Nema rezultata</h3>
+              <p className="text-gray-600">Pokušajte sa drugačijim kriterijumima pretrage.</p>
+            </div>
+          ) : (
+            <>
+          {/* Lista radova */}
+          <div className="space-y-4">
+            {currentItems.map((p, idx) => (
+              <div key={p.id} className="bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-all p-6">
+                {/* Broj */}
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#294a70] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                    {startIndex + idx + 1}
+                  </div>
+                  
+                  <div className="flex-1">
+                    {/* Naslov */}
+                    <h3 className="text-xl font-bold text-[#294a70] mb-2 hover:underline cursor-pointer">
                       {p.fileUrl ? (
-                        <a
-                          href={getFileUrl(p.fileUrl)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                          className="text-[#294a70] hover:text-[#1f3a5a] hover:underline cursor-pointer font-semibold transition-colors"
-                        >
+                        <a href={p.fileUrl} target="_blank" rel="noopener noreferrer">
                           {p.title}
                         </a>
                       ) : (
-                        <span className="text-gray-700">{p.title}</span>
+                        <span>{p.title}</span>
                       )}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{p.year}</td>
-
+                    </h3>
+                    
+                    {/* Godina */}
+                    <div className="text-sm text-gray-600 mb-3">
+                      {p.year}
+                    </div>
+                    
+                    {/* Tip rada */}
+                    <div className="text-sm text-gray-600 mb-3">
+                      {p.type === 'bachelors' && 'Independent thesis Basic level, 10 credits / 15 HE credits'}
+                      {p.type === 'masters' && 'Independent thesis Advanced level, 20 credits / 30 HE credits'}
+                      {p.type === 'specialist' && 'Specialist thesis'}
+                      <br />
+                      Student thesis
+                    </div>
+                    
+                    {/* Autor i Mentor */}
+                    <div className="flex flex-wrap gap-4 mb-3 text-sm">
+                      <div>
+                        <span className="font-semibold text-gray-700">Autor:</span>{' '}
+                        <span className="text-gray-600">{p.first_name} {p.last_name}</span>
+                      </div>
+                      {p.mentor && (
+                        <div>
+                          <span className="font-semibold text-gray-700">Mentor:</span>{' '}
+                          <span className="text-gray-600">{p.mentor}</span>
+                        </div>
+                      )}
+                      {p.language && (
+                        <div>
+                          <span className="font-semibold text-gray-700">Jezik:</span>{' '}
+                          <span className="text-gray-600">{languageNames[p.language] || p.language}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Abstract dugme */}
+                    {p.abstract && (
+                      <details className="mt-3">
+                        <summary className="cursor-pointer text-[#294a70] font-semibold hover:underline inline-flex items-center gap-2">
+                          ▸ Abstract [en]
+                        </summary>
+                        <div className="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 leading-relaxed">
+                          {p.abstract}
+                        </div>
+                      </details>
+                    )}
+                    
+                    {/* Download dugme */}
+                    {p.fileUrl && (
+                      <div className="mt-4">
+                        <a
+                          href={p.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold text-sm"
+                        >
+                          📄 Download full text (pdf)
+                        </a>
+                      </div>
+                    )}
+                    
+                    {/* Admin akcije */}
                     {isAdmin && (
-                      <td className="px-6 py-4">
+                      <div className="mt-4 pt-4 border-t border-gray-200">
                         <button
                           onClick={() => {
                             setSelectedThesis(p);
                             setShowUploadModal(true);
                           }}
-                          className="bg-[#294a70] text-white px-4 py-2 rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold"
+                          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md font-semibold text-sm"
                         >
-                          📤 Otpremi
+                          📤 Otpremi PDF
                         </button>
-                      </td>
+                      </div>
                     )}
-                  </tr>
-                ))}
-              </tbody>
-              </table>
-            </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Pagination */}
@@ -553,6 +816,10 @@ export default function DiplomskiRadovi() {
               </div>
             </div>
           )}
+          </>
+          )}
+            </div>
+          </div>
         </div>
       </div>
         </>
