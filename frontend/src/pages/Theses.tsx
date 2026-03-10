@@ -197,10 +197,12 @@ export default function DiplomskiRadovi() {
     const keywords = (p.keywords || "").toLowerCase();
     const committeeMembers = (p.committee_members || "").toLowerCase();
     const topic = (p.topic || "").toLowerCase();
+    const abstract = (p.abstract || "").toLowerCase();
+    const grade = (p.grade || "").toLowerCase();
     
     const searchLower = searchTerm.toLowerCase();
 
-    // Pretraga po svim poljima
+    // Pretraga po SVIM poljima
     const matchesSearch = searchTerm === "" || 
       firstName.includes(searchLower) ||
       lastName.includes(searchLower) ||
@@ -208,7 +210,9 @@ export default function DiplomskiRadovi() {
       mentor.includes(searchLower) ||
       keywords.includes(searchLower) ||
       committeeMembers.includes(searchLower) ||
-      topic.includes(searchLower);
+      topic.includes(searchLower) ||
+      abstract.includes(searchLower) ||
+      grade.includes(searchLower);
 
     // Filter po tipu rada
     const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
