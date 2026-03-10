@@ -241,6 +241,7 @@ model theses {
   grade             String?  @db.VarChar(10) // A, B, C, D, E, F
   topic             String?  @db.VarChar(255)
   keywords          String?  @db.Text // JSON array ili comma-separated
+  language          String?  @db.VarChar(50) // Jezik rada (npr. "English", "Serbian")
   
   // Abstract (sažetak)
   abstract          String?  @db.Text
@@ -252,4 +253,5 @@ model theses {
   @@index([mentor])
   @@index([grade])
   @@index([topic])
+  @@index([language])
 }
