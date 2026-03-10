@@ -202,6 +202,12 @@ export default function DiplomskiRadovi() {
   const uniqueYears = Array.from(new Set(podaci.map(p => p.year).filter(Boolean))).sort((a, b) => b - a);
   const uniqueLanguages = Array.from(new Set(podaci.map(p => p.language).filter(Boolean))).sort();
 
+  // Mapiranje jezika na puni naziv
+  const languageNames: { [key: string]: string } = {
+    'en': 'English',
+    'mn': 'Montenegro'
+  };
+
   // Filtriranje - napredna pretraga
   const filtrirani = podaci.filter((p) => {
     // Priprema podataka za pretragu
@@ -593,7 +599,9 @@ export default function DiplomskiRadovi() {
                     >
                       <option value="all">Svi jezici</option>
                       {uniqueLanguages.map(language => (
-                        <option key={language} value={language}>{language}</option>
+                        <option key={language} value={language}>
+                          {languageNames[language] || language}
+                        </option>
                       ))}
                     </select>
                   </div>

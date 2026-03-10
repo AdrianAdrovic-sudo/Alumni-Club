@@ -84,7 +84,7 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
           <div><b>grade</b> – ocjena (A, B, C, D, E, F)</div>
           <div><b>topic</b> – tema rada</div>
           <div><b>keywords</b> – ključne riječi, odvojene zarezom</div>
-          <div><b>language</b> – jezik rada (npr. "English", "Serbian", "Bosnian")</div>
+          <div><b>language</b> – jezik rada (en = English, mn = Montenegro)</div>
           <div><b>abstract</b> – sažetak rada</div>
         </div>
 
@@ -92,7 +92,7 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
 
         <pre className="bg-gray-100 p-3 rounded text-xs mt-3 whitespace-pre-wrap overflow-x-auto">
 first_name,last_name,title,type,year,file_url,mentor,committee_members,grade,topic,keywords,language,abstract
-Marko,Markovic,Primena masinskog ucenja,bachelors,2024,https://example.com/rad1.pdf,Prof. dr Ivan Petrovic,"Prof. dr Ivan Petrovic, Doc. dr Ana Jovanovic",A,Machine Learning,"AI, Machine Learning",English,"Ovaj rad istrazuje primenu..."
+Marko,Markovic,Primena masinskog ucenja,bachelors,2024,https://example.com/rad1.pdf,Prof. dr Ivan Petrovic,"Prof. dr Ivan Petrovic, Doc. dr Ana Jovanovic",A,Machine Learning,"AI, Machine Learning",en,"Ovaj rad istrazuje primenu..."
         </pre>
         </div>
 
