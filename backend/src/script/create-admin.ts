@@ -4,11 +4,11 @@ async function createAdminUser() {
   console.log("👑 Creating Admin User...\n");
 
   const adminUser = {
-    username: "zana.knezevic", // ili 'superadmin' - izaberite jedinstven username
-    email: "fit.alumni.club@gmail.com", // promenite na vaš email
-    password: "admin123", // promenite na jaku šifru
-    firstName: "Zana",
-    lastName: "Knezevic",
+    username: "adminadmin", // ili 'superadmin' - izaberite jedinstven username
+    email: "ansar2299@gmail.com", // promenite na vaš email
+    password: "admin12345", // promenite na jaku šifru
+    firstName: "Ansar",
+    lastName: "Kurbardovic",
     enrollmentYear: 2025, // ili godina kada ste diplomirali
     role: "admin", // eksplicitno postavljamo admin role
     occupation: "",
@@ -42,7 +42,7 @@ async function createAdminUser() {
     if (error.code === "P2002") {
       console.error("❌ Admin user already exists!");
       console.error(
-        "   Either change the email/username or delete the existing user."
+        "   Either change the email/username or delete the existing user.",
       );
     } else {
       console.error("❌ Error creating admin user:", error.message);
