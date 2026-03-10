@@ -446,6 +446,147 @@ export default function DiplomskiRadovi() {
             </p>
           </div>
           
+          {/* Glavni kontejner sa filterima i listom */}
+          <div className="flex gap-6">
+            {/* Levi sidebar - Napredni filteri */}
+            <div className="w-64 flex-shrink-0">
+              <div className="bg-white rounded-lg shadow-md p-4 sticky top-4">
+                <h3 className="font-bold text-lg text-[#294a70] mb-4">Refine search result</h3>
+                
+                {/* Tip rada */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Tip rada</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="type"
+                        checked={thesisTypeFilter === "all"}
+                        onChange={() => setThesisTypeFilter("all")}
+                        className="text-[#294a70]"
+                      />
+                      <span className="text-sm">Sve ({podaci.length})</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="type"
+                        checked={thesisTypeFilter === "bachelors"}
+                        onChange={() => setThesisTypeFilter("bachelors")}
+                        className="text-[#294a70]"
+                      />
+                      <span className="text-sm">Osnovne ({podaci.filter(p => p.type === "bachelors").length})</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="type"
+                        checked={thesisTypeFilter === "masters"}
+                        onChange={() => setThesisTypeFilter("masters")}
+                        className="text-[#294a70]"
+                      />
+                      <span className="text-sm">Master ({podaci.filter(p => p.type === "masters").length})</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="type"
+                        checked={thesisTypeFilter === "specialist"}
+                        onChange={() => setThesisTypeFilter("specialist")}
+                        className="text-[#294a70]"
+                      />
+                      <span className="text-sm">Specijalističke ({podaci.filter(p => p.type === "specialist").length})</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Mentor */}
+                {uniqueMentors.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Mentor</h4>
+                    <select
+                      value={selectedMentor}
+                      onChange={(e) => setSelectedMentor(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Svi mentori</option>
+                      {uniqueMentors.map(mentor => (
+                        <option key={mentor} value={mentor}>{mentor}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Ocjena */}
+                {uniqueGrades.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Ocjena</h4>
+                    <select
+                      value={selectedGrade}
+                      onChange={(e) => setSelectedGrade(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Sve ocjene</option>
+                      {uniqueGrades.map(grade => (
+                        <option key={grade} value={grade}>{grade}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Tema */}
+                {uniqueTopics.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Tema</h4>
+                    <select
+                      value={selectedTopic}
+                      onChange={(e) => setSelectedTopic(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Sve teme</option>
+                      {uniqueTopics.map(topic => (
+                        <option key={topic} value={topic}>{topic}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Godina */}
+                {uniqueYears.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Godina</h4>
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Sve godine</option>
+                      {uniqueYears.map(year => (
+                        <option key={year} value={year.toString()}>{year}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Reset dugme */}
+                <button
+                  onClick={() => {
+                    setThesisTypeFilter("all");
+                    setSelectedMentor("all");
+                    setSelectedGrade("all");
+                    setSelectedTopic("all");
+                    setSelectedYear("all");
+                    setSearchTerm("");
+                  }}
+                  className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-semibold"
+                >
+                  Resetuj filtere
+                </button>
+              </div>
+            </div>
+
+            {/* Desna strana - Lista radova */}
+            <div className="flex-1">
           {/* Lista radova */}
           <div className="space-y-4">
             {currentItems.map((p, idx) => (
@@ -613,6 +754,8 @@ export default function DiplomskiRadovi() {
               </div>
             </div>
           )}
+            </div>
+          </div>
         </div>
       </div>
         </>
