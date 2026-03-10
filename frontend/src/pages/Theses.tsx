@@ -28,6 +28,13 @@ export default function DiplomskiRadovi() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
+  // Napredni filteri
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState<string>("all");
+  const [selectedGrade, setSelectedGrade] = useState<string>("all");
+  const [selectedTopic, setSelectedTopic] = useState<string>("all");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+
   const fetchTheses = async () => {
     try {
       setLoading(true);
@@ -187,6 +194,12 @@ export default function DiplomskiRadovi() {
   const topicStats: [string, number][] = getTopicStats();
   const keywordStats: [string, number][] = getKeywordStats();
 
+  // Dobijanje jedinstvenih vrednosti za filtere
+  const uniqueMentors = Array.from(new Set(podaci.map(p => p.mentor).filter(Boolean))).sort();
+  const uniqueGrades = Array.from(new Set(podaci.map(p => p.grade).filter(Boolean))).sort();
+  const uniqueTopics = Array.from(new Set(podaci.map(p => p.topic).filter(Boolean))).sort();
+  const uniqueYears = Array.from(new Set(podaci.map(p => p.year).filter(Boolean))).sort((a, b) => b - a);
+
   // Filtriranje - napredna pretraga
   const filtrirani = podaci.filter((p) => {
     // Priprema podataka za pretragu
@@ -216,8 +229,14 @@ export default function DiplomskiRadovi() {
 
     // Filter po tipu rada
     const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
+    
+    // Napredni filteri
+    const matchesMentor = selectedMentor === "all" || p.mentor === selectedMentor;
+    const matchesGrade = selectedGrade === "all" || p.grade === selectedGrade;
+    const matchesTopic = selectedTopic === "all" || p.topic === selectedTopic;
+    const matchesYear = selectedYear === "all" || p.year?.toString() === selectedYear;
 
-    return matchesSearch && matchesType;
+    return matchesSearch && matchesType && matchesMentor && matchesGrade && matchesTopic && matchesYear;
   });
 
   // Sortiranje
@@ -253,7 +272,7 @@ export default function DiplomskiRadovi() {
   // Reset na prvu stranicu kada se promeni pretraga ili filter
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, thesisTypeFilter, sortBy]);
+  }, [searchTerm, thesisTypeFilter, sortBy, selectedMentor, selectedGrade, selectedTopic, selectedYear]);
 
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
