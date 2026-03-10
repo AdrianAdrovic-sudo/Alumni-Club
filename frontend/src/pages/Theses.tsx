@@ -416,70 +416,107 @@ export default function DiplomskiRadovi() {
 
       <div className="w-full flex-1 flex items-center justify-center px-4 md:px-8 py-8 bg-white">
         <div className="w-full max-w-6xl">
-          {/* Info text - moved here above table */}
+          {/* Info text */}
           <div className="mb-6">
             <p className="text-sm sm:text-base text-gray-700 bg-blue-50 border-l-4 border-[#294a70] rounded-r-lg p-4 shadow-sm">
-              💡 <strong>Savjet:</strong> Kliknite na naziv diplomskog rada da ga preuzmete na svoj uređaj.
+              💡 <strong>Savjet:</strong> Kliknite na "Abstract" da pročitate sažetak rada.
             </p>
           </div>
           
-          <div className="shadow-xl rounded-2xl overflow-hidden bg-white border border-gray-200">
-            <div className="w-full overflow-x-auto">
-              <table className="w-full border-collapse table-auto min-w-[600px]">
-                <thead className="bg-gradient-to-r from-[#294a70] to-[#3d5a7f] text-white">
-                  <tr>
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Ime</th>
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Prezime</th>
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Naziv diplomskog rada</th>
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">Datum diplomiranja</th>
-
-                  {isAdmin && (
-                    <th className="px-6 py-4 text-left font-bold text-sm uppercase tracking-wide">
-                      Akcije
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((p) => (
-                  <tr key={p.id} className="border-b border-gray-200 hover:bg-blue-50 transition-colors">
-                    <td className="px-6 py-4 text-gray-800 font-medium">{p.first_name}</td>
-                    <td className="px-6 py-4 text-gray-800 font-medium">{p.last_name}</td>
-                    <td className="px-6 py-4">
+          {/* Lista radova */}
+          <div className="space-y-4">
+            {currentItems.map((p, idx) => (
+              <div key={p.id} className="bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-all p-6">
+                {/* Broj */}
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#294a70] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                    {startIndex + idx + 1}
+                  </div>
+                  
+                  <div className="flex-1">
+                    {/* Naslov */}
+                    <h3 className="text-xl font-bold text-[#294a70] mb-2 hover:underline cursor-pointer">
                       {p.fileUrl ? (
-                        <a
-                          href={getFileUrl(p.fileUrl)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                          className="text-[#294a70] hover:text-[#1f3a5a] hover:underline cursor-pointer font-semibold transition-colors"
-                        >
+                        <a href={p.fileUrl} target="_blank" rel="noopener noreferrer">
                           {p.title}
                         </a>
                       ) : (
-                        <span className="text-gray-700">{p.title}</span>
+                        <span>{p.title}</span>
                       )}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{p.year}</td>
-
+                    </h3>
+                    
+                    {/* Godina */}
+                    <div className="text-sm text-gray-600 mb-3">
+                      {p.year}
+                    </div>
+                    
+                    {/* Tip rada */}
+                    <div className="text-sm text-gray-600 mb-3">
+                      {p.type === 'bachelors' && 'Independent thesis Basic level, 10 credits / 15 HE credits'}
+                      {p.type === 'masters' && 'Independent thesis Advanced level, 20 credits / 30 HE credits'}
+                      {p.type === 'specialist' && 'Specialist thesis'}
+                      <br />
+                      Student thesis
+                    </div>
+                    
+                    {/* Autor i Mentor */}
+                    <div className="flex flex-wrap gap-4 mb-3 text-sm">
+                      <div>
+                        <span className="font-semibold text-gray-700">Autor:</span>{' '}
+                        <span className="text-gray-600">{p.first_name} {p.last_name}</span>
+                      </div>
+                      {p.mentor && (
+                        <div>
+                          <span className="font-semibold text-gray-700">Mentor:</span>{' '}
+                          <span className="text-gray-600">{p.mentor}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Abstract dugme */}
+                    {p.abstract && (
+                      <details className="mt-3">
+                        <summary className="cursor-pointer text-[#294a70] font-semibold hover:underline inline-flex items-center gap-2">
+                          ▸ Abstract [en]
+                        </summary>
+                        <div className="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 leading-relaxed">
+                          {p.abstract}
+                        </div>
+                      </details>
+                    )}
+                    
+                    {/* Download dugme */}
+                    {p.fileUrl && (
+                      <div className="mt-4">
+                        <a
+                          href={p.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold text-sm"
+                        >
+                          📄 Download full text (pdf)
+                        </a>
+                      </div>
+                    )}
+                    
+                    {/* Admin akcije */}
                     {isAdmin && (
-                      <td className="px-6 py-4">
+                      <div className="mt-4 pt-4 border-t border-gray-200">
                         <button
                           onClick={() => {
                             setSelectedThesis(p);
                             setShowUploadModal(true);
                           }}
-                          className="bg-[#294a70] text-white px-4 py-2 rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold"
+                          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md font-semibold text-sm"
                         >
-                          📤 Otpremi
+                          📤 Otpremi PDF
                         </button>
-                      </td>
+                      </div>
                     )}
-                  </tr>
-                ))}
-              </tbody>
-              </table>
-            </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Pagination */}
