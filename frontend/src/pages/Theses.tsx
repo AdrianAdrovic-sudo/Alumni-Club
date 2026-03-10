@@ -34,6 +34,7 @@ export default function DiplomskiRadovi() {
   const [selectedGrade, setSelectedGrade] = useState<string>("all");
   const [selectedTopic, setSelectedTopic] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
 
   const fetchTheses = async () => {
     try {
@@ -199,6 +200,7 @@ export default function DiplomskiRadovi() {
   const uniqueGrades = Array.from(new Set(podaci.map(p => p.grade).filter(Boolean))).sort();
   const uniqueTopics = Array.from(new Set(podaci.map(p => p.topic).filter(Boolean))).sort();
   const uniqueYears = Array.from(new Set(podaci.map(p => p.year).filter(Boolean))).sort((a, b) => b - a);
+  const uniqueLanguages = Array.from(new Set(podaci.map(p => p.language).filter(Boolean))).sort();
 
   // Filtriranje - napredna pretraga
   const filtrirani = podaci.filter((p) => {
@@ -212,6 +214,7 @@ export default function DiplomskiRadovi() {
     const topic = (p.topic || "").toLowerCase();
     const abstract = (p.abstract || "").toLowerCase();
     const grade = (p.grade || "").toLowerCase();
+    const language = (p.language || "").toLowerCase();
     
     const searchLower = searchTerm.toLowerCase();
 
@@ -225,7 +228,8 @@ export default function DiplomskiRadovi() {
       committeeMembers.includes(searchLower) ||
       topic.includes(searchLower) ||
       abstract.includes(searchLower) ||
-      grade.includes(searchLower);
+      grade.includes(searchLower) ||
+      language.includes(searchLower);
 
     // Filter po tipu rada
     const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
@@ -235,8 +239,9 @@ export default function DiplomskiRadovi() {
     const matchesGrade = selectedGrade === "all" || p.grade === selectedGrade;
     const matchesTopic = selectedTopic === "all" || p.topic === selectedTopic;
     const matchesYear = selectedYear === "all" || p.year?.toString() === selectedYear;
+    const matchesLanguage = selectedLanguage === "all" || p.language === selectedLanguage;
 
-    return matchesSearch && matchesType && matchesMentor && matchesGrade && matchesTopic && matchesYear;
+    return matchesSearch && matchesType && matchesMentor && matchesGrade && matchesTopic && matchesYear && matchesLanguage;
   });
 
   // Sortiranje
@@ -269,7 +274,8 @@ export default function DiplomskiRadovi() {
                       selectedMentor !== "all" || 
                       selectedGrade !== "all" || 
                       selectedTopic !== "all" || 
-                      selectedYear !== "all";
+                      selectedYear !== "all" ||
+                      selectedLanguage !== "all";
 
   // Paginacija
   const totalPages = Math.ceil(sortirani.length / itemsPerPage);
@@ -280,7 +286,7 @@ export default function DiplomskiRadovi() {
   // Reset na prvu stranicu kada se promeni pretraga ili filter
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, thesisTypeFilter, sortBy, selectedMentor, selectedGrade, selectedTopic, selectedYear]);
+  }, [searchTerm, thesisTypeFilter, sortBy, selectedMentor, selectedGrade, selectedTopic, selectedYear, selectedLanguage]);
 
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
@@ -576,6 +582,23 @@ export default function DiplomskiRadovi() {
                   </div>
                 )}
 
+                {/* Jezik */}
+                {uniqueLanguages.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-sm text-gray-700 mb-2">Jezik</h4>
+                    <select
+                      value={selectedLanguage}
+                      onChange={(e) => setSelectedLanguage(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    >
+                      <option value="all">Svi jezici</option>
+                      {uniqueLanguages.map(language => (
+                        <option key={language} value={language}>{language}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 {/* Reset dugme */}
                 <button
                   onClick={() => {
@@ -584,6 +607,7 @@ export default function DiplomskiRadovi() {
                     setSelectedGrade("all");
                     setSelectedTopic("all");
                     setSelectedYear("all");
+                    setSelectedLanguage("all");
                     setSearchTerm("");
                   }}
                   className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-semibold"

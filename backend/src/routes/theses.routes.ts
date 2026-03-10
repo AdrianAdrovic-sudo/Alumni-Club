@@ -46,6 +46,7 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
           grade: row.grade ? (row.grade || "").trim().toUpperCase() : null,
           topic: row.topic ? (row.topic || "").trim() : null,
           keywords: row.keywords ? (row.keywords || "").trim() : null,
+          language: row.language ? (row.language || "").trim() : null,
           abstract: row.abstract ? (row.abstract || "").trim() : null,
           user_id: row.user_id && !isNaN(Number(row.user_id)) ? Number(row.user_id) : 1,
         }));
@@ -89,6 +90,7 @@ router.get("/", async (req, res) => {
       grade: t.grade,
       topic: t.topic,
       keywords: t.keywords,
+      language: t.language,
       abstract: t.abstract,
     }));
 
