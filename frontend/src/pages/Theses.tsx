@@ -26,7 +26,7 @@ export default function DiplomskiRadovi() {
 
   // Paginacija
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 20;
 
   // Napredni filteri
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -262,6 +262,14 @@ export default function DiplomskiRadovi() {
       return 0;
   }
 });
+
+  // Provera da li korisnik aktivno pretražuje
+  const isSearching = searchTerm !== "" || 
+                      thesisTypeFilter !== "all" || 
+                      selectedMentor !== "all" || 
+                      selectedGrade !== "all" || 
+                      selectedTopic !== "all" || 
+                      selectedYear !== "all";
 
   // Paginacija
   const totalPages = Math.ceil(sortirani.length / itemsPerPage);
@@ -587,6 +595,22 @@ export default function DiplomskiRadovi() {
 
             {/* Desna strana - Lista radova */}
             <div className="flex-1">
+          
+          {/* Ako nema pretrage, prikaži poruku */}
+          {!isSearching ? (
+            <div className="bg-white rounded-lg shadow-md p-12 text-center">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-2xl font-bold text-[#294a70] mb-2">Pretražite diplomske radove</h3>
+              <p className="text-gray-600">Koristite search ili filtere sa leve strane da pronađete radove.</p>
+            </div>
+          ) : currentItems.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-md p-12 text-center">
+              <div className="text-6xl mb-4">📭</div>
+              <h3 className="text-2xl font-bold text-[#294a70] mb-2">Nema rezultata</h3>
+              <p className="text-gray-600">Pokušajte sa drugačijim kriterijumima pretrage.</p>
+            </div>
+          ) : (
+            <>
           {/* Lista radova */}
           <div className="space-y-4">
             {currentItems.map((p, idx) => (
@@ -753,6 +777,8 @@ export default function DiplomskiRadovi() {
                 </button>
               </div>
             </div>
+          )}
+          </>
           )}
             </div>
           </div>
