@@ -205,7 +205,7 @@ export default function DiplomskiRadovi() {
   // Mapiranje jezika na puni naziv
   const languageNames: { [key: string]: string } = {
     'en': 'English',
-    'mn': 'Montenegro'
+    'cg': 'Crna Gora'
   };
 
   // Filtriranje - napredna pretraga
@@ -446,7 +446,7 @@ export default function DiplomskiRadovi() {
             <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Pretraži po imenu, prezimenu, nazivu, mentoru, ključnim riječima..."
+              placeholder="Pretraži po imenu, prezimenu, nazivu, mentoru, jeziku, ključnim riječima..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#294a70] focus:border-[#294a70] shadow-sm hover:border-gray-400 transition-all"
@@ -689,6 +689,12 @@ export default function DiplomskiRadovi() {
                         <div>
                           <span className="font-semibold text-gray-700">Mentor:</span>{' '}
                           <span className="text-gray-600">{p.mentor}</span>
+                        </div>
+                      )}
+                      {p.language && (
+                        <div>
+                          <span className="font-semibold text-gray-700">Jezik:</span>{' '}
+                          <span className="text-gray-600">{languageNames[p.language] || p.language}</span>
                         </div>
                       )}
                     </div>

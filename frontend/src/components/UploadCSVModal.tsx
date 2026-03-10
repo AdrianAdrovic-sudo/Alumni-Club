@@ -84,7 +84,7 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
           <div><b>grade</b> – ocjena (A, B, C, D, E, F)</div>
           <div><b>topic</b> – tema rada</div>
           <div><b>keywords</b> – ključne riječi, odvojene zarezom</div>
-          <div><b>language</b> – jezik rada (en = English, mn = Montenegro)</div>
+          <div><b>language</b> – jezik rada (en = English, cg = Crna Gora)</div>
           <div><b>abstract</b> – sažetak rada</div>
         </div>
 
