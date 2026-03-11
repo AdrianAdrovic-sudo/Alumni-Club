@@ -431,14 +431,6 @@ export default function DiplomskiRadovi() {
           )}
           </div>
 
-          {/* Dodaj rad dugme (za sve korisnike) */}
-          <button 
-            onClick={() => setShowAddThesisModal(true)}
-            className="flex items-center gap-2 px-5 py-3 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg whitespace-nowrap font-semibold"
-          >
-            ➕ Dodaj rad
-          </button>
-
           {/* Dodaj rad Button */}
           <button 
             onClick={() => setShowAddThesisModal(true)}
