@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import UploadThesisModal from "../components/UploadThesisModal";
 import UploadCSVModal from "../components/UploadCSVModal";
+import AddThesisModal from "../components/AddThesisModal";
 import axios from "axios";
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -20,6 +21,7 @@ export default function DiplomskiRadovi() {
   const [selectedThesis, setSelectedThesis] = useState<any>(null);
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
   const [showCsvModal, setShowCsvModal] = useState(false);
+  const [showAddThesisModal, setShowAddThesisModal] = useState(false);
   const [podaci, setPodaci] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -428,6 +430,16 @@ export default function DiplomskiRadovi() {
             </div>
           )}
           </div>
+
+          {/* Dodaj rad Button (samo za prijavljene korisnike) */}
+          {user && (
+            <button 
+              onClick={() => setShowAddThesisModal(true)}
+              className="flex items-center gap-2 px-5 py-3 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg whitespace-nowrap font-semibold"
+            >
+              ➕ Dodaj rad
+            </button>
+          )}
 
           {/* CSV Upload Button (Admin only) */}
           {isAdmin && (
@@ -1269,6 +1281,12 @@ export default function DiplomskiRadovi() {
         isOpen={showCsvModal}
         onClose={() => setShowCsvModal(false)}
         onUploadSuccess={fetchTheses}
+      />
+
+      <AddThesisModal
+        isOpen={showAddThesisModal}
+        onClose={() => setShowAddThesisModal(false)}
+        onSuccess={fetchTheses}
       />
     </div>
   );
