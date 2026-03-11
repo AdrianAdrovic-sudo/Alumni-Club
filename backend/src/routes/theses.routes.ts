@@ -68,6 +68,58 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
     });
 });
 
+router.post("/", async (req, res) => {
+  try {
+    const {
+      first_name,
+      last_name,
+      title,
+      type,
+      year,
+      file_url,
+      mentor,
+      committee_members,
+      grade,
+      topic,
+      keywords,
+      language,
+      abstract,
+      user_id,
+    } = req.body;
+
+    if (!first_name || !last_name || !title || !type || !user_id) {
+      return res.status(400).json({ message: "Obavezna polja nisu popunjena" });
+    }
+
+    const newThesis = await prisma.theses.create({
+      data: {
+        first_name: first_name.trim(),
+        last_name: last_name.trim(),
+        title: title.trim(),
+        type: type.trim().toLowerCase(),
+        year: year || null,
+        file_url: file_url || "",
+        mentor: mentor || null,
+        committee_members: committee_members || null,
+        grade: grade || null,
+        topic: topic || null,
+        keywords: keywords || null,
+        language: language || null,
+        abstract: abstract || null,
+        user_id,
+      },
+    });
+
+    res.json({
+      message: "Rad uspjesno dodat",
+      thesis: newThesis,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Greska pri dodavanju rada" });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const theses = await prisma.theses.findMany({
