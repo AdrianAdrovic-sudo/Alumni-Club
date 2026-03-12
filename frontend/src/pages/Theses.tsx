@@ -223,6 +223,8 @@ export default function DiplomskiRadovi() {
     const abstract = (p.abstract || "").toLowerCase();
     const grade = (p.grade || "").toLowerCase();
     const language = (p.language || "").toLowerCase();
+    const additionalTitle = (p.additional_title || "").toLowerCase();
+    const additionalSubtitle = (p.additional_subtitle || "").toLowerCase();
     
     const searchLower = searchTerm.toLowerCase();
 
@@ -231,6 +233,8 @@ export default function DiplomskiRadovi() {
       firstName.includes(searchLower) ||
       lastName.includes(searchLower) ||
       title.includes(searchLower) ||
+      additionalTitle.includes(searchLower) ||
+      additionalSubtitle.includes(searchLower) ||
       mentor.includes(searchLower) ||
       keywords.includes(searchLower) ||
       committeeMembers.includes(searchLower) ||
@@ -676,6 +680,31 @@ export default function DiplomskiRadovi() {
                         <span>{p.title}</span>
                       )}
                     </h3>
+
+                    {p.subtitle && (
+                      <div className="text-sm text-gray-700 mb-2">
+                        {p.subtitle}
+                      </div>
+                    )}
+
+                    {(p.additional_title || p.additional_subtitle) && (
+                      <div className="text-sm text-gray-600 mb-2">
+                        <span className="font-semibold text-gray-700">Prevod</span>
+                        {p.additional_title_language && (
+                          <span className="ml-2 text-xs text-gray-500">
+                            ({languageNames[p.additional_title_language] || p.additional_title_language})
+                          </span>
+                        )}
+                        <div className="mt-1">
+                          {p.additional_title && (
+                            <div className="text-gray-700">{p.additional_title}</div>
+                          )}
+                          {p.additional_subtitle && (
+                            <div className="text-gray-500">{p.additional_subtitle}</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Godina */}
                     <div className="text-sm text-gray-600 mb-3">

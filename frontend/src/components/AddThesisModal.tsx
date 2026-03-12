@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 interface AddThesisModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function AddThesisModal({ isOpen, onClose }: AddThesisModalProps) {
+interface AlumniOption {
+  id: number;
+  first_name: string;
+  last_name: string;
+}
+
+export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesisModalProps) {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
 
@@ -15,6 +22,9 @@ export default function AddThesisModal({ isOpen, onClose }: AddThesisModalProps)
   const [selectedAlumniId, setSelectedAlumniId] = useState("");
   const [newAlumniFirstName, setNewAlumniFirstName] = useState("");
   const [newAlumniLastName, setNewAlumniLastName] = useState("");
+  const [alumniOptions, setAlumniOptions] = useState<AlumniOption[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Polja za naslov
   const [title, setTitle] = useState("");
@@ -36,11 +46,141 @@ export default function AddThesisModal({ isOpen, onClose }: AddThesisModalProps)
   const [keywords, setKeywords] = useState("");
   const [abstract, setAbstract] = useState("");
 
+  useEffect(() => {
+    if (!isAdmin || !isOpen) {
+      return;
+    }
+
+    const loadAlumni = async () => {
+      try {
+        const response = await fetch("/api/alumni/directory");
+        const data = await response.json();
+        if (response.ok && Array.isArray(data.users)) {
+          setAlumniOptions(
+            data.users.map((u: AlumniOption) => ({
+              id: u.id,
+              first_name: u.first_name,
+              last_name: u.last_name,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Greska pri ucitavanju alumnista:", err);
+      }
+    };
+
+    loadAlumni();
+  }, [isAdmin, isOpen]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Funkcionalnost dodavanja rada će biti implementirana kasnije.");
+    setErrorMessage("");
+
+    if (!user) {
+      setErrorMessage("Morate biti prijavljeni da biste dodali rad.");
+      return;
+    }
+
+    if (!title.trim()) {
+      setErrorMessage("Naziv rada je obavezan.");
+      return;
+    }
+
+    if (!titleLanguage.trim()) {
+      setErrorMessage("Jezik naslova je obavezan.");
+      return;
+    }
+
+    const parsedYear = Number(year);
+    if (!year || Number.isNaN(parsedYear) || parsedYear < 1900 || parsedYear > 2100) {
+      setErrorMessage("Godina mora biti izmedju 1900 i 2100.");
+      return;
+    }
+
+    if ((additionalTitle.trim() || additionalSubtitle.trim()) && !additionalTitleLanguage.trim()) {
+      setErrorMessage("Jezik dodatnog naslova je obavezan kada unosite prevod.");
+      return;
+    }
+
+    let authorFirstName = user.first_name || "";
+    let authorLastName = user.last_name || "";
+    let authorUserId = user.id;
+
+    if (isAdmin) {
+      if (selectExistingAlumni) {
+        if (!selectedAlumniId) {
+          setErrorMessage("Morate izabrati alumnistu.");
+          return;
+        }
+        const selected = alumniOptions.find((a) => a.id === Number(selectedAlumniId));
+        if (!selected) {
+          setErrorMessage("Izabrani alumnista nije pronadjen.");
+          return;
+        }
+        authorFirstName = selected.first_name;
+        authorLastName = selected.last_name;
+        authorUserId = selected.id;
+      } else {
+        if (!newAlumniFirstName.trim() || !newAlumniLastName.trim()) {
+          setErrorMessage("Ime i prezime novog alumniste su obavezni.");
+          return;
+        }
+        authorFirstName = newAlumniFirstName.trim();
+        authorLastName = newAlumniLastName.trim();
+        authorUserId = user.id;
+      }
+    }
+
+    if (!authorFirstName || !authorLastName) {
+      setErrorMessage("Ime i prezime autora su obavezni.");
+      return;
+    }
+
+    const payload = {
+      first_name: authorFirstName,
+      last_name: authorLastName,
+      title: title.trim(),
+      subtitle: subtitle.trim() || null,
+      title_language: titleLanguage.trim(),
+      additional_title: additionalTitle.trim() || null,
+      additional_subtitle: additionalSubtitle.trim() || null,
+      additional_title_language: additionalTitleLanguage.trim() || null,
+      type: thesisType,
+      year: parsedYear,
+      file_url: pdfLink.trim() || "",
+      mentor: mentor.trim() || null,
+      committee_members: committeeMembers.trim() || null,
+      grade: grade || null,
+      topic: topic.trim() || null,
+      keywords: keywords.trim() || null,
+      language: language.trim() || null,
+      abstract: abstract.trim() || null,
+      user_id: authorUserId,
+    };
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/theses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Greska pri dodavanju rada.");
+      }
+
+      await onSuccess?.();
+      onClose();
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(err.message || "Greska pri dodavanju rada.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -57,6 +197,11 @@ export default function AddThesisModal({ isOpen, onClose }: AddThesisModalProps)
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {errorMessage && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {errorMessage}
+            </div>
+          )}
           {/* Alumnista sekcija - samo za admina */}
           {isAdmin && (
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -95,7 +240,11 @@ export default function AddThesisModal({ isOpen, onClose }: AddThesisModalProps)
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                     >
                       <option value="">-- Izaberi alumnistu --</option>
-                      {/* Lista alumnista će biti učitana dinamički */}
+                      {alumniOptions.map((alumni) => (
+                        <option key={alumni.id} value={alumni.id}>
+                          {alumni.first_name} {alumni.last_name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 ) : (
@@ -401,9 +550,10 @@ export default function AddThesisModal({ isOpen, onClose }: AddThesisModalProps)
             </button>
             <button
               type="submit"
+              disabled={isSubmitting}
               className="px-6 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-colors font-semibold"
             >
-              Dodaj rad
+              {isSubmitting ? "Dodavanje..." : "Dodaj rad"}
             </button>
           </div>
         </form>

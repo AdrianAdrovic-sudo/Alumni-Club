@@ -231,9 +231,14 @@ model theses {
   first_name        String
   last_name         String
   title             String   @db.VarChar(255)
+  subtitle          String?  @db.VarChar(255)
+  title_language    String   @db.VarChar(50)
+  additional_title  String?  @db.VarChar(255)
+  additional_subtitle String? @db.VarChar(255)
+  additional_title_language String? @db.VarChar(50)
   type              String   @db.VarChar(100)
   file_url          String   @db.VarChar(255)
-  year              Int?
+  year              Int
   
   // Podaci za statistiku
   mentor            String?  @db.VarChar(255)

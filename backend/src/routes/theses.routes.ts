@@ -34,22 +34,36 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
     .on("data", (data) => results.push(data))
     .on("end", async () => {
       try {
-        const thesesData = results.map((row) => ({
-          first_name: (row.first_name || "").trim(),
-          last_name: (row.last_name || "").trim(),
-          title: (row.title || "").trim(),
-          type: (row.type || "").trim().toLowerCase(),
-          year: row.year && !isNaN(Number(row.year)) ? Number(row.year) : null,
-          file_url: (row.file_url || "").trim(),
-          mentor: row.mentor ? (row.mentor || "").trim() : null,
-          committee_members: row.committee_members ? (row.committee_members || "").trim() : null,
-          grade: row.grade ? (row.grade || "").trim().toUpperCase() : null,
-          topic: row.topic ? (row.topic || "").trim() : null,
-          keywords: row.keywords ? (row.keywords || "").trim() : null,
-          language: row.language ? (row.language || "").trim() : null,
-          abstract: row.abstract ? (row.abstract || "").trim() : null,
-          user_id: row.user_id && !isNaN(Number(row.user_id)) ? Number(row.user_id) : 1,
-        }));
+        const thesesData = results.map((row) => {
+          const parsedYear = Number(row.year);
+          if (Number.isNaN(parsedYear) || parsedYear < 1900 || parsedYear > 2100) {
+            throw new Error("CSV sadrzi neispravnu godinu.");
+          }
+
+          return {
+            first_name: (row.first_name || "").trim(),
+            last_name: (row.last_name || "").trim(),
+            title: (row.title || "").trim(),
+            subtitle: row.subtitle ? (row.subtitle || "").trim() : null,
+            title_language: (row.title_language || row.titleLanguage || row.language || "en").trim(),
+            additional_title: row.additional_title ? (row.additional_title || "").trim() : null,
+            additional_subtitle: row.additional_subtitle ? (row.additional_subtitle || "").trim() : null,
+            additional_title_language: row.additional_title_language
+              ? (row.additional_title_language || "").trim()
+              : null,
+            type: (row.type || "").trim().toLowerCase(),
+            year: parsedYear,
+            file_url: (row.file_url || "").trim(),
+            mentor: row.mentor ? (row.mentor || "").trim() : null,
+            committee_members: row.committee_members ? (row.committee_members || "").trim() : null,
+            grade: row.grade ? (row.grade || "").trim().toUpperCase() : null,
+            topic: row.topic ? (row.topic || "").trim() : null,
+            keywords: row.keywords ? (row.keywords || "").trim() : null,
+            language: row.language ? (row.language || "").trim() : null,
+            abstract: row.abstract ? (row.abstract || "").trim() : null,
+            user_id: row.user_id && !isNaN(Number(row.user_id)) ? Number(row.user_id) : 1,
+          };
+        });
 
         await prisma.theses.createMany({
           data: thesesData,
@@ -74,6 +88,11 @@ router.post("/", async (req, res) => {
       first_name,
       last_name,
       title,
+      subtitle,
+      title_language,
+      additional_title,
+      additional_subtitle,
+      additional_title_language,
       type,
       year,
       file_url,
@@ -87,8 +106,13 @@ router.post("/", async (req, res) => {
       user_id,
     } = req.body;
 
-    if (!first_name || !last_name || !title || !type || !user_id) {
+    if (!first_name || !last_name || !title || !title_language || !type || !user_id) {
       return res.status(400).json({ message: "Obavezna polja nisu popunjena" });
+    }
+
+    const parsedYear = Number(year);
+    if (Number.isNaN(parsedYear) || parsedYear < 1900 || parsedYear > 2100) {
+      return res.status(400).json({ message: "Godina mora biti izmedju 1900 i 2100" });
     }
 
     const newThesis = await prisma.theses.create({
@@ -96,8 +120,13 @@ router.post("/", async (req, res) => {
         first_name: first_name.trim(),
         last_name: last_name.trim(),
         title: title.trim(),
+        subtitle: subtitle ? subtitle.trim() : null,
+        title_language: title_language.trim(),
+        additional_title: additional_title ? additional_title.trim() : null,
+        additional_subtitle: additional_subtitle ? additional_subtitle.trim() : null,
+        additional_title_language: additional_title_language ? additional_title_language.trim() : null,
         type: type.trim().toLowerCase(),
-        year: year || null,
+        year: parsedYear,
         file_url: file_url || "",
         mentor: mentor || null,
         committee_members: committee_members || null,
@@ -133,6 +162,11 @@ router.get("/", async (req, res) => {
       first_name: t.first_name,
       last_name: t.last_name,
       title: t.title,
+      subtitle: t.subtitle,
+      title_language: t.title_language,
+      additional_title: t.additional_title,
+      additional_subtitle: t.additional_subtitle,
+      additional_title_language: t.additional_title_language,
       date: t.year ? `01.07.${t.year}.` : "",
       type: t.type,
       fileUrl: t.file_url,
