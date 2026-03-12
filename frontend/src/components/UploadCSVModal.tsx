@@ -56,7 +56,7 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
 
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Upload CSV</h2>
@@ -67,33 +67,42 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
 
         <div className="mt-4 text-sm text-gray-600">
           <p className="font-semibold mb-1">Napomena:</p>
-        <p>CSV fajl mora imati sljedeće kolone:</p>
+          <p>CSV fajl mora imati sljedeće kolone:</p>
 
-        <div className="bg-gray-100 p-3 mt-2 rounded text-sm leading-6 max-h-64 overflow-y-auto">
-          <div className="mb-2 font-bold text-[#294a70]">Obavezne kolone:</div>
-          <div><b>first_name</b> – ime studenta</div>
-          <div><b>last_name</b> – prezime studenta</div>
-          <div><b>title</b> – naziv rada</div>
-          <div><b>type</b> – bachelors / masters / specialist</div>
-          <div><b>year</b> – godina</div>
-          <div><b>file_url</b> – link na rad</div>
-          
-          <div className="mt-3 mb-2 font-bold text-[#294a70]">Opcione kolone (za statistiku):</div>
-          <div><b>mentor</b> – mentor (npr. "Prof. dr Ivan Petrović")</div>
-          <div><b>committee_members</b> – članovi komisije, odvojeni zarezom</div>
-          <div><b>grade</b> – ocjena (A, B, C, D, E, F)</div>
-          <div><b>topic</b> – tema rada</div>
-          <div><b>keywords</b> – ključne riječi, odvojene zarezom</div>
-          <div><b>language</b> – jezik rada (en = English, cg = Crna Gora)</div>
-          <div><b>abstract</b> – sažetak rada</div>
-        </div>
+          <div className="bg-gray-100 p-3 mt-2 rounded text-sm leading-6 max-h-64 overflow-y-auto">
+            <div className="mb-2 font-bold text-[#294a70]">Obavezne kolone:</div>
+            <div><b>first_name</b> – ime studenta</div>
+            <div><b>last_name</b> – prezime studenta</div>
+            <div><b>title</b> – naziv rada</div>
+            <div><b>title_language</b> – jezik naslova (npr. en, cg)</div>
+            <div><b>type</b> – bachelors / masters / specialist</div>
+            <div><b>year</b> – godina</div>
+            <div><b>file_url</b> – link na rad</div>
+            
+            <div className="mt-3 mb-2 font-bold text-[#294a70]">Opcione kolone (prevod naslova):</div>
+            <div><b>subtitle</b> – podnaslov rada</div>
+            <div><b>additional_title</b> – prevod naslova</div>
+            <div><b>additional_subtitle</b> – prevod podnaslova</div>
+            <div><b>additional_title_language</b> – jezik prevoda</div>
 
-        <p className="mt-2">Primjer:</p>
+            <div className="mt-3 mb-2 font-bold text-[#294a70]">Opcione kolone (statistika):</div>
+            <div><b>mentor</b> – mentor (npr. "Prof. dr Ivan Petrović")</div>
+            <div><b>committee_members</b> – članovi komisije, odvojeni zarezom</div>
+            <div><b>grade</b> – ocjena (A, B, C, D, E, F)</div>
+            <div><b>topic</b> – tema rada</div>
+            <div><b>keywords</b> – ključne riječi, odvojene zarezom</div>
+            <div><b>language</b> – jezik rada (en = English, cg = Crna Gora)</div>
+            <div><b>abstract</b> – sažetak rada</div>
+          </div>
 
-        <pre className="bg-gray-100 p-3 rounded text-xs mt-3 whitespace-pre-wrap overflow-x-auto">
-first_name,last_name,title,type,year,file_url,mentor,committee_members,grade,topic,keywords,language,abstract
-Marko,Markovic,Primena masinskog ucenja,bachelors,2024,https://example.com/rad1.pdf,Prof. dr Ivan Petrovic,"Prof. dr Ivan Petrovic, Doc. dr Ana Jovanovic",A,Machine Learning,"AI, Machine Learning",en,"Ovaj rad istrazuje primenu..."
-        </pre>
+          <div className="mt-4 bg-[#eef5ff] border border-[#d7e6ff] rounded-lg p-4">
+            <p className="font-semibold text-[#2a3c60]">Primjer CSV formata:</p>
+            <div className="mt-2 bg-white border border-[#6b7aa5] rounded-md p-3">
+              <pre className="text-[12px] leading-5 whitespace-pre-wrap overflow-x-auto text-[#1f2a44]">
+first_name,last_name,title,subtitle,title_language,additional_title,additional_subtitle,additional_title_language,type,year,file_url,mentor,committee_members,grade,topic,keywords,language,abstract Marko,Markovic,Primena masinskog ucenja,,cg,Application of ML,,en,bachelors,2024,https://example.com/rad1.pdf,Prof. dr Ivan Petrovic,"Prof. dr Ivan Petrovic, Doc. dr Ana Jovanovic",A,Machine Learning,"AI, Machine Learning",en,"Ovaj rad istrazuje primenu..."
+              </pre>
+            </div>
+          </div>
         </div>
 
         <div className="mb-4">
