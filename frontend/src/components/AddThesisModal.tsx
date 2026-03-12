@@ -46,6 +46,8 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const [topic, setTopic] = useState("");
   const [keywords, setKeywords] = useState("");
   const [abstract, setAbstract] = useState("");
+  const [defenseDate, setDefenseDate] = useState("");
+  const [defenseTime, setDefenseTime] = useState("");
 
   useEffect(() => {
     if (!isAdmin || !isOpen) {
@@ -173,6 +175,9 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
       keywords: keywords.trim(),
       language: language.trim() || null,
       abstract: abstract.trim() || null,
+      defense_date: defenseDate && defenseTime 
+        ? new Date(`${defenseDate}T${defenseTime}`).toISOString() 
+        : null,
       user_id: authorUserId,
     };
 
@@ -600,6 +605,33 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70] min-h-[120px]"
                   placeholder="Unesite sažetak rada"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Termin odbrane rada (opciono)
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <input
+                      type="date"
+                      value={defenseDate}
+                      onChange={(e) => setDefenseDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="time"
+                      value={defenseTime}
+                      onChange={(e) => setDefenseTime(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Unesite datum i vrijeme prezentacije/odbrane rada
+                </p>
               </div>
             </div>
           </div>

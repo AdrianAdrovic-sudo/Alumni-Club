@@ -251,6 +251,9 @@ model theses {
   // Abstract (sažetak)
   abstract          String?  @db.Text
   
+  // Termin odbrane rada
+  defense_date      DateTime? @db.Timestamp(6)
+  
   created_at        DateTime @default(now())
   user_id           Int
   user              users    @relation(fields: [user_id], references: [id])

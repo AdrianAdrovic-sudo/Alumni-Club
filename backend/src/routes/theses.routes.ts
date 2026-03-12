@@ -62,6 +62,7 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
             keywords: row.keywords ? (row.keywords || "").trim() : null,
             language: row.language ? (row.language || "").trim() : null,
             abstract: row.abstract ? (row.abstract || "").trim() : null,
+            defense_date: row.defense_date ? new Date(row.defense_date) : null,
             user_id: row.user_id && !isNaN(Number(row.user_id)) ? Number(row.user_id) : 1,
           };
         });
@@ -104,6 +105,7 @@ router.post("/", async (req, res) => {
       keywords,
       language,
       abstract,
+      defense_date,
       user_id,
     } = req.body;
 
@@ -136,6 +138,7 @@ router.post("/", async (req, res) => {
         keywords: keywords.trim(),
         language: language || null,
         abstract: abstract || null,
+        defense_date: defense_date ? new Date(defense_date) : null,
         user_id,
       },
     });
@@ -180,6 +183,7 @@ router.get("/", async (req, res) => {
       keywords: t.keywords,
       language: t.language,
       abstract: t.abstract,
+      defense_date: t.defense_date,
     }));
 
     res.json(formatted);
