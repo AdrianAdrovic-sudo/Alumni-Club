@@ -63,6 +63,26 @@ export default function DiplomskiRadovi() {
     }
   }, [activeTab, isAdmin]);
 
+  const handleDeleteThesis = async (thesisId: number) => {
+    const confirmed = window.confirm("Da li ste sigurni da zelite da obrisete rad?");
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/theses/${thesisId}`, { method: "DELETE" });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Greska pri brisanju rada");
+      }
+      await fetchTheses();
+      alert("Rad je uspjesno obrisan");
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Greska pri brisanju rada");
+    }
+  };
+
   const getFileUrl = (fileUrl?: string | null) => {
     if (!fileUrl) {
       return "";
@@ -769,15 +789,23 @@ export default function DiplomskiRadovi() {
                     {/* Admin akcije */}
                     {isAdmin && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
-                        <button
-                          onClick={() => {
-                            setSelectedThesis(p);
-                            setShowUploadModal(true);
-                          }}
-                          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md font-semibold text-sm"
-                        >
-                          📤 Otpremi PDF
-                        </button>
+                        <div className="flex flex-wrap gap-3">
+                          <button
+                            onClick={() => {
+                              setSelectedThesis(p);
+                              setShowUploadModal(true);
+                            }}
+                            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md font-semibold text-sm"
+                          >
+                            📤 Otpremi PDF
+                          </button>
+                          <button
+                            onClick={() => handleDeleteThesis(p.id)}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-md font-semibold text-sm"
+                          >
+                            🗑 Obrisi
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

@@ -299,4 +299,37 @@ router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const thesisId = Number(req.params.id);
+    if (!thesisId || Number.isNaN(thesisId)) {
+      return res.status(400).json({ message: "Neispravan ID rada" });
+    }
+
+    const existingThesis = await prisma.theses.findUnique({
+      where: { id: thesisId },
+      select: { file_url: true },
+    });
+
+    if (!existingThesis) {
+      return res.status(404).json({ message: "Rad nije pronadjen" });
+    }
+
+    await prisma.theses.delete({ where: { id: thesisId } });
+
+    if (existingThesis.file_url && existingThesis.file_url.startsWith("/uploads/")) {
+      const relativePath = existingThesis.file_url.replace(/^\/uploads\//, "");
+      const filePath = path.join(uploadsRoot, relativePath);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    res.json({ message: "Rad uspjesno obrisan" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Greska pri brisanju rada" });
+  }
+});
+
 export default router;
