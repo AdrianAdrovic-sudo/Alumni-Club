@@ -39,7 +39,8 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const [year, setYear] = useState("");
   const [pdfLink, setPdfLink] = useState("");
   const [mentor, setMentor] = useState("");
-  const [committeeMembers, setCommitteeMembers] = useState("");
+  const [committeeMembers, setCommitteeMembers] = useState<string[]>([]);
+  const [newCommitteeMember, setNewCommitteeMember] = useState("");
   const [grade, setGrade] = useState("");
   const [language, setLanguage] = useState("en");
   const [topic, setTopic] = useState("");
@@ -104,6 +105,21 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
       return;
     }
 
+    if (!topic.trim()) {
+      setErrorMessage("Tema rada je obavezna.");
+      return;
+    }
+
+    if (!keywords.trim()) {
+      setErrorMessage("Ključne riječi su obavezne.");
+      return;
+    }
+
+    if (!mentor.trim()) {
+      setErrorMessage("Mentor je obavezan.");
+      return;
+    }
+
     let authorFirstName = user.first_name || "";
     let authorLastName = user.last_name || "";
     let authorUserId = user.id;
@@ -150,11 +166,11 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
       type: thesisType,
       year: parsedYear,
       file_url: pdfLink.trim() || "",
-      mentor: mentor.trim() || null,
-      committee_members: committeeMembers.trim() || null,
+      mentor: mentor.trim(),
+      committee_members: committeeMembers.length > 0 ? committeeMembers.join(", ") : null,
       grade: grade || null,
-      topic: topic.trim() || null,
-      keywords: keywords.trim() || null,
+      topic: topic.trim(),
+      keywords: keywords.trim(),
       language: language.trim() || null,
       abstract: abstract.trim() || null,
       user_id: authorUserId,
@@ -468,7 +484,7 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Mentor
+                  Mentor <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -476,20 +492,67 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                   onChange={(e) => setMentor(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                   placeholder="Ime i prezime mentora"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Članovi komisije
+                  Članovi komisije (opciono)
                 </label>
-                <input
-                  type="text"
-                  value={committeeMembers}
-                  onChange={(e) => setCommitteeMembers(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
-                  placeholder="Odvojeni zarezom (npr. Ime Prezime, Ime Prezime)"
-                />
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newCommitteeMember}
+                      onChange={(e) => setNewCommitteeMember(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (newCommitteeMember.trim()) {
+                            setCommitteeMembers([...committeeMembers, newCommitteeMember.trim()]);
+                            setNewCommitteeMember("");
+                          }
+                        }
+                      }}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                      placeholder="Ime i prezime člana komisije"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newCommitteeMember.trim()) {
+                          setCommitteeMembers([...committeeMembers, newCommitteeMember.trim()]);
+                          setNewCommitteeMember("");
+                        }
+                      }}
+                      className="px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-colors font-semibold"
+                    >
+                      Dodaj
+                    </button>
+                  </div>
+                  {committeeMembers.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {committeeMembers.map((member, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
+                        >
+                          <span className="text-sm">{member}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCommitteeMembers(committeeMembers.filter((_, i) => i !== index));
+                            }}
+                            className="text-blue-600 hover:text-blue-800 font-bold"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -501,7 +564,7 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Tema
+                  Tema <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -509,12 +572,13 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                   onChange={(e) => setTopic(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                   placeholder="Tema rada"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Ključne riječi
+                  Ključne riječi <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -522,6 +586,7 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                   onChange={(e) => setKeywords(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                   placeholder="Odvojene zarezom (npr. AI, Machine Learning, Python)"
+                  required
                 />
               </div>
 

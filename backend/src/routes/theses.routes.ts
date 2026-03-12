@@ -107,8 +107,8 @@ router.post("/", async (req, res) => {
       user_id,
     } = req.body;
 
-    if (!first_name || !last_name || !title || !title_language || !type || !user_id) {
-      return res.status(400).json({ message: "Obavezna polja nisu popunjena" });
+    if (!first_name || !last_name || !title || !title_language || !type || !user_id || !topic || !keywords || !mentor) {
+      return res.status(400).json({ message: "Obavezna polja nisu popunjena (ime, prezime, naslov, jezik naslova, tip, tema, ključne riječi, mentor)" });
     }
 
     const parsedYear = Number(year);
@@ -129,11 +129,11 @@ router.post("/", async (req, res) => {
         type: type.trim().toLowerCase(),
         year: parsedYear,
         file_url: file_url || "",
-        mentor: mentor || null,
+        mentor: mentor.trim(),
         committee_members: committee_members || null,
         grade: grade || null,
-        topic: topic || null,
-        keywords: keywords || null,
+        topic: topic.trim(),
+        keywords: keywords.trim(),
         language: language || null,
         abstract: abstract || null,
         user_id,
