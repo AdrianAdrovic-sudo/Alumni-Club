@@ -10,7 +10,7 @@ import axios from "axios";
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export default function DiplomskiRadovi() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isAdmin = user?.role === 'admin';
 
   const [activeTab, setActiveTab] = useState<"search" | "statistics">("search");
@@ -70,7 +70,10 @@ export default function DiplomskiRadovi() {
     }
 
     try {
-      const response = await fetch(`/api/theses/${thesisId}`, { method: "DELETE" });
+      const response = await fetch(`/api/theses/${thesisId}`, {
+        method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || "Greska pri brisanju rada");
@@ -787,18 +790,20 @@ export default function DiplomskiRadovi() {
                     )}
                     
                     {/* Admin akcije */}
-                    {isAdmin && (
+                    {(isAdmin || user?.id === p.user_id) && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <div className="flex flex-wrap gap-3">
-                          <button
-                            onClick={() => {
-                              setSelectedThesis(p);
-                              setShowUploadModal(true);
-                            }}
-                            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md font-semibold text-sm"
-                          >
-                            📤 Otpremi PDF
-                          </button>
+                          {isAdmin && (
+                            <button
+                              onClick={() => {
+                                setSelectedThesis(p);
+                                setShowUploadModal(true);
+                              }}
+                              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md font-semibold text-sm"
+                            >
+                              📤 Otpremi PDF
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDeleteThesis(p.id)}
                             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-md font-semibold text-sm"

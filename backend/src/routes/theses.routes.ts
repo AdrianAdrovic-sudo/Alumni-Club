@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
 import prisma from "../prisma";
+import { authenticate } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 const uploadsRoot = path.join(__dirname, "..", "..", "uploads");
@@ -159,6 +160,7 @@ router.get("/", async (req, res) => {
 
     const formatted = theses.map((t: any) => ({
       id: t.id,
+      user_id: t.user_id,
       first_name: t.first_name,
       last_name: t.last_name,
       title: t.title,
@@ -299,7 +301,7 @@ router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticate, async (req, res) => {
   try {
     const thesisId = Number(req.params.id);
     if (!thesisId || Number.isNaN(thesisId)) {
@@ -308,11 +310,15 @@ router.delete("/:id", async (req, res) => {
 
     const existingThesis = await prisma.theses.findUnique({
       where: { id: thesisId },
-      select: { file_url: true },
+      select: { file_url: true, user_id: true },
     });
 
     if (!existingThesis) {
       return res.status(404).json({ message: "Rad nije pronadjen" });
+    }
+
+    if (req.user?.role !== "admin" && req.user?.id !== existingThesis.user_id) {
+      return res.status(403).json({ message: "Nemate pravo da obrisete ovaj rad" });
     }
 
     await prisma.theses.delete({ where: { id: thesisId } });
