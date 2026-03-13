@@ -1,8 +1,7 @@
-import { FaSearch, FaFilter, FaUpload } from "react-icons/fa";
+import { FaSearch, FaFilter } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import UploadThesisModal from "../components/UploadThesisModal";
 import UploadCSVModal from "../components/UploadCSVModal";
 import AddThesisModal from "../components/AddThesisModal";
 import EditThesisModal from "../components/EditThesisModal";
@@ -18,8 +17,6 @@ export default function DiplomskiRadovi() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("datum-desc");
   const [showFilter, setShowFilter] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedThesis, setSelectedThesis] = useState<any>(null);
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [showAddThesisModal, setShowAddThesisModal] = useState(false);
@@ -827,15 +824,7 @@ export default function DiplomskiRadovi() {
                               >
                                 ✏️ Edituj
                               </button>
-                              <button
-                                onClick={() => {
-                                  setSelectedThesis(p);
-                                  setShowUploadModal(true);
-                                }}
-                                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md font-semibold text-sm"
-                              >
-                                📤 Otpremi PDF
-                              </button>
+                              
                             </>
                           )}
                           <button
@@ -1362,16 +1351,7 @@ export default function DiplomskiRadovi() {
         </div>
       )}
 
-      {/* Upload Thesis Modal */}
-      <UploadThesisModal
-        isOpen={showUploadModal}
-        onClose={() => {
-          setShowUploadModal(false);
-          setSelectedThesis(null);
-        }}
-        onUploadSuccess={fetchTheses}
-        thesisContext={selectedThesis}
-      />
+      
 
       <UploadCSVModal
         isOpen={showCsvModal}
@@ -1397,3 +1377,5 @@ export default function DiplomskiRadovi() {
     </div>
   );
 }
+
+
