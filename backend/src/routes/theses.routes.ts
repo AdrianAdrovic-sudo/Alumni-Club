@@ -184,6 +184,7 @@ router.get("/", async (req, res) => {
       language: t.language,
       abstract: t.abstract,
       defense_date: t.defense_date,
+      download_count: t.download_count,
     }));
 
     res.json(formatted);
@@ -339,6 +340,38 @@ router.delete("/:id", authenticate, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Greska pri brisanju rada" });
+  }
+});
+
+router.post("/:id/download", async (req, res) => {
+  try {
+    const thesisId = Number(req.params.id);
+    if (!thesisId || Number.isNaN(thesisId)) {
+      return res.status(400).json({ message: "Neispravan ID rada" });
+    }
+
+    const thesis = await prisma.theses.findUnique({
+      where: { id: thesisId },
+    });
+
+    if (!thesis) {
+      return res.status(404).json({ message: "Rad nije pronadjen" });
+    }
+
+    // Povećaj brojač preuzimanja
+    await prisma.theses.update({
+      where: { id: thesisId },
+      data: {
+        download_count: {
+          increment: 1,
+        },
+      },
+    });
+
+    res.json({ message: "Brojac preuzimanja azuriran", download_count: thesis.download_count + 1 });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Greska pri azuriranju brojaca" });
   }
 });
 

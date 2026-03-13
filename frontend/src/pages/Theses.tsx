@@ -778,14 +778,28 @@ export default function DiplomskiRadovi() {
                     {/* Download dugme */}
                     {p.fileUrl && (
                       <div className="mt-4">
-                        <a
-                          href={p.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold text-sm"
+                        <button
+                          onClick={async () => {
+                            try {
+                              // Povećaj brojač preuzimanja
+                              await axios.post(`/api/theses/${p.id}/download`);
+                              // Otvori PDF u novom tabu
+                              window.open(p.fileUrl, '_blank');
+                            } catch (err) {
+                              console.error("Greška pri bilježenju preuzimanja:", err);
+                              // Otvori PDF čak i ako brojač ne radi
+                              window.open(p.fileUrl, '_blank');
+                            }
+                          }}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold text-sm cursor-pointer"
                         >
                           📄 Download full text (pdf)
-                        </a>
+                          {p.download_count > 0 && (
+                            <span className="ml-2 px-2 py-0.5 bg-white text-[#294a70] rounded-full text-xs font-bold">
+                              {p.download_count}
+                            </span>
+                          )}
+                        </button>
                       </div>
                     )}
                     
