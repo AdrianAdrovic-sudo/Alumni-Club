@@ -41,10 +41,11 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   // Ostala polja
   const [thesisType, setThesisType] = useState("bachelors");
   const [year, setYear] = useState("");
-  const [pdfLink, setPdfLink] = useState("");
   const [mentor, setMentor] = useState("");
   const [mentorSuggestions, setMentorSuggestions] = useState<string[]>([]);
   const [showMentorSuggestions, setShowMentorSuggestions] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [committeeMembers, setCommitteeMembers] = useState<string[]>([]);
   const [newCommitteeMember, setNewCommitteeMember] = useState("");
   const [grade, setGrade] = useState("");
@@ -133,6 +134,24 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
 
   if (!isOpen) return null;
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedFile(null);
+      setFileError(null);
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      setSelectedFile(null);
+      setFileError("Dozvoljeni su samo PDF fajlovi");
+      return;
+    }
+
+    setSelectedFile(file);
+    setFileError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
@@ -175,6 +194,11 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
 
     if (!mentor.trim()) {
       setErrorMessage("Mentor je obavezan.");
+      return;
+    }
+
+    if (!selectedFile) {
+      setErrorMessage("PDF fajl je obavezan.");
       return;
     }
 
@@ -251,7 +275,7 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
       additional_title_language: additionalTitleLanguage.trim() || null,
       type: thesisType,
       year: parsedYear,
-      file_url: pdfLink.trim() || "",
+      file_url: "",
       mentor: mentor.trim(),
       committee_members: committeeMembers.length > 0 ? committeeMembers.join(", ") : null,
       grade: grade || null,
@@ -276,6 +300,33 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || "Greska pri dodavanju rada.");
+      }
+
+      if (selectedFile) {
+        const createdId = data?.id ?? data?.thesis?.id;
+        if (!createdId) {
+          throw new Error("Nije moguce otpremiti PDF jer ID rada nije dostupan.");
+        }
+
+        const uploadForm = new FormData();
+        uploadForm.append("file", selectedFile);
+        uploadForm.append("type", thesisType);
+        if (title.trim()) {
+          uploadForm.append("title", title.trim());
+        }
+        if (String(parsedYear).trim()) {
+          uploadForm.append("year", String(parsedYear).trim());
+        }
+
+        const uploadResponse = await fetch(`/api/theses/upload-pdf/${createdId}`, {
+          method: "POST",
+          body: uploadForm,
+        });
+
+        const uploadData = await uploadResponse.json();
+        if (!uploadResponse.ok) {
+          throw new Error(uploadData.message || "Upload nije uspio");
+        }
       }
 
       await onSuccess?.();
@@ -584,15 +635,25 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
 
             <div className="mt-4">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                PDF link
+                Otpremi PDF <span className="text-red-500">*</span>
               </label>
               <input
-                type="url"
-                value={pdfLink}
-                onChange={(e) => setPdfLink(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
-                placeholder="https://example.com/thesis.pdf"
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handleFileChange}
+                required
+                className={`w-full px-4 py-2 border rounded-lg ${
+                  fileError ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {selectedFile && (
+                <p className="mt-1 text-sm text-green-600">
+                  Novi PDF: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+              {fileError && (
+                <p className="mt-1 text-sm text-red-500">{fileError}</p>
+              )}
             </div>
           </div>
 
