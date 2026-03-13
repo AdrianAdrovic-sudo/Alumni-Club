@@ -783,12 +783,20 @@ export default function DiplomskiRadovi() {
                             try {
                               // Povećaj brojač preuzimanja
                               await axios.post(`/api/theses/${p.id}/download`);
+                              console.log("Brojač preuzimanja ažuriran za rad:", p.id);
+                              
                               // Otvori PDF u novom tabu
-                              window.open(p.fileUrl, '_blank');
+                              const newWindow = window.open(p.fileUrl, '_blank');
+                              if (!newWindow) {
+                                alert("Molimo omogućite pop-up prozore za preuzimanje PDF-a.");
+                              }
                             } catch (err) {
                               console.error("Greška pri bilježenju preuzimanja:", err);
                               // Otvori PDF čak i ako brojač ne radi
-                              window.open(p.fileUrl, '_blank');
+                              const newWindow = window.open(p.fileUrl, '_blank');
+                              if (!newWindow) {
+                                alert("Molimo omogućite pop-up prozore za preuzimanje PDF-a.");
+                              }
                             }
                           }}
                           className="inline-flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold text-sm cursor-pointer"
