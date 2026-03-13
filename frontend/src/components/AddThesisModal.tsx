@@ -141,13 +141,41 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
         authorLastName = selected.last_name;
         authorUserId = selected.id;
       } else {
+        // Dodavanje novog alumnistu
         if (!newAlumniFirstName.trim() || !newAlumniLastName.trim()) {
           setErrorMessage("Ime i prezime novog alumniste su obavezni.");
           return;
         }
-        authorFirstName = newAlumniFirstName.trim();
-        authorLastName = newAlumniLastName.trim();
-        authorUserId = user.id;
+        
+        // Kreiraj novog alumnistu u bazi
+        try {
+          const createUserResponse = await fetch("/api/admin/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              first_name: newAlumniFirstName.trim(),
+              last_name: newAlumniLastName.trim(),
+              email: `${newAlumniFirstName.trim().toLowerCase()}.${newAlumniLastName.trim().toLowerCase()}@temp.alumni.com`,
+              username: `${newAlumniFirstName.trim().toLowerCase()}_${newAlumniLastName.trim().toLowerCase()}_${Date.now()}`,
+              password: Math.random().toString(36).slice(-8), // Privremena lozinka
+              role: "user",
+              enrollment_year: parsedYear,
+            }),
+          });
+
+          const userData = await createUserResponse.json();
+          if (!createUserResponse.ok) {
+            throw new Error(userData.message || "Greska pri kreiranju novog alumnistu.");
+          }
+
+          authorFirstName = newAlumniFirstName.trim();
+          authorLastName = newAlumniLastName.trim();
+          authorUserId = userData.id; // userData je direktno user objekat
+        } catch (err: any) {
+          console.error(err);
+          setErrorMessage(err.message || "Greska pri kreiranju novog alumnistu.");
+          return;
+        }
       }
     }
 
