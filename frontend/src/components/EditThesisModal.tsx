@@ -20,6 +20,8 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
   const [alumniSearch, setAlumniSearch] = useState("");
   const [showAlumniDropdown, setShowAlumniDropdown] = useState(false);
   const [selectedAlumni, setSelectedAlumni] = useState<any>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -45,6 +47,13 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
     defense_time: "",
     user_id: "",
   });
+
+  const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+  const currentFileUrl = formData.file_url
+    ? (formData.file_url.startsWith("http://") || formData.file_url.startsWith("https://")
+        ? formData.file_url
+        : `${BACKEND_URL}${formData.file_url.startsWith("/") ? formData.file_url : `/${formData.file_url}`}`)
+    : "";
 
   // Učitaj alumni listu
   useEffect(() => {
@@ -92,6 +101,8 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
         defense_time: defenseDate ? defenseDate.toTimeString().slice(0, 5) : "",
         user_id: thesis.user_id || "",
       });
+      setSelectedFile(null);
+      setFileError(null);
 
       // Postavi trenutnog alumnistu ako postoji
       if (thesis.user_id) {
@@ -144,6 +155,24 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedFile(null);
+      setFileError(null);
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      setSelectedFile(null);
+      setFileError("Dozvoljeni su samo PDF fajlovi");
+      return;
+    }
+
+    setSelectedFile(file);
+    setFileError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -168,6 +197,27 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
           Authorization: `Bearer ${token}`,
         },
       });
+      if (selectedFile) {
+        const uploadForm = new FormData();
+        uploadForm.append("file", selectedFile);
+        uploadForm.append("type", formData.type);
+        if (formData.title.trim()) {
+          uploadForm.append("title", formData.title.trim());
+        }
+        if (String(formData.year).trim()) {
+          uploadForm.append("year", String(formData.year).trim());
+        }
+
+        const uploadResponse = await fetch(`/api/theses/upload-pdf/${thesis.id}`, {
+          method: "POST",
+          body: uploadForm,
+        });
+
+        const uploadData = await uploadResponse.json();
+        if (!uploadResponse.ok) {
+          throw new Error(uploadData.message || "Upload nije uspio");
+        }
+      }
 
       alert("Rad uspješno ažuriran!");
       onEditSuccess();
@@ -386,17 +436,43 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
             </div>
           </div>
 
-          {/* PDF link */}
+          {/* PDF upload */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">PDF Link</label>
+            <label className="block text-sm font-medium mb-2">Otpremi PDF</label>
+            {currentFileUrl && !selectedFile && (
+              <p className="mb-2 text-sm text-gray-600">
+                Trenutni PDF:{" "}
+                <a
+                  href={currentFileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-[#294a70] hover:underline"
+                >
+                  Otvori trenutno otpremljeni fajl
+                </a>
+              </p>
+            )}
             <input
-              type="text"
-              name="file_url"
-              value={formData.file_url}
-              onChange={handleChange}
-              placeholder="https://example.com/rad.pdf"
-              className="w-full px-4 py-2 border rounded-lg"
+              type="file"
+              accept=".pdf,application/pdf"
+              onChange={handleFileChange}
+              className={`w-full px-4 py-2 border rounded-lg ${
+                fileError ? "border-red-500" : "border-gray-300"
+              }`}
             />
+            {selectedFile && (
+              <p className="mt-1 text-sm text-green-600">
+                Novi PDF: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+              </p>
+            )}
+            {currentFileUrl && (
+              <p className="mt-1 text-xs text-gray-500">
+                Ako ne izaberes novi PDF, ostace sacuvan ovaj postojeci fajl.
+              </p>
+            )}
+            {fileError && (
+              <p className="mt-1 text-sm text-red-500">{fileError}</p>
+            )}
           </div>
 
           {/* Mentor */}
@@ -546,3 +622,4 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
 };
 
 export default EditThesisModal;
+
