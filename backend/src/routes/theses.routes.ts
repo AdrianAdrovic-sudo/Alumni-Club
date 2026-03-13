@@ -10,6 +10,7 @@ const router = express.Router();
 const uploadsRoot = path.join(__dirname, "..", "..", "uploads");
 const csvUploadsDir = uploadsRoot;
 const pdfUploadsDir = path.join(uploadsRoot, "pdfs");
+const zipUploadsDir = path.join(uploadsRoot, "zips");
 
 if (!fs.existsSync(csvUploadsDir)) {
   fs.mkdirSync(csvUploadsDir, { recursive: true });
@@ -19,6 +20,9 @@ if (!fs.existsSync(pdfUploadsDir)) {
   fs.mkdirSync(pdfUploadsDir, { recursive: true });
 }
 
+if (!fs.existsSync(zipUploadsDir)) {
+  fs.mkdirSync(zipUploadsDir, { recursive: true });
+}
 const upload = multer({ dest: csvUploadsDir });
 
 router.post("/upload-csv", upload.single("file"), async (req, res) => {
@@ -201,6 +205,7 @@ router.get("/", async (req, res) => {
       date: t.year ? `01.07.${t.year}.` : "",
       type: t.type,
       fileUrl: t.file_url,
+      zipUrl: t.zip_file,
       year: t.year,
       mentor: t.mentor,
       committee_members: t.committee_members,
@@ -251,6 +256,45 @@ const pdfUpload = multer({
   },
 });
 
+
+const thesisZipStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, zipUploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const originalExt = path.extname(file.originalname).toLowerCase();
+    const ext = originalExt === ".zip" ? originalExt : ".zip";
+    const baseName =
+      path
+        .basename(file.originalname, path.extname(file.originalname))
+        .replace(/[^a-zA-Z0-9_-]+/g, "_")
+        .replace(/^_+|_+$/g, "") || "thesis_docs";
+
+    cb(null, `${Date.now()}_${baseName}${ext}`);
+  },
+});
+
+const zipUpload = multer({
+  storage: thesisZipStorage,
+  limits: {
+    fileSize: 50 * 1024 * 1024,
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "application/zip",
+      "application/x-zip-compressed",
+      "multipart/x-zip",
+      "application/octet-stream",
+    ];
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (ext !== ".zip" && !allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Dozvoljeni su samo ZIP fajlovi"));
+    }
+
+    cb(null, true);
+  },
+});
 router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
   try {
     const thesisId = Number(req.params.id);
@@ -329,6 +373,56 @@ router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Greska pri uploadu PDF" });
+  }
+});
+
+
+router.post("/upload-zip/:id", zipUpload.single("file"), async (req, res) => {
+  try {
+    const thesisId = Number(req.params.id);
+
+    if (!thesisId || Number.isNaN(thesisId)) {
+      return res.status(400).json({ message: "Neispravan ID rada" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "ZIP nije poslat" });
+    }
+
+    const existingThesis = await prisma.theses.findUnique({
+      where: { id: thesisId },
+      select: { zip_file: true },
+    });
+
+    if (!existingThesis) {
+      return res.status(404).json({ message: "Rad nije pronadjen" });
+    }
+
+    if (existingThesis.zip_file && existingThesis.zip_file.startsWith("/uploads/")) {
+      const relativePath = existingThesis.zip_file.replace(/^\/uploads\//, "");
+      const filePath = path.join(uploadsRoot, relativePath);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    const updatedThesis = await prisma.theses.update({
+      where: { id: thesisId },
+      data: {
+        zip_file: `/uploads/zips/${req.file.filename}`,
+      },
+    });
+
+    res.json({
+      message: "ZIP uspjesno otpremljen",
+      thesis: {
+        id: updatedThesis.id,
+        zipUrl: updatedThesis.zip_file,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Greska pri uploadu ZIP" });
   }
 });
 
@@ -425,7 +519,7 @@ router.delete("/:id", authenticate, async (req, res) => {
 
     const existingThesis = await prisma.theses.findUnique({
       where: { id: thesisId },
-      select: { file_url: true, user_id: true },
+      select: { file_url: true, zip_file: true, user_id: true },
     });
 
     if (!existingThesis) {
@@ -486,3 +580,13 @@ router.post("/:id/download", async (req, res) => {
 });
 
 export default router;
+
+
+
+
+
+
+
+
+
+

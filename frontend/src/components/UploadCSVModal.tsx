@@ -59,7 +59,7 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6">
 
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Upload CSV</h2>
@@ -102,7 +102,7 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
               <div className="font-bold text-[#294a70] text-base mb-2">Opcione kolone (ostalo):</div>
               <div className="ml-3 space-y-1">
                 <div><span className="font-semibold">file_url</span> – link na PDF fajl</div>
-                <div><span className="font-semibold">committee_members</span> – članovi komisije, odvojeni zarezom</div>
+                <div><span className="font-semibold">zip_file</span> - link na ZIP fajl (dodatna dokumentacija)</div><div><span className="font-semibold">committee_members</span> – članovi komisije, odvojeni zarezom</div>
                 <div><span className="font-semibold">grade</span> – ocjena (A, B, C, D, E ili F)</div>
                 <div><span className="font-semibold">language</span> – jezik rada (en = English, cg = Crna Gora)</div>
                 <div><span className="font-semibold">abstract</span> – sažetak rada</div>
@@ -115,13 +115,13 @@ const UploadCSVModal: React.FC<UploadCSVModalProps> = ({
             </div>
           </div>
 
-          <div className="mt-4 bg-[#eef5ff] border border-[#b8d4ff] rounded-lg p-4">
+          <div className="mt-4 bg-[#eef5ff] border border-[#b8d4ff] rounded-lg p-4 max-w-3xl mx-auto">
             <p className="font-semibold text-[#2a3c60] mb-2">Primjer CSV formata:</p>
             <div className="mt-2 bg-white border border-[#8ba8d1] rounded-md p-3 overflow-x-auto">
               <pre className="text-[11px] leading-5 text-[#1f2a44]" style={{whiteSpace: 'pre'}}>
-{`first_name,last_name,title,subtitle,title_language,additional_title,additional_subtitle,additional_title_language,type,year,file_url,mentor,committee_members,grade,topic,keywords,language,abstract,defense_date
-Marko,Marković,Primena mašinskog učenja u analizi podataka,,cg,Application of Machine Learning in Data Analysis,,en,bachelors,2024,https://example.com/rad1.pdf,Prof. dr Ivan Petrović,"Prof. dr Ivan Petrović, Doc. dr Ana Jovanović, Prof. dr Marija Nikolić",A,Machine Learning,"AI, Machine Learning, Neural Networks",cg,"Ovaj rad istražuje primenu mašinskog učenja u analizi velikih skupova podataka.",2024-06-15 10:00:00
-Ana,Jovanović,Deep Learning for Image Recognition,A Comprehensive Study,en,Duboko učenje za prepoznavanje slika,Sveobuhvatna studija,cg,masters,2024,https://example.com/rad2.pdf,Prof. dr Marija Nikolić,"Prof. dr Stefan Đorđević, Doc. dr Jelena Marković",A,Deep Learning,"Deep Learning, Computer Vision, AI",en,"This thesis explores deep learning techniques for image recognition.",2024-08-05 15:00:00`}
+{`first_name,last_name,title,subtitle,title_language,additional_title,additional_subtitle,additional_title_language,type,year,file_url,zip_file,mentor,committee_members,grade,topic,keywords,language,abstract,defense_date
+Marko,Marković,Primena mašinskog učenja u analizi podataka,,cg,Application of Machine Learning in Data Analysis,,en,bachelors,2024,https://example.com/rad1.pdf,,Prof. dr Ivan Petrović,"Prof. dr Ivan Petrović, Doc. dr Ana Jovanović, Prof. dr Marija Nikolić",A,Machine Learning,"AI, Machine Learning, Neural Networks",cg,"Ovaj rad istražuje primenu mašinskog učenja u analizi velikih skupova podataka.",2024-06-15 10:00:00
+Ana,Jovanović,Deep Learning for Image Recognition,A Comprehensive Study,en,Duboko učenje za prepoznavanje slika,Sveobuhvatna studija,cg,masters,2024,https://example.com/rad2.pdf,,Prof. dr Marija Nikolić,"Prof. dr Stefan Đorđević, Doc. dr Jelena Marković",A,Deep Learning,"Deep Learning, Computer Vision, AI",en,"This thesis explores deep learning techniques for image recognition.",2024-08-05 15:00:00`}
               </pre>
             </div>
           </div>
@@ -162,3 +162,4 @@ Ana,Jovanović,Deep Learning for Image Recognition,A Comprehensive Study,en,Dubo
 };
 
 export default UploadCSVModal;
+

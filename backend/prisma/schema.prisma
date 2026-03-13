@@ -238,6 +238,7 @@ model theses {
   additional_title_language String? @db.VarChar(50)
   type              String   @db.VarChar(100)
   file_url          String   @db.VarChar(255)
+  zip_file           String?  @db.VarChar(255)
   year              Int
   
   // Podaci za statistiku
@@ -266,3 +267,6 @@ model theses {
   @@index([topic])
   @@index([language])
 }
+
+
+

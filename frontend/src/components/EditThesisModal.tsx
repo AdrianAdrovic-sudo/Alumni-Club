@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 interface EditThesisModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
   onEditSuccess,
   thesis,
 }) => {
+  const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [alumni, setAlumni] = useState<any[]>([]);
   const [filteredAlumni, setFilteredAlumni] = useState<any[]>([]);
@@ -22,6 +24,10 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
   const [selectedAlumni, setSelectedAlumni] = useState<any>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [selectedZipFile, setSelectedZipFile] = useState<File | null>(null);
+  const [zipError, setZipError] = useState<string | null>(null);
+  const [mentorSuggestions, setMentorSuggestions] = useState<string[]>([]);
+  const [showMentorSuggestions, setShowMentorSuggestions] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -36,6 +42,7 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
     type: "bachelors",
     year: new Date().getFullYear(),
     file_url: "",
+    zip_file: "",
     mentor: "",
     committee_members: "",
     grade: "",
@@ -53,6 +60,11 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
     ? (formData.file_url.startsWith("http://") || formData.file_url.startsWith("https://")
         ? formData.file_url
         : `${BACKEND_URL}${formData.file_url.startsWith("/") ? formData.file_url : `/${formData.file_url}`}`)
+    : "";
+  const currentZipUrl = formData.zip_file
+    ? (formData.zip_file.startsWith("http://") || formData.zip_file.startsWith("https://")
+        ? formData.zip_file
+        : `${BACKEND_URL}${formData.zip_file.startsWith("/") ? formData.zip_file : `/${formData.zip_file}`}`)
     : "";
 
   // Učitaj alumni listu
@@ -90,6 +102,7 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
         type: thesis.type || "bachelors",
         year: thesis.year || new Date().getFullYear(),
         file_url: thesis.fileUrl || "",
+        zip_file: thesis.zipUrl || "",
         mentor: thesis.mentor || "",
         committee_members: thesis.committee_members || "",
         grade: thesis.grade || "",
@@ -133,6 +146,28 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
     }
   }, [alumniSearch, alumni]);
 
+  // Učitaj mentore iz baze
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const loadMentors = async () => {
+      try {
+        const response = await fetch("/api/theses");
+        const data = await response.json();
+        if (response.ok && Array.isArray(data)) {
+          const uniqueMentors = Array.from(
+            new Set(data.map((t: any) => t.mentor).filter(Boolean))
+          ).sort() as string[];
+          setMentorSuggestions(uniqueMentors);
+        }
+      } catch (err) {
+        console.error("Greska pri ucitavanju mentora:", err);
+      }
+    };
+
+    loadMentors();
+  }, [isOpen]);
+
   const handleAlumniSelect = (alumnus: any) => {
     setSelectedAlumni(alumnus);
     setAlumniSearch(`${alumnus.first_name} ${alumnus.last_name}`);
@@ -149,7 +184,7 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
   if (!isOpen) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData({
+      setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
@@ -160,6 +195,8 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
     if (!file) {
       setSelectedFile(null);
       setFileError(null);
+      setSelectedZipFile(null);
+      setZipError(null);
       return;
     }
 
@@ -171,6 +208,28 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
 
     setSelectedFile(file);
     setFileError(null);
+  };
+
+  const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedZipFile(null);
+      setZipError(null);
+      return;
+    }
+
+    const isZip = file.type === "application/zip" ||
+      file.type === "application/x-zip-compressed" ||
+      file.name.toLowerCase().endsWith(".zip");
+
+    if (!isZip) {
+      setSelectedZipFile(null);
+      setZipError("Dozvoljeni su samo ZIP fajlovi");
+      return;
+    }
+
+    setSelectedZipFile(file);
+    setZipError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -191,7 +250,9 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
         user_id: formData.user_id ? Number(formData.user_id) : null,
       };
 
-      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Morate biti prijavljeni da biste azurirali rad.");
+      }
       await axios.put(`/api/theses/${thesis.id}`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -210,6 +271,27 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
 
         const uploadResponse = await fetch(`/api/theses/upload-pdf/${thesis.id}`, {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: uploadForm,
+        });
+
+        const uploadData = await uploadResponse.json();
+        if (!uploadResponse.ok) {
+          throw new Error(uploadData.message || "Upload nije uspio");
+        }
+      }
+
+      if (selectedZipFile) {
+        const uploadForm = new FormData();
+        uploadForm.append("file", selectedZipFile);
+
+        const uploadResponse = await fetch(`/api/theses/upload-zip/${thesis.id}`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           body: uploadForm,
         });
 
@@ -475,21 +557,86 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
             )}
           </div>
 
+          {/* ZIP upload */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">
+              Otpremi ZIP (dodatna dokumentacija)
+            </label>
+            {currentZipUrl && !selectedZipFile && (
+              <p className="mb-2 text-sm text-gray-600">
+                Trenutni ZIP:{" "}
+                <a
+                  href={currentZipUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-[#294a70] hover:underline"
+                >
+                  Preuzmi trenutni ZIP
+                </a>
+              </p>
+            )}
+            <input
+              type="file"
+              accept=".zip,application/zip"
+              onChange={handleZipChange}
+              className={`w-full px-4 py-2 border rounded-lg ${
+                zipError ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {selectedZipFile && (
+              <p className="mt-1 text-sm text-green-600">
+                Novi ZIP: {selectedZipFile.name} ({(selectedZipFile.size / 1024 / 1024).toFixed(2)} MB)
+              </p>
+            )}
+            {currentZipUrl && (
+              <p className="mt-1 text-xs text-gray-500">
+                Ako ne izaberes novi ZIP, ostace sacuvan ovaj postojeci fajl.
+              </p>
+            )}
+            {zipError && (
+              <p className="mt-1 text-sm text-red-500">{zipError}</p>
+            )}
+          </div>
+
           {/* Mentor */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Mentor *</label>
-            <input
-              type="text"
-              name="mentor"
-              value={formData.mentor}
-              onChange={handleChange}
-              required
-              placeholder="Prof. dr Ivan Petrović"
-              className="w-full px-4 py-2 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                name="mentor"
+                value={formData.mentor}
+                onChange={(e) => {
+                  handleChange(e);
+                  setShowMentorSuggestions(e.target.value.length > 0);
+                }}
+                onFocus={() => setShowMentorSuggestions(formData.mentor.length > 0)}
+                onBlur={() => setTimeout(() => setShowMentorSuggestions(false), 200)}
+                required
+                placeholder="Prof. dr Ivan Petrovic"
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+              {showMentorSuggestions && mentorSuggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {mentorSuggestions
+                    .filter((m) => m.toLowerCase().includes(formData.mentor.toLowerCase()))
+                    .map((suggestion, index) => (
+                      <div
+                        key={index}
+                        onClick={() => {
+                          setFormData({ ...formData, mentor: suggestion });
+                          setShowMentorSuggestions(false);
+                        }}
+                        className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                      >
+                        {suggestion}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
-
-          {/* Članovi komisije */}
+{/* Članovi komisije */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Članovi komisije</label>
             <input
@@ -622,4 +769,6 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
 };
 
 export default EditThesisModal;
+
+
 

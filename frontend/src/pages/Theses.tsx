@@ -96,6 +96,30 @@ export default function DiplomskiRadovi() {
     return `${BACKEND_URL}${fileUrl.startsWith("/") ? fileUrl : `/${fileUrl}`}`;
   };
 
+  const downloadFile = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Neuspjesno preuzimanje fajla");
+      }
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+      console.error("Greska pri preuzimanju fajla:", err);
+      const newWindow = window.open(url, "_blank");
+      if (!newWindow) {
+        alert("Molimo omogucite pop-up prozore za preuzimanje fajla.");
+      }
+    }
+  };
+
   // Calculate statistics
   const getStatsByYear = () => {
     const yearStats: { [key: number]: { total: number; bachelors: number; masters: number; specialist: number } } = {};
@@ -773,43 +797,62 @@ export default function DiplomskiRadovi() {
                       </details>
                     )}
                     
-                    {/* Download dugme */}
-                    {p.fileUrl && (
-                      <div className="mt-4">
-                        <button
-                          onClick={async () => {
-                            try {
-                              // Povećaj brojač preuzimanja
-                              await axios.post(`/api/theses/${p.id}/download`);
-                              console.log("Brojač preuzimanja ažuriran za rad:", p.id);
-                              
-                              // Otvori PDF u novom tabu
-                              const newWindow = window.open(p.fileUrl, '_blank');
-                              if (!newWindow) {
-                                alert("Molimo omogućite pop-up prozore za preuzimanje PDF-a.");
+                    {/* Download dugmad */}
+                    {(p.fileUrl || p.zipUrl) && (
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        {p.fileUrl && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                // Povecaj brojac preuzimanja
+                                await axios.post(`/api/theses/${p.id}/download`);
+                                console.log("Brojac preuzimanja azuriran za rad:", p.id);
+
+                                const safeTitle = (p.title || "thesis")
+                                  .toString()
+                                  .replace(/[^a-zA-Z0-9_-]+/g, "_")
+                                  .replace(/^_+|_+$/g, "")
+                                  .slice(0, 60) || "thesis";
+                                const fileUrl = getFileUrl(p.fileUrl);
+                                await downloadFile(fileUrl, `${safeTitle}.pdf`);
+                              } catch (err) {
+                                console.error("Greska pri biljezenju preuzimanja:", err);
+                                const safeTitle = (p.title || "thesis")
+                                  .toString()
+                                  .replace(/[^a-zA-Z0-9_-]+/g, "_")
+                                  .replace(/^_+|_+$/g, "")
+                                  .slice(0, 60) || "thesis";
+                                const fileUrl = getFileUrl(p.fileUrl);
+                                await downloadFile(fileUrl, `${safeTitle}.pdf`);
                               }
-                            } catch (err) {
-                              console.error("Greška pri bilježenju preuzimanja:", err);
-                              // Otvori PDF čak i ako brojač ne radi
-                              const newWindow = window.open(p.fileUrl, '_blank');
+                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold text-sm cursor-pointer"
+                          >
+                            📄 Download full text (pdf)
+                            {p.download_count > 0 && (
+                              <span className="ml-2 px-2 py-0.5 bg-white text-[#294a70] rounded-full text-xs font-bold">
+                                {p.download_count}
+                              </span>
+                            )}
+                          </button>
+                        )}
+{p.zipUrl && (
+                          <button
+                            onClick={() => {
+                              const zipLink = getFileUrl(p.zipUrl);
+                              const newWindow = window.open(zipLink, "_blank");
                               if (!newWindow) {
-                                alert("Molimo omogućite pop-up prozore za preuzimanje PDF-a.");
+                                alert("Molimo omogucite pop-up prozore za preuzimanje ZIP-a.");
                               }
-                            }
-                          }}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-all shadow-md hover:shadow-lg font-semibold text-sm cursor-pointer"
-                        >
-                          📄 Download full text (pdf)
-                          {p.download_count > 0 && (
-                            <span className="ml-2 px-2 py-0.5 bg-white text-[#294a70] rounded-full text-xs font-bold">
-                              {p.download_count}
-                            </span>
-                          )}
-                        </button>
+                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#2f6a6a] text-white rounded-lg hover:bg-[#255555] transition-all shadow-md hover:shadow-lg font-semibold text-sm cursor-pointer"
+                          >
+                            📁 Preuzmi ZIP
+                          </button>
+                        )}
                       </div>
                     )}
-                    
-                    {/* Admin akcije */}
+{/* Admin akcije */}
                     {(isAdmin || user?.id === p.user_id) && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <div className="flex flex-wrap gap-3">
@@ -1377,5 +1420,7 @@ export default function DiplomskiRadovi() {
     </div>
   );
 }
+
+
 
 

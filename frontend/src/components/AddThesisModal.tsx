@@ -14,7 +14,7 @@ interface AlumniOption {
 }
 
 export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesisModalProps) {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isAdmin = user?.role === "admin";
 
   // Alumnista polja
@@ -46,6 +46,8 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const [showMentorSuggestions, setShowMentorSuggestions] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [selectedZipFile, setSelectedZipFile] = useState<File | null>(null);
+  const [zipError, setZipError] = useState<string | null>(null);
   const [committeeMembers, setCommitteeMembers] = useState<string[]>([]);
   const [newCommitteeMember, setNewCommitteeMember] = useState("");
   const [grade, setGrade] = useState("");
@@ -55,6 +57,23 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const [abstract, setAbstract] = useState("");
   const [defenseDate, setDefenseDate] = useState("");
   const [defenseTime, setDefenseTime] = useState("");
+
+  const readJsonSafe = async (response: Response) => {
+    try {
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const toSlug = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+
+  const shortId = () => Math.random().toString(36).slice(2, 8);
 
   useEffect(() => {
     if (!isAdmin || !isOpen) {
@@ -152,6 +171,28 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
     setFileError(null);
   };
 
+  const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedZipFile(null);
+      setZipError(null);
+      return;
+    }
+
+    const isZip = file.type === "application/zip" ||
+      file.type === "application/x-zip-compressed" ||
+      file.name.toLowerCase().endsWith(".zip");
+
+    if (!isZip) {
+      setSelectedZipFile(null);
+      setZipError("Dozvoljeni su samo ZIP fajlovi");
+      return;
+    }
+
+    setSelectedZipFile(file);
+    setZipError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
@@ -231,26 +272,33 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
         try {
           const createUserResponse = await fetch("/api/admin/users", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
             body: JSON.stringify({
               first_name: newAlumniFirstName.trim(),
               last_name: newAlumniLastName.trim(),
-              email: `${newAlumniFirstName.trim().toLowerCase()}.${newAlumniLastName.trim().toLowerCase()}@temp.alumni.com`,
-              username: `${newAlumniFirstName.trim().toLowerCase()}_${newAlumniLastName.trim().toLowerCase()}_${Date.now()}`,
+              email: `${toSlug(newAlumniFirstName)}.${toSlug(newAlumniLastName)}.${shortId()}@temp.alumni.com`,
+              username: `${toSlug(newAlumniFirstName).slice(0, 12)}_${toSlug(newAlumniLastName).slice(0, 12)}_${shortId()}`.slice(0, 30),
               password: Math.random().toString(36).slice(-8), // Privremena lozinka
               role: "user",
               enrollment_year: parsedYear,
             }),
           });
 
-          const userData = await createUserResponse.json();
+          const userData = await readJsonSafe(createUserResponse);
           if (!createUserResponse.ok) {
-            throw new Error(userData.message || "Greska pri kreiranju novog alumnistu.");
+            throw new Error(
+              userData?.message
+                ? `${userData.message}${userData?.error ? `: ${userData.error}` : ""}`
+                : "Greska pri kreiranju novog alumnistu."
+            );
           }
 
           authorFirstName = newAlumniFirstName.trim();
           authorLastName = newAlumniLastName.trim();
-          authorUserId = userData.id; // userData je direktno user objekat
+          authorUserId = userData?.id; // userData je direktno user objekat
         } catch (err: any) {
           console.error(err);
           setErrorMessage(err.message || "Greska pri kreiranju novog alumnistu.");
@@ -293,13 +341,16 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
       setIsSubmitting(true);
       const response = await fetch("/api/theses", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = await readJsonSafe(response);
       if (!response.ok) {
-        throw new Error(data.message || "Greska pri dodavanju rada.");
+        throw new Error(data?.message || "Greska pri dodavanju rada.");
       }
 
       if (selectedFile) {
@@ -323,9 +374,29 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
           body: uploadForm,
         });
 
-        const uploadData = await uploadResponse.json();
+        const uploadData = await readJsonSafe(uploadResponse);
         if (!uploadResponse.ok) {
-          throw new Error(uploadData.message || "Upload nije uspio");
+          throw new Error(uploadData?.message || "Upload nije uspio");
+        }
+      }
+
+      if (selectedZipFile) {
+        const createdId = data?.id ?? data?.thesis?.id;
+        if (!createdId) {
+          throw new Error("Nije moguce otpremiti ZIP jer ID rada nije dostupan.");
+        }
+
+        const uploadForm = new FormData();
+        uploadForm.append("file", selectedZipFile);
+
+        const uploadResponse = await fetch(`/api/theses/upload-zip/${createdId}`, {
+          method: "POST",
+          body: uploadForm,
+        });
+
+        const uploadData = await readJsonSafe(uploadResponse);
+        if (!uploadResponse.ok) {
+          throw new Error(uploadData?.message || "Upload nije uspio");
         }
       }
 
@@ -653,6 +724,28 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
               )}
               {fileError && (
                 <p className="mt-1 text-sm text-red-500">{fileError}</p>
+              )}
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Otpremi ZIP (dodatna dokumentacija) (opciono)
+              </label>
+              <input
+                type="file"
+                accept=".zip,application/zip"
+                onChange={handleZipChange}
+                className={`w-full px-4 py-2 border rounded-lg ${
+                  zipError ? "border-red-500" : "border-gray-300"
+                }`}
+              />
+              {selectedZipFile && (
+                <p className="mt-1 text-sm text-green-600">
+                  ZIP: {selectedZipFile.name} ({(selectedZipFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+              {zipError && (
+                <p className="mt-1 text-sm text-red-500">{zipError}</p>
               )}
             </div>
           </div>
