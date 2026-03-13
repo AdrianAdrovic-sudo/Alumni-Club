@@ -35,38 +35,41 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
     .on("data", (data) => results.push(data))
     .on("end", async () => {
       try {
-        const thesesData = results.map((row) => {
+        const thesesData = results.map((row, index) => {
           const parsedYear = Number(row.year);
           if (Number.isNaN(parsedYear) || parsedYear < 1900 || parsedYear > 2100) {
-            throw new Error("CSV sadrzi neispravnu godinu.");
+            throw new Error(`Red ${index + 2}: Neispravna godina (${row.year})`);
           }
 
           return {
             first_name: (row.first_name || "").trim(),
             last_name: (row.last_name || "").trim(),
             title: (row.title || "").trim(),
-            subtitle: row.subtitle ? (row.subtitle || "").trim() : null,
-            title_language: (row.title_language || row.titleLanguage || row.language || "en").trim(),
-            additional_title: row.additional_title ? (row.additional_title || "").trim() : null,
-            additional_subtitle: row.additional_subtitle ? (row.additional_subtitle || "").trim() : null,
-            additional_title_language: row.additional_title_language
-              ? (row.additional_title_language || "").trim()
+            subtitle: row.subtitle && row.subtitle.trim() ? row.subtitle.trim() : null,
+            title_language: (row.title_language || "en").trim(),
+            additional_title: row.additional_title && row.additional_title.trim() ? row.additional_title.trim() : null,
+            additional_subtitle: row.additional_subtitle && row.additional_subtitle.trim() ? row.additional_subtitle.trim() : null,
+            additional_title_language: row.additional_title_language && row.additional_title_language.trim()
+              ? row.additional_title_language.trim()
               : null,
             type: (row.type || "").trim().toLowerCase(),
             year: parsedYear,
-            file_url: (row.file_url || "").trim(),
-            mentor: row.mentor ? (row.mentor || "").trim() : null,
-            committee_members: row.committee_members ? (row.committee_members || "").trim() : null,
-            grade: row.grade ? (row.grade || "").trim().toUpperCase() : null,
-            topic: row.topic ? (row.topic || "").trim() : null,
-            keywords: row.keywords ? (row.keywords || "").trim() : null,
-            language: row.language ? (row.language || "").trim() : null,
-            abstract: row.abstract ? (row.abstract || "").trim() : null,
-            user_id: row.user_id && !isNaN(Number(row.user_id)) ? Number(row.user_id) : 1,
+            file_url: row.file_url && row.file_url.trim() ? row.file_url.trim() : "",
+            mentor: row.mentor && row.mentor.trim() ? row.mentor.trim() : null,
+            committee_members: row.committee_members && row.committee_members.trim() ? row.committee_members.trim() : null,
+            grade: row.grade && row.grade.trim() ? row.grade.trim().toUpperCase() : null,
+            topic: row.topic && row.topic.trim() ? row.topic.trim() : null,
+            keywords: row.keywords && row.keywords.trim() ? row.keywords.trim() : null,
+            language: row.language && row.language.trim() ? row.language.trim() : null,
+            abstract: row.abstract && row.abstract.trim() ? row.abstract.trim() : null,
+            defense_date: row.defense_date && row.defense_date.trim() ? new Date(row.defense_date) : null,
+            user_id: null as number | null, // CSV import - user_id je null, admin može kasnije dodijeliti
           };
         });
 
+        // @ts-ignore - Prisma klijent će biti ažuriran nakon restarta servera
         await prisma.theses.createMany({
+          // @ts-ignore
           data: thesesData,
         });
 
@@ -76,14 +79,28 @@ router.post("/upload-csv", upload.single("file"), async (req, res) => {
           message: "CSV uspjesno importovan",
           count: thesesData.length,
         });
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Greska pri importu CSV" });
+      } catch (err: any) {
+        console.error("Greška pri importu CSV:", err);
+        fs.unlinkSync(filePath); // Obriši fajl i u slučaju greške
+        res.status(500).json({ 
+          message: err.message || "Greska pri importu CSV",
+          error: err.toString()
+        });
       }
+    })
+    .on("error", (err) => {
+      console.error("Greška pri čitanju CSV fajla:", err);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      res.status(500).json({ 
+        message: "Greška pri čitanju CSV fajla",
+        error: err.message
+      });
     });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authenticate, async (req, res) => {
   try {
     const {
       first_name,
@@ -104,16 +121,27 @@ router.post("/", async (req, res) => {
       keywords,
       language,
       abstract,
+      defense_date,
       user_id,
     } = req.body;
 
-    if (!first_name || !last_name || !title || !title_language || !type || !user_id) {
-      return res.status(400).json({ message: "Obavezna polja nisu popunjena" });
+    if (!first_name || !last_name || !title || !title_language || !type || !topic || !keywords || !mentor) {
+      return res.status(400).json({ message: "Obavezna polja nisu popunjena (ime, prezime, naslov, jezik naslova, tip, tema, ključne riječi, mentor)" });
     }
 
     const parsedYear = Number(year);
     if (Number.isNaN(parsedYear) || parsedYear < 1900 || parsedYear > 2100) {
       return res.status(400).json({ message: "Godina mora biti izmedju 1900 i 2100" });
+    }
+
+    // Ako je admin i poslao user_id, koristi taj
+    // Ako je alumnista, koristi njegov ID
+    // Ako nema user_id, ostavi null
+    let finalUserId = null;
+    if (req.user?.role === 'admin' && user_id) {
+      finalUserId = user_id;
+    } else if (req.user?.role !== 'admin') {
+      finalUserId = req.user?.id || null;
     }
 
     const newThesis = await prisma.theses.create({
@@ -129,14 +157,15 @@ router.post("/", async (req, res) => {
         type: type.trim().toLowerCase(),
         year: parsedYear,
         file_url: file_url || "",
-        mentor: mentor || null,
+        mentor: mentor.trim(),
         committee_members: committee_members || null,
         grade: grade || null,
-        topic: topic || null,
-        keywords: keywords || null,
+        topic: topic.trim(),
+        keywords: keywords.trim(),
         language: language || null,
         abstract: abstract || null,
-        user_id,
+        defense_date: defense_date ? new Date(defense_date) : null,
+        user_id: finalUserId,
       },
     });
 
@@ -180,6 +209,8 @@ router.get("/", async (req, res) => {
       keywords: t.keywords,
       language: t.language,
       abstract: t.abstract,
+      defense_date: t.defense_date,
+      download_count: t.download_count,
     }));
 
     res.json(formatted);
@@ -301,6 +332,90 @@ router.post("/upload-pdf/:id", pdfUpload.single("file"), async (req, res) => {
   }
 });
 
+router.put("/:id", authenticate, async (req, res) => {
+  try {
+    const thesisId = Number(req.params.id);
+    if (!thesisId || Number.isNaN(thesisId)) {
+      return res.status(400).json({ message: "Neispravan ID rada" });
+    }
+
+    // Samo admin može editovati radove
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ message: "Samo admin može editovati radove" });
+    }
+
+    const {
+      first_name,
+      last_name,
+      title,
+      subtitle,
+      title_language,
+      additional_title,
+      additional_subtitle,
+      additional_title_language,
+      type,
+      year,
+      file_url,
+      mentor,
+      committee_members,
+      grade,
+      topic,
+      keywords,
+      language,
+      abstract,
+      defense_date,
+      user_id,
+    } = req.body;
+
+    const existingThesis = await prisma.theses.findUnique({
+      where: { id: thesisId },
+    });
+
+    if (!existingThesis) {
+      return res.status(404).json({ message: "Rad nije pronadjen" });
+    }
+
+    const parsedYear = year ? Number(year) : existingThesis.year;
+    if (Number.isNaN(parsedYear) || parsedYear < 1900 || parsedYear > 2100) {
+      return res.status(400).json({ message: "Godina mora biti izmedju 1900 i 2100" });
+    }
+
+    const updatedThesis = await prisma.theses.update({
+      where: { id: thesisId },
+      data: {
+        first_name: first_name ? first_name.trim() : existingThesis.first_name,
+        last_name: last_name ? last_name.trim() : existingThesis.last_name,
+        title: title ? title.trim() : existingThesis.title,
+        subtitle: subtitle !== undefined ? (subtitle ? subtitle.trim() : null) : existingThesis.subtitle,
+        title_language: title_language ? title_language.trim() : existingThesis.title_language,
+        additional_title: additional_title !== undefined ? (additional_title ? additional_title.trim() : null) : existingThesis.additional_title,
+        additional_subtitle: additional_subtitle !== undefined ? (additional_subtitle ? additional_subtitle.trim() : null) : existingThesis.additional_subtitle,
+        additional_title_language: additional_title_language !== undefined ? (additional_title_language ? additional_title_language.trim() : null) : existingThesis.additional_title_language,
+        type: type ? type.trim().toLowerCase() : existingThesis.type,
+        year: parsedYear,
+        file_url: file_url !== undefined ? file_url : existingThesis.file_url,
+        mentor: mentor !== undefined ? (mentor ? mentor.trim() : null) : existingThesis.mentor,
+        committee_members: committee_members !== undefined ? committee_members : existingThesis.committee_members,
+        grade: grade !== undefined ? grade : existingThesis.grade,
+        topic: topic !== undefined ? (topic ? topic.trim() : null) : existingThesis.topic,
+        keywords: keywords !== undefined ? (keywords ? keywords.trim() : null) : existingThesis.keywords,
+        language: language !== undefined ? language : existingThesis.language,
+        abstract: abstract !== undefined ? abstract : existingThesis.abstract,
+        defense_date: defense_date !== undefined ? (defense_date ? new Date(defense_date) : null) : existingThesis.defense_date,
+        user_id: user_id !== undefined ? user_id : existingThesis.user_id,
+      },
+    });
+
+    res.json({
+      message: "Rad uspjesno azuriran",
+      thesis: updatedThesis,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Greska pri azuriranju rada" });
+  }
+});
+
 router.delete("/:id", authenticate, async (req, res) => {
   try {
     const thesisId = Number(req.params.id);
@@ -335,6 +450,38 @@ router.delete("/:id", authenticate, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Greska pri brisanju rada" });
+  }
+});
+
+router.post("/:id/download", async (req, res) => {
+  try {
+    const thesisId = Number(req.params.id);
+    if (!thesisId || Number.isNaN(thesisId)) {
+      return res.status(400).json({ message: "Neispravan ID rada" });
+    }
+
+    const thesis = await prisma.theses.findUnique({
+      where: { id: thesisId },
+    });
+
+    if (!thesis) {
+      return res.status(404).json({ message: "Rad nije pronadjen" });
+    }
+
+    // Povećaj brojač preuzimanja
+    await prisma.theses.update({
+      where: { id: thesisId },
+      data: {
+        download_count: {
+          increment: 1,
+        },
+      },
+    });
+
+    res.json({ message: "Brojac preuzimanja azuriran", download_count: thesis.download_count + 1 });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Greska pri azuriranju brojaca" });
   }
 });
 

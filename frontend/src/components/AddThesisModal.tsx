@@ -23,6 +23,10 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const [newAlumniFirstName, setNewAlumniFirstName] = useState("");
   const [newAlumniLastName, setNewAlumniLastName] = useState("");
   const [alumniOptions, setAlumniOptions] = useState<AlumniOption[]>([]);
+  const [filteredAlumni, setFilteredAlumni] = useState<AlumniOption[]>([]);
+  const [alumniSearch, setAlumniSearch] = useState("");
+  const [showAlumniDropdown, setShowAlumniDropdown] = useState(false);
+  const [selectedAlumni, setSelectedAlumni] = useState<AlumniOption | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -39,12 +43,17 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const [year, setYear] = useState("");
   const [pdfLink, setPdfLink] = useState("");
   const [mentor, setMentor] = useState("");
-  const [committeeMembers, setCommitteeMembers] = useState("");
+  const [mentorSuggestions, setMentorSuggestions] = useState<string[]>([]);
+  const [showMentorSuggestions, setShowMentorSuggestions] = useState(false);
+  const [committeeMembers, setCommitteeMembers] = useState<string[]>([]);
+  const [newCommitteeMember, setNewCommitteeMember] = useState("");
   const [grade, setGrade] = useState("");
   const [language, setLanguage] = useState("en");
   const [topic, setTopic] = useState("");
   const [keywords, setKeywords] = useState("");
   const [abstract, setAbstract] = useState("");
+  const [defenseDate, setDefenseDate] = useState("");
+  const [defenseTime, setDefenseTime] = useState("");
 
   useEffect(() => {
     if (!isAdmin || !isOpen) {
@@ -71,6 +80,56 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
 
     loadAlumni();
   }, [isAdmin, isOpen]);
+
+  // Filter alumni based on search
+  useEffect(() => {
+    if (alumniSearch.trim() === "") {
+      setFilteredAlumni(alumniOptions.slice(0, 10)); // Prikaži prvih 10
+    } else {
+      const searchLower = alumniSearch.toLowerCase();
+      const filtered = alumniOptions.filter((a: AlumniOption) => {
+        const fullName = `${a.first_name} ${a.last_name}`.toLowerCase();
+        return fullName.includes(searchLower);
+      });
+      setFilteredAlumni(filtered.slice(0, 10)); // Max 10 rezultata
+    }
+  }, [alumniSearch, alumniOptions]);
+
+  const handleAlumniSelect = (alumnus: AlumniOption) => {
+    setSelectedAlumni(alumnus);
+    setAlumniSearch(`${alumnus.first_name} ${alumnus.last_name}`);
+    setSelectedAlumniId(String(alumnus.id));
+    setShowAlumniDropdown(false);
+  };
+
+  const handleAlumniClear = () => {
+    setSelectedAlumni(null);
+    setAlumniSearch("");
+    setSelectedAlumniId("");
+  };
+
+  // Učitaj mentore iz baze
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const loadMentors = async () => {
+      try {
+        const response = await fetch("/api/theses");
+        const data = await response.json();
+        if (response.ok && Array.isArray(data)) {
+          // Izvuci jedinstvene mentore
+          const uniqueMentors = Array.from(
+            new Set(data.map((t: any) => t.mentor).filter(Boolean))
+          ).sort() as string[];
+          setMentorSuggestions(uniqueMentors);
+        }
+      } catch (err) {
+        console.error("Greska pri ucitavanju mentora:", err);
+      }
+    };
+
+    loadMentors();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -104,6 +163,21 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
       return;
     }
 
+    if (!topic.trim()) {
+      setErrorMessage("Tema rada je obavezna.");
+      return;
+    }
+
+    if (!keywords.trim()) {
+      setErrorMessage("Ključne riječi su obavezne.");
+      return;
+    }
+
+    if (!mentor.trim()) {
+      setErrorMessage("Mentor je obavezan.");
+      return;
+    }
+
     let authorFirstName = user.first_name || "";
     let authorLastName = user.last_name || "";
     let authorUserId = user.id;
@@ -123,13 +197,41 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
         authorLastName = selected.last_name;
         authorUserId = selected.id;
       } else {
+        // Dodavanje novog alumnistu
         if (!newAlumniFirstName.trim() || !newAlumniLastName.trim()) {
           setErrorMessage("Ime i prezime novog alumniste su obavezni.");
           return;
         }
-        authorFirstName = newAlumniFirstName.trim();
-        authorLastName = newAlumniLastName.trim();
-        authorUserId = user.id;
+        
+        // Kreiraj novog alumnistu u bazi
+        try {
+          const createUserResponse = await fetch("/api/admin/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              first_name: newAlumniFirstName.trim(),
+              last_name: newAlumniLastName.trim(),
+              email: `${newAlumniFirstName.trim().toLowerCase()}.${newAlumniLastName.trim().toLowerCase()}@temp.alumni.com`,
+              username: `${newAlumniFirstName.trim().toLowerCase()}_${newAlumniLastName.trim().toLowerCase()}_${Date.now()}`,
+              password: Math.random().toString(36).slice(-8), // Privremena lozinka
+              role: "user",
+              enrollment_year: parsedYear,
+            }),
+          });
+
+          const userData = await createUserResponse.json();
+          if (!createUserResponse.ok) {
+            throw new Error(userData.message || "Greska pri kreiranju novog alumnistu.");
+          }
+
+          authorFirstName = newAlumniFirstName.trim();
+          authorLastName = newAlumniLastName.trim();
+          authorUserId = userData.id; // userData je direktno user objekat
+        } catch (err: any) {
+          console.error(err);
+          setErrorMessage(err.message || "Greska pri kreiranju novog alumnistu.");
+          return;
+        }
       }
     }
 
@@ -150,13 +252,16 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
       type: thesisType,
       year: parsedYear,
       file_url: pdfLink.trim() || "",
-      mentor: mentor.trim() || null,
-      committee_members: committeeMembers.trim() || null,
+      mentor: mentor.trim(),
+      committee_members: committeeMembers.length > 0 ? committeeMembers.join(", ") : null,
       grade: grade || null,
-      topic: topic.trim() || null,
-      keywords: keywords.trim() || null,
+      topic: topic.trim(),
+      keywords: keywords.trim(),
       language: language.trim() || null,
       abstract: abstract.trim() || null,
+      defense_date: defenseDate && defenseTime 
+        ? new Date(`${defenseDate}T${defenseTime}`).toISOString() 
+        : null,
       user_id: authorUserId,
     };
 
@@ -230,22 +335,52 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                 </div>
 
                 {selectExistingAlumni ? (
-                  <div>
+                  <div className="relative">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Izaberi alumnistu
                     </label>
-                    <select
-                      value={selectedAlumniId}
-                      onChange={(e) => setSelectedAlumniId(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
-                    >
-                      <option value="">-- Izaberi alumnistu --</option>
-                      {alumniOptions.map((alumni) => (
-                        <option key={alumni.id} value={alumni.id}>
-                          {alumni.first_name} {alumni.last_name}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="text"
+                      value={alumniSearch}
+                      onChange={(e) => {
+                        setAlumniSearch(e.target.value);
+                        setShowAlumniDropdown(true);
+                      }}
+                      onFocus={() => setShowAlumniDropdown(true)}
+                      placeholder="Počni kucati ime ili prezime..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70] pr-20"
+                    />
+                    {selectedAlumni && (
+                      <button
+                        type="button"
+                        onClick={handleAlumniClear}
+                        className="absolute right-2 top-10 px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Ukloni
+                      </button>
+                    )}
+                    
+                    {/* Dropdown sa rezultatima */}
+                    {showAlumniDropdown && filteredAlumni.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {filteredAlumni.map((alumnus) => (
+                          <div
+                            key={alumnus.id}
+                            onClick={() => handleAlumniSelect(alumnus)}
+                            className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
+                          >
+                            <div className="font-semibold text-gray-800">
+                              {alumnus.first_name} {alumnus.last_name}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {selectedAlumni && (
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ Izabran: {selectedAlumni.first_name} {selectedAlumni.last_name}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-4">
@@ -466,30 +601,103 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
             <h3 className="font-semibold text-lg text-[#294a70] mb-4">Mentor i komisija</h3>
             
             <div className="space-y-4">
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Mentor
+                  Mentor <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={mentor}
-                  onChange={(e) => setMentor(e.target.value)}
+                  onChange={(e) => {
+                    setMentor(e.target.value);
+                    setShowMentorSuggestions(e.target.value.length > 0);
+                  }}
+                  onFocus={() => setShowMentorSuggestions(mentor.length > 0)}
+                  onBlur={() => setTimeout(() => setShowMentorSuggestions(false), 200)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                   placeholder="Ime i prezime mentora"
+                  required
                 />
+                {showMentorSuggestions && mentorSuggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {mentorSuggestions
+                      .filter((m) => m.toLowerCase().includes(mentor.toLowerCase()))
+                      .map((suggestion, index) => (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            setMentor(suggestion);
+                            setShowMentorSuggestions(false);
+                          }}
+                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                        >
+                          {suggestion}
+                        </div>
+                      ))}
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Počnite kucati da vidite postojeće mentore ili unesite novog
+                </p>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Članovi komisije
+                  Članovi komisije (opciono)
                 </label>
-                <input
-                  type="text"
-                  value={committeeMembers}
-                  onChange={(e) => setCommitteeMembers(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
-                  placeholder="Odvojeni zarezom (npr. Ime Prezime, Ime Prezime)"
-                />
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newCommitteeMember}
+                      onChange={(e) => setNewCommitteeMember(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (newCommitteeMember.trim()) {
+                            setCommitteeMembers([...committeeMembers, newCommitteeMember.trim()]);
+                            setNewCommitteeMember("");
+                          }
+                        }
+                      }}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                      placeholder="Ime i prezime člana komisije"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newCommitteeMember.trim()) {
+                          setCommitteeMembers([...committeeMembers, newCommitteeMember.trim()]);
+                          setNewCommitteeMember("");
+                        }
+                      }}
+                      className="px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-colors font-semibold"
+                    >
+                      Dodaj
+                    </button>
+                  </div>
+                  {committeeMembers.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {committeeMembers.map((member, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
+                        >
+                          <span className="text-sm">{member}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCommitteeMembers(committeeMembers.filter((_, i) => i !== index));
+                            }}
+                            className="text-blue-600 hover:text-blue-800 font-bold"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -501,7 +709,7 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Tema
+                  Tema <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -509,12 +717,13 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                   onChange={(e) => setTopic(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                   placeholder="Tema rada"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Ključne riječi
+                  Ključne riječi <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -522,6 +731,7 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                   onChange={(e) => setKeywords(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                   placeholder="Odvojene zarezom (npr. AI, Machine Learning, Python)"
+                  required
                 />
               </div>
 
@@ -535,6 +745,33 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70] min-h-[120px]"
                   placeholder="Unesite sažetak rada"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Termin odbrane rada (opciono)
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <input
+                      type="date"
+                      value={defenseDate}
+                      onChange={(e) => setDefenseDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="time"
+                      value={defenseTime}
+                      onChange={(e) => setDefenseTime(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Unesite datum i vrijeme prezentacije/odbrane rada
+                </p>
               </div>
             </div>
           </div>
