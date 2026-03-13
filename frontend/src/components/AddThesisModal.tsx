@@ -39,6 +39,8 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const [year, setYear] = useState("");
   const [pdfLink, setPdfLink] = useState("");
   const [mentor, setMentor] = useState("");
+  const [mentorSuggestions, setMentorSuggestions] = useState<string[]>([]);
+  const [showMentorSuggestions, setShowMentorSuggestions] = useState(false);
   const [committeeMembers, setCommitteeMembers] = useState<string[]>([]);
   const [newCommitteeMember, setNewCommitteeMember] = useState("");
   const [grade, setGrade] = useState("");
@@ -74,6 +76,29 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
 
     loadAlumni();
   }, [isAdmin, isOpen]);
+
+  // Učitaj mentore iz baze
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const loadMentors = async () => {
+      try {
+        const response = await fetch("/api/theses");
+        const data = await response.json();
+        if (response.ok && Array.isArray(data)) {
+          // Izvuci jedinstvene mentore
+          const uniqueMentors = Array.from(
+            new Set(data.map((t: any) => t.mentor).filter(Boolean))
+          ).sort() as string[];
+          setMentorSuggestions(uniqueMentors);
+        }
+      } catch (err) {
+        console.error("Greska pri ucitavanju mentora:", err);
+      }
+    };
+
+    loadMentors();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -515,18 +540,44 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
             <h3 className="font-semibold text-lg text-[#294a70] mb-4">Mentor i komisija</h3>
             
             <div className="space-y-4">
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Mentor <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={mentor}
-                  onChange={(e) => setMentor(e.target.value)}
+                  onChange={(e) => {
+                    setMentor(e.target.value);
+                    setShowMentorSuggestions(e.target.value.length > 0);
+                  }}
+                  onFocus={() => setShowMentorSuggestions(mentor.length > 0)}
+                  onBlur={() => setTimeout(() => setShowMentorSuggestions(false), 200)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
                   placeholder="Ime i prezime mentora"
                   required
                 />
+                {showMentorSuggestions && mentorSuggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {mentorSuggestions
+                      .filter((m) => m.toLowerCase().includes(mentor.toLowerCase()))
+                      .map((suggestion, index) => (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            setMentor(suggestion);
+                            setShowMentorSuggestions(false);
+                          }}
+                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                        >
+                          {suggestion}
+                        </div>
+                      ))}
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Počnite kucati da vidite postojeće mentore ili unesite novog
+                </p>
               </div>
 
               <div>
