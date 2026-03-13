@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import UploadThesisModal from "../components/UploadThesisModal";
 import UploadCSVModal from "../components/UploadCSVModal";
 import AddThesisModal from "../components/AddThesisModal";
+import EditThesisModal from "../components/EditThesisModal";
 import axios from "axios";
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -22,6 +23,8 @@ export default function DiplomskiRadovi() {
   const [thesisTypeFilter, setThesisTypeFilter] = useState<string>("all");
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [showAddThesisModal, setShowAddThesisModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingThesis, setEditingThesis] = useState<any>(null);
   const [podaci, setPodaci] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -42,8 +45,6 @@ export default function DiplomskiRadovi() {
     try {
       setLoading(true);
       const response = await axios.get("/api/theses");
-      console.log("API DATA:", response.data);
-      console.log("Broj radova:", response.data.length);
       setPodaci(response.data);
     } catch (err) {
       console.error("Greška pri učitavanju radova:", err);
@@ -816,15 +817,26 @@ export default function DiplomskiRadovi() {
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <div className="flex flex-wrap gap-3">
                           {isAdmin && (
-                            <button
-                              onClick={() => {
-                                setSelectedThesis(p);
-                                setShowUploadModal(true);
-                              }}
-                              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md font-semibold text-sm"
-                            >
-                              📤 Otpremi PDF
-                            </button>
+                            <>
+                              <button
+                                onClick={() => {
+                                  setEditingThesis(p);
+                                  setShowEditModal(true);
+                                }}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md font-semibold text-sm"
+                              >
+                                ✏️ Edituj
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedThesis(p);
+                                  setShowUploadModal(true);
+                                }}
+                                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all shadow-md font-semibold text-sm"
+                              >
+                                📤 Otpremi PDF
+                              </button>
+                            </>
                           )}
                           <button
                             onClick={() => handleDeleteThesis(p.id)}
@@ -1371,6 +1383,16 @@ export default function DiplomskiRadovi() {
         isOpen={showAddThesisModal}
         onClose={() => setShowAddThesisModal(false)}
         onSuccess={fetchTheses}
+      />
+
+      <EditThesisModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingThesis(null);
+        }}
+        onEditSuccess={fetchTheses}
+        thesis={editingThesis}
       />
     </div>
   );

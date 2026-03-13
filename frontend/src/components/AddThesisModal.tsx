@@ -23,6 +23,10 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const [newAlumniFirstName, setNewAlumniFirstName] = useState("");
   const [newAlumniLastName, setNewAlumniLastName] = useState("");
   const [alumniOptions, setAlumniOptions] = useState<AlumniOption[]>([]);
+  const [filteredAlumni, setFilteredAlumni] = useState<AlumniOption[]>([]);
+  const [alumniSearch, setAlumniSearch] = useState("");
+  const [showAlumniDropdown, setShowAlumniDropdown] = useState(false);
+  const [selectedAlumni, setSelectedAlumni] = useState<AlumniOption | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -76,6 +80,33 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
 
     loadAlumni();
   }, [isAdmin, isOpen]);
+
+  // Filter alumni based on search
+  useEffect(() => {
+    if (alumniSearch.trim() === "") {
+      setFilteredAlumni(alumniOptions.slice(0, 10)); // Prikaži prvih 10
+    } else {
+      const searchLower = alumniSearch.toLowerCase();
+      const filtered = alumniOptions.filter((a: AlumniOption) => {
+        const fullName = `${a.first_name} ${a.last_name}`.toLowerCase();
+        return fullName.includes(searchLower);
+      });
+      setFilteredAlumni(filtered.slice(0, 10)); // Max 10 rezultata
+    }
+  }, [alumniSearch, alumniOptions]);
+
+  const handleAlumniSelect = (alumnus: AlumniOption) => {
+    setSelectedAlumni(alumnus);
+    setAlumniSearch(`${alumnus.first_name} ${alumnus.last_name}`);
+    setSelectedAlumniId(String(alumnus.id));
+    setShowAlumniDropdown(false);
+  };
+
+  const handleAlumniClear = () => {
+    setSelectedAlumni(null);
+    setAlumniSearch("");
+    setSelectedAlumniId("");
+  };
 
   // Učitaj mentore iz baze
   useEffect(() => {
@@ -304,22 +335,52 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                 </div>
 
                 {selectExistingAlumni ? (
-                  <div>
+                  <div className="relative">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Izaberi alumnistu
                     </label>
-                    <select
-                      value={selectedAlumniId}
-                      onChange={(e) => setSelectedAlumniId(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
-                    >
-                      <option value="">-- Izaberi alumnistu --</option>
-                      {alumniOptions.map((alumni) => (
-                        <option key={alumni.id} value={alumni.id}>
-                          {alumni.first_name} {alumni.last_name}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="text"
+                      value={alumniSearch}
+                      onChange={(e) => {
+                        setAlumniSearch(e.target.value);
+                        setShowAlumniDropdown(true);
+                      }}
+                      onFocus={() => setShowAlumniDropdown(true)}
+                      placeholder="Počni kucati ime ili prezime..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70] pr-20"
+                    />
+                    {selectedAlumni && (
+                      <button
+                        type="button"
+                        onClick={handleAlumniClear}
+                        className="absolute right-2 top-10 px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Ukloni
+                      </button>
+                    )}
+                    
+                    {/* Dropdown sa rezultatima */}
+                    {showAlumniDropdown && filteredAlumni.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {filteredAlumni.map((alumnus) => (
+                          <div
+                            key={alumnus.id}
+                            onClick={() => handleAlumniSelect(alumnus)}
+                            className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
+                          >
+                            <div className="font-semibold text-gray-800">
+                              {alumnus.first_name} {alumnus.last_name}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {selectedAlumni && (
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ Izabran: {selectedAlumni.first_name} {selectedAlumni.last_name}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-4">

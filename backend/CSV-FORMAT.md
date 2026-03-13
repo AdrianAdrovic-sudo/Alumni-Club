@@ -24,14 +24,13 @@
 - `language` - Jezik rada (npr. `en`, `cg`)
 - `abstract` - Sažetak rada (kratak opis)
 - `defense_date` - Datum odbrane rada (format: YYYY-MM-DD HH:MM:SS ili ISO 8601)
-- `user_id` - ID korisnika (default: 1)
 
 ## Primjer CSV fajla:
 
 ```csv
-first_name,last_name,title,subtitle,title_language,additional_title,additional_subtitle,additional_title_language,type,year,file_url,mentor,committee_members,grade,topic,keywords,language,abstract,defense_date,user_id
-Marko,Marković,Primena mašinskog učenja,,cg,Application of Machine Learning,,en,bachelors,2024,https://example.com/rad1.pdf,Prof. dr Ivan Petrović,"Prof. dr Ivan Petrović, Doc. dr Ana Jovanović",A,Machine Learning,"AI, Machine Learning, Neural Networks",cg,"Ovaj rad istražuje primenu mašinskog učenja...",2024-06-15 10:00:00,1
-Ana,Jovanović,Deep Learning Applications,A Comprehensive Study,en,Primjena dubokog učenja,Sveobuhvatna studija,cg,masters,2024,https://example.com/rad2.pdf,Prof. dr Petar Petrović,"Prof. dr Petar Petrović, Doc. dr Marko Marković, Dr Ana Nikolić",A,Deep Learning,"Deep Learning, Neural Networks, AI",en,"This thesis explores deep learning applications...",2024-07-20 14:30:00,2
+first_name,last_name,title,subtitle,title_language,additional_title,additional_subtitle,additional_title_language,type,year,file_url,mentor,committee_members,grade,topic,keywords,language,abstract,defense_date
+Marko,Marković,Primena mašinskog učenja,,cg,Application of Machine Learning,,en,bachelors,2024,https://example.com/rad1.pdf,Prof. dr Ivan Petrović,"Prof. dr Ivan Petrović, Doc. dr Ana Jovanović",A,Machine Learning,"AI, Machine Learning, Neural Networks",cg,"Ovaj rad istražuje primenu mašinskog učenja...",2024-06-15 10:00:00
+Ana,Jovanović,Deep Learning Applications,A Comprehensive Study,en,Primjena dubokog učenja,Sveobuhvatna studija,cg,masters,2024,https://example.com/rad2.pdf,Prof. dr Petar Petrović,"Prof. dr Petar Petrović, Doc. dr Marko Marković, Dr Ana Nikolić",A,Deep Learning,"Deep Learning, Neural Networks, AI",en,"This thesis explores deep learning applications...",2024-07-20 14:30:00
 ```
 
 ## Napomene:
@@ -42,6 +41,7 @@ Ana,Jovanović,Deep Learning Applications,A Comprehensive Study,en,Primjena dubo
 - Tip rada mora biti: bachelors, masters ili specialist (malim slovima)
 - Ocjena mora biti: A, B, C, D, E ili F (velikim slovima)
 - Datum odbrane mora biti u formatu: YYYY-MM-DD HH:MM:SS (npr. 2024-06-15 10:00:00)
+- **user_id se automatski dodijeljuje i ne treba ga unositi u CSV**
 
 ## Primjer fajla:
 Pogledaj `example-theses.csv` za kompletan primjer.

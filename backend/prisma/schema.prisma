@@ -258,8 +258,8 @@ model theses {
   download_count    Int       @default(0)
   
   created_at        DateTime @default(now())
-  user_id           Int
-  user              users    @relation(fields: [user_id], references: [id])
+  user_id           Int?
+  user              users?   @relation(fields: [user_id], references: [id])
   
   @@index([mentor])
   @@index([grade])
