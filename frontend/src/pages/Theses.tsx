@@ -154,8 +154,7 @@ export default function DiplomskiRadovi() {
       }
     });
     return Object.entries(mentorStats)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10); // Top 10 mentora
+      .sort((a, b) => b[1] - a[1]); // Svi mentori, bez limita
   };
 
   // Statistika članova komisija - iz pravih podataka
@@ -172,8 +171,7 @@ export default function DiplomskiRadovi() {
       }
     });
     return Object.entries(committeeStats)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10); // Top 10 članova
+      .sort((a, b) => b[1] - a[1]); // Svi članovi, bez limita
   };
 
   // Statistika ocjena - iz pravih podataka
@@ -1188,8 +1186,9 @@ export default function DiplomskiRadovi() {
               <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8 animate-fadeIn">
                 <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
                   <span>👨‍🏫</span> Statistika mentora
+                  <span className="text-sm font-normal text-gray-500 ml-2">({mentorStats.length} mentora)</span>
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                   {mentorStats.map(([mentor, count], index) => {
                     const maxCount = mentorStats[0][1];
                     const percentage = (count / maxCount) * 100;
@@ -1222,8 +1221,9 @@ export default function DiplomskiRadovi() {
               <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8 animate-fadeIn">
                 <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
                   <span>👥</span> Statistika članova komisija
+                  <span className="text-sm font-normal text-gray-500 ml-2">({committeeStats.length} članova)</span>
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                   {committeeStats.map(([member, count], index) => {
                     const maxCount = committeeStats[0][1];
                     const percentage = (count / maxCount) * 100;
