@@ -145,33 +145,56 @@ export default function DiplomskiRadovi() {
   console.log("📅 Years:", years);
   console.log("📈 Max theses in year:", maxThesesInYear);
 
+  // Normalizacija imena - zamjena specijalnih karaktera za poređenje
+  const normalizeName = (name: string): string => {
+    return name
+      .replace(/ć/g, 'c').replace(/Ć/g, 'C')
+      .replace(/č/g, 'c').replace(/Č/g, 'C')
+      .replace(/đ/g, 'dj').replace(/Đ/g, 'Dj')
+      .replace(/š/g, 's').replace(/Š/g, 'S')
+      .replace(/ž/g, 'z').replace(/Ž/g, 'Z')
+      .trim();
+  };
+
   // Statistika mentora - iz pravih podataka
   const getMentorStats = () => {
     const mentorStats: { [key: string]: number } = {};
+    const mentorDisplayNames: { [key: string]: string } = {};
     podaci.forEach(thesis => {
       if (thesis.mentor) {
-        mentorStats[thesis.mentor] = (mentorStats[thesis.mentor] || 0) + 1;
+        const normalized = normalizeName(thesis.mentor);
+        if (!mentorDisplayNames[normalized]) {
+          mentorDisplayNames[normalized] = thesis.mentor;
+        }
+        mentorStats[normalized] = (mentorStats[normalized] || 0) + 1;
       }
     });
     return Object.entries(mentorStats)
-      .sort((a, b) => b[1] - a[1]); // Svi mentori, bez limita
+      .sort((a, b) => b[1] - a[1])
+      .map(([key, count]) => [mentorDisplayNames[key], count] as [string, number]);
   };
 
   // Statistika članova komisija - iz pravih podataka
   const getCommitteeStats = () => {
     const committeeStats: { [key: string]: number } = {};
+    const committeeDisplayNames: { [key: string]: string } = {};
     podaci.forEach(thesis => {
       if (thesis.committee_members) {
         const members = thesis.committee_members.split(',').map((m: string) => m.trim());
         members.forEach((member: string) => {
           if (member) {
-            committeeStats[member] = (committeeStats[member] || 0) + 1;
+            const normalized = normalizeName(member);
+            if (!committeeDisplayNames[normalized]) {
+              committeeDisplayNames[normalized] = member;
+            }
+            committeeStats[normalized] = (committeeStats[normalized] || 0) + 1;
           }
         });
       }
     });
     return Object.entries(committeeStats)
-      .sort((a, b) => b[1] - a[1]); // Svi članovi, bez limita
+      .sort((a, b) => b[1] - a[1])
+      .map(([key, count]) => [committeeDisplayNames[key], count] as [string, number]);
   };
 
   // Statistika ocjena - iz pravih podataka
@@ -205,32 +228,44 @@ export default function DiplomskiRadovi() {
   // Statistika tema - iz pravih podataka
   const getTopicStats = () => {
     const topicStats: { [key: string]: number } = {};
+    const topicDisplayNames: { [key: string]: string } = {};
     podaci.forEach(thesis => {
       if (thesis.topic) {
-        topicStats[thesis.topic] = (topicStats[thesis.topic] || 0) + 1;
+        const normalized = normalizeName(thesis.topic);
+        if (!topicDisplayNames[normalized]) {
+          topicDisplayNames[normalized] = thesis.topic;
+        }
+        topicStats[normalized] = (topicStats[normalized] || 0) + 1;
       }
     });
     return Object.entries(topicStats)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10); // Top 10 tema
+      .slice(0, 10)
+      .map(([key, count]) => [topicDisplayNames[key], count] as [string, number]);
   };
 
   // Statistika ključnih riječi - iz pravih podataka
   const getKeywordStats = () => {
     const keywordStats: { [key: string]: number } = {};
+    const keywordDisplayNames: { [key: string]: string } = {};
     podaci.forEach(thesis => {
       if (thesis.keywords) {
         const keywords = thesis.keywords.split(',').map((k: string) => k.trim());
         keywords.forEach((keyword: string) => {
           if (keyword) {
-            keywordStats[keyword] = (keywordStats[keyword] || 0) + 1;
+            const normalized = normalizeName(keyword);
+            if (!keywordDisplayNames[normalized]) {
+              keywordDisplayNames[normalized] = keyword;
+            }
+            keywordStats[normalized] = (keywordStats[normalized] || 0) + 1;
           }
         });
       }
     });
     return Object.entries(keywordStats)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 15); // Top 15 ključnih riječi
+      .slice(0, 15)
+      .map(([key, count]) => [keywordDisplayNames[key], count] as [string, number]);
   };
 
   const mentorStats: [string, number][] = getMentorStats();
@@ -1191,7 +1226,7 @@ export default function DiplomskiRadovi() {
                 <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                   {mentorStats.map(([mentor, count], index) => {
                     const maxCount = mentorStats[0][1];
-                    const percentage = (count / maxCount) * 100;
+                    const percentage = (count / maxCount) * 60;
                     return (
                       <div key={mentor} className="flex items-center gap-4 group">
                         <div className="w-8 h-8 bg-[#294a70] text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -1226,7 +1261,7 @@ export default function DiplomskiRadovi() {
                 <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                   {committeeStats.map(([member, count], index) => {
                     const maxCount = committeeStats[0][1];
-                    const percentage = (count / maxCount) * 100;
+                    const percentage = (count / maxCount) * 60;
                     return (
                       <div key={member} className="flex items-center gap-4 group">
                         <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -1326,7 +1361,7 @@ export default function DiplomskiRadovi() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {topicStats.map(([topic, count], index) => {
                     const maxCount = topicStats[0][1];
-                    const percentage = (count / maxCount) * 100;
+                    const percentage = (count / maxCount) * 60;
                     return (
                       <div key={topic} className="bg-gradient-to-r from-gray-50 to-white p-4 rounded-lg border border-gray-200 hover:shadow-lg hover:border-purple-300 transition-all group">
                         <div className="flex items-center gap-3 mb-2">
