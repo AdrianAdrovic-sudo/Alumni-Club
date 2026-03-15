@@ -37,6 +37,7 @@ export default function DiplomskiRadovi() {
   const [selectedTopic, setSelectedTopic] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [hoveredYear, setHoveredYear] = useState<number | null>(null);
 
   const fetchTheses = async () => {
     try {
@@ -145,35 +146,56 @@ export default function DiplomskiRadovi() {
   console.log("📅 Years:", years);
   console.log("📈 Max theses in year:", maxThesesInYear);
 
+  // Normalizacija imena - zamjena specijalnih karaktera za poređenje
+  const normalizeName = (name: string): string => {
+    return name
+      .replace(/ć/g, 'c').replace(/Ć/g, 'C')
+      .replace(/č/g, 'c').replace(/Č/g, 'C')
+      .replace(/đ/g, 'dj').replace(/Đ/g, 'Dj')
+      .replace(/š/g, 's').replace(/Š/g, 'S')
+      .replace(/ž/g, 'z').replace(/Ž/g, 'Z')
+      .trim();
+  };
+
   // Statistika mentora - iz pravih podataka
   const getMentorStats = () => {
     const mentorStats: { [key: string]: number } = {};
+    const mentorDisplayNames: { [key: string]: string } = {};
     podaci.forEach(thesis => {
       if (thesis.mentor) {
-        mentorStats[thesis.mentor] = (mentorStats[thesis.mentor] || 0) + 1;
+        const normalized = normalizeName(thesis.mentor);
+        if (!mentorDisplayNames[normalized]) {
+          mentorDisplayNames[normalized] = thesis.mentor;
+        }
+        mentorStats[normalized] = (mentorStats[normalized] || 0) + 1;
       }
     });
     return Object.entries(mentorStats)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10); // Top 10 mentora
+      .map(([key, count]) => [mentorDisplayNames[key], count] as [string, number]);
   };
 
   // Statistika članova komisija - iz pravih podataka
   const getCommitteeStats = () => {
     const committeeStats: { [key: string]: number } = {};
+    const committeeDisplayNames: { [key: string]: string } = {};
     podaci.forEach(thesis => {
       if (thesis.committee_members) {
         const members = thesis.committee_members.split(',').map((m: string) => m.trim());
         members.forEach((member: string) => {
           if (member) {
-            committeeStats[member] = (committeeStats[member] || 0) + 1;
+            const normalized = normalizeName(member);
+            if (!committeeDisplayNames[normalized]) {
+              committeeDisplayNames[normalized] = member;
+            }
+            committeeStats[normalized] = (committeeStats[normalized] || 0) + 1;
           }
         });
       }
     });
     return Object.entries(committeeStats)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10); // Top 10 članova
+      .map(([key, count]) => [committeeDisplayNames[key], count] as [string, number]);
   };
 
   // Statistika ocjena - iz pravih podataka
@@ -207,32 +229,44 @@ export default function DiplomskiRadovi() {
   // Statistika tema - iz pravih podataka
   const getTopicStats = () => {
     const topicStats: { [key: string]: number } = {};
+    const topicDisplayNames: { [key: string]: string } = {};
     podaci.forEach(thesis => {
       if (thesis.topic) {
-        topicStats[thesis.topic] = (topicStats[thesis.topic] || 0) + 1;
+        const normalized = normalizeName(thesis.topic);
+        if (!topicDisplayNames[normalized]) {
+          topicDisplayNames[normalized] = thesis.topic;
+        }
+        topicStats[normalized] = (topicStats[normalized] || 0) + 1;
       }
     });
     return Object.entries(topicStats)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 10); // Top 10 tema
+      .slice(0, 10)
+      .map(([key, count]) => [topicDisplayNames[key], count] as [string, number]);
   };
 
   // Statistika ključnih riječi - iz pravih podataka
   const getKeywordStats = () => {
     const keywordStats: { [key: string]: number } = {};
+    const keywordDisplayNames: { [key: string]: string } = {};
     podaci.forEach(thesis => {
       if (thesis.keywords) {
         const keywords = thesis.keywords.split(',').map((k: string) => k.trim());
         keywords.forEach((keyword: string) => {
           if (keyword) {
-            keywordStats[keyword] = (keywordStats[keyword] || 0) + 1;
+            const normalized = normalizeName(keyword);
+            if (!keywordDisplayNames[normalized]) {
+              keywordDisplayNames[normalized] = keyword;
+            }
+            keywordStats[normalized] = (keywordStats[normalized] || 0) + 1;
           }
         });
       }
     });
     return Object.entries(keywordStats)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 15); // Top 15 ključnih riječi
+      .slice(0, 15)
+      .map(([key, count]) => [keywordDisplayNames[key], count] as [string, number]);
   };
 
   const mentorStats: [string, number][] = getMentorStats();
@@ -242,10 +276,30 @@ export default function DiplomskiRadovi() {
   const topicStats: [string, number][] = getTopicStats();
   const keywordStats: [string, number][] = getKeywordStats();
 
-  // Dobijanje jedinstvenih vrednosti za filtere
-  const uniqueMentors = Array.from(new Set(podaci.map(p => p.mentor).filter(Boolean))).sort();
+  // Dobijanje jedinstvenih vrednosti za filtere (normalizovano za č, ć, š, ž, đ)
+  const getUniqueMentors = () => {
+    const seen: { [key: string]: string } = {};
+    podaci.forEach(p => {
+      if (p.mentor) {
+        const normalized = normalizeName(p.mentor);
+        if (!seen[normalized]) seen[normalized] = p.mentor;
+      }
+    });
+    return Object.values(seen).sort();
+  };
+  const getUniqueTopics = () => {
+    const seen: { [key: string]: string } = {};
+    podaci.forEach(p => {
+      if (p.topic) {
+        const normalized = normalizeName(p.topic);
+        if (!seen[normalized]) seen[normalized] = p.topic;
+      }
+    });
+    return Object.values(seen).sort();
+  };
+  const uniqueMentors = getUniqueMentors();
   const uniqueGrades = Array.from(new Set(podaci.map(p => p.grade).filter(Boolean))).sort();
-  const uniqueTopics = Array.from(new Set(podaci.map(p => p.topic).filter(Boolean))).sort();
+  const uniqueTopics = getUniqueTopics();
   const uniqueYears = Array.from(new Set(podaci.map(p => p.year).filter(Boolean))).sort((a, b) => b - a);
   const uniqueLanguages = Array.from(new Set(podaci.map(p => p.language).filter(Boolean))).sort();
 
@@ -257,23 +311,24 @@ export default function DiplomskiRadovi() {
 
   // Filtriranje - napredna pretraga
   const filtrirani = podaci.filter((p) => {
-    // Priprema podataka za pretragu
-    const firstName = (p.first_name || "").toLowerCase();
-    const lastName = (p.last_name || "").toLowerCase();
-    const title = (p.title || "").toLowerCase();
-    const mentor = (p.mentor || "").toLowerCase();
-    const keywords = (p.keywords || "").toLowerCase();
-    const committeeMembers = (p.committee_members || "").toLowerCase();
-    const topic = (p.topic || "").toLowerCase();
-    const abstract = (p.abstract || "").toLowerCase();
+    // Priprema podataka za pretragu (normalizovano za č, ć, š, ž, đ)
+    const firstName = normalizeName((p.first_name || "").toLowerCase());
+    const lastName = normalizeName((p.last_name || "").toLowerCase());
+    const title = normalizeName((p.title || "").toLowerCase());
+    const mentor = normalizeName((p.mentor || "").toLowerCase());
+    const keywords = normalizeName((p.keywords || "").toLowerCase());
+    const committeeMembers = normalizeName((p.committee_members || "").toLowerCase());
+    const topic = normalizeName((p.topic || "").toLowerCase());
+    const abstract = normalizeName((p.abstract || "").toLowerCase());
     const grade = (p.grade || "").toLowerCase();
     const language = (p.language || "").toLowerCase();
-    const additionalTitle = (p.additional_title || "").toLowerCase();
-    const additionalSubtitle = (p.additional_subtitle || "").toLowerCase();
+    const additionalTitle = normalizeName((p.additional_title || "").toLowerCase());
+    const additionalSubtitle = normalizeName((p.additional_subtitle || "").toLowerCase());
     
-    const searchLower = searchTerm.toLowerCase();
+    // Normalizujemo i sam search term
+    const searchLower = normalizeName(searchTerm.toLowerCase());
 
-    // Pretraga po SVIM poljima
+    // Pretraga po SVIM poljima (normalizovano)
     const matchesSearch = searchTerm === "" || 
       firstName.includes(searchLower) ||
       lastName.includes(searchLower) ||
@@ -291,10 +346,10 @@ export default function DiplomskiRadovi() {
     // Filter po tipu rada
     const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
     
-    // Napredni filteri
-    const matchesMentor = selectedMentor === "all" || p.mentor === selectedMentor;
+    // Napredni filteri (normalizovano poređenje)
+    const matchesMentor = selectedMentor === "all" || normalizeName(p.mentor || "") === normalizeName(selectedMentor);
     const matchesGrade = selectedGrade === "all" || p.grade === selectedGrade;
-    const matchesTopic = selectedTopic === "all" || p.topic === selectedTopic;
+    const matchesTopic = selectedTopic === "all" || normalizeName(p.topic || "") === normalizeName(selectedTopic);
     const matchesYear = selectedYear === "all" || p.year?.toString() === selectedYear;
     const matchesLanguage = selectedLanguage === "all" || p.language === selectedLanguage;
 
@@ -1045,28 +1100,32 @@ export default function DiplomskiRadovi() {
                   <p>Nema podataka za prikaz grafikona</p>
                 </div>
               ) : (
-              <div className="overflow-x-auto">
-              <div className="flex items-end justify-between gap-3 md:gap-4 h-96 border-l-4 border-b-4 border-[#294a70] pl-4 pb-4 bg-gradient-to-t from-gray-50 to-white rounded-bl-lg min-w-max"
-                   style={{ minWidth: years.length > 10 ? `${years.length * 80}px` : 'auto' }}
+              <div className={years.length > 14 ? "overflow-x-auto" : ""}>
+              <div className="flex items-end justify-between gap-3 md:gap-4 h-96 border-l-4 border-b-4 border-[#294a70] pl-4 pb-4 bg-gradient-to-t from-gray-50 to-white rounded-bl-lg mb-4"
+                   style={{ minWidth: years.length > 14 ? `${years.length * 80}px` : 'auto' }}
               >
                 {years.sort((a, b) => a - b).map(year => {
                   const stats = yearStats[year];
-                  const maxHeight = 320; // maksimalna visina u pikselima (povećano za više radova)
+                  const maxHeight = 320;
                   const barHeight = (stats.total / Math.max(maxThesesInYear, 10)) * maxHeight;
                   
                   return (
                     <div key={year} className="flex-1 flex flex-col items-center gap-2">
                       {/* Bar */}
-                      <div className="w-full flex flex-col items-center">
+                      <div className="w-full flex flex-col items-center relative">
                         <div 
-                          className="w-full bg-gradient-to-t from-[#294a70] via-[#3d5a7f] to-[#5a7fa0] rounded-t-lg shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer relative group border-2 border-[#294a70] flex items-start justify-center pt-2"
+                          className={`w-5/6 bg-gradient-to-t from-[#294a70] via-[#3d5a7f] to-[#5a7fa0] rounded-t-lg shadow-lg transition-all cursor-pointer border-2 ${hoveredYear === year ? 'border-yellow-400 shadow-2xl' : 'border-[#294a70]'} flex items-start justify-center pt-2`}
                           style={{ 
                             height: `${Math.max(barHeight, 40)}px`
                           }}
+                          onMouseEnter={() => setHoveredYear(year)}
+                          onMouseLeave={() => setHoveredYear(null)}
                         >
                           <span className="text-sm md:text-base font-bold text-white">{stats.total}</span>
-                          {/* Tooltip on hover */}
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 hidden group-hover:block bg-[#294a70] text-white text-xs rounded-lg py-3 px-4 whitespace-nowrap z-10 shadow-xl border-2 border-white">
+                        </div>
+                        {/* Tooltip ispod bara */}
+                        {hoveredYear === year && (
+                          <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-[#294a70] text-white text-xs rounded-lg py-3 px-4 whitespace-nowrap z-50 shadow-xl border-2 border-white pointer-events-none">
                             <div className="font-bold mb-2 text-sm border-b border-white/30 pb-1">{year}. godina</div>
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
@@ -1083,7 +1142,7 @@ export default function DiplomskiRadovi() {
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                       {/* Year Label */}
                       <span className="text-xs md:text-sm font-bold text-[#294a70] mt-2 bg-gray-100 px-3 py-1 rounded-full">{year}</span>
@@ -1188,11 +1247,12 @@ export default function DiplomskiRadovi() {
               <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8 animate-fadeIn">
                 <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
                   <span>👨‍🏫</span> Statistika mentora
+                  <span className="text-sm font-normal text-gray-500 ml-2">({mentorStats.length} mentora)</span>
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                   {mentorStats.map(([mentor, count], index) => {
                     const maxCount = mentorStats[0][1];
-                    const percentage = (count / maxCount) * 100;
+                    const percentage = (count / maxCount) * 60;
                     return (
                       <div key={mentor} className="flex items-center gap-4 group">
                         <div className="w-8 h-8 bg-[#294a70] text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -1222,11 +1282,12 @@ export default function DiplomskiRadovi() {
               <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-8 animate-fadeIn">
                 <h3 className="text-2xl font-bold text-[#294a70] mb-6 flex items-center gap-2">
                   <span>👥</span> Statistika članova komisija
+                  <span className="text-sm font-normal text-gray-500 ml-2">({committeeStats.length} članova)</span>
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                   {committeeStats.map(([member, count], index) => {
                     const maxCount = committeeStats[0][1];
-                    const percentage = (count / maxCount) * 100;
+                    const percentage = (count / maxCount) * 60;
                     return (
                       <div key={member} className="flex items-center gap-4 group">
                         <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -1326,7 +1387,7 @@ export default function DiplomskiRadovi() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {topicStats.map(([topic, count], index) => {
                     const maxCount = topicStats[0][1];
-                    const percentage = (count / maxCount) * 100;
+                    const percentage = (count / maxCount) * 60;
                     return (
                       <div key={topic} className="bg-gradient-to-r from-gray-50 to-white p-4 rounded-lg border border-gray-200 hover:shadow-lg hover:border-purple-300 transition-all group">
                         <div className="flex items-center gap-3 mb-2">

@@ -17,6 +17,17 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const { user, token } = useAuth();
   const isAdmin = user?.role === "admin";
 
+  // Normalizacija imena - zamjena specijalnih karaktera za poređenje
+  const normalizeName = (name: string): string => {
+    return name
+      .replace(/ć/g, 'c').replace(/Ć/g, 'C')
+      .replace(/č/g, 'c').replace(/Č/g, 'C')
+      .replace(/đ/g, 'dj').replace(/Đ/g, 'Dj')
+      .replace(/š/g, 's').replace(/Š/g, 'S')
+      .replace(/ž/g, 'z').replace(/Ž/g, 'Z')
+      .trim();
+  };
+
   // Alumnista polja
   const [selectExistingAlumni, setSelectExistingAlumni] = useState(true);
   const [selectedAlumniId, setSelectedAlumniId] = useState("");
@@ -50,6 +61,8 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
   const [zipError, setZipError] = useState<string | null>(null);
   const [committeeMembers, setCommitteeMembers] = useState<string[]>([]);
   const [newCommitteeMember, setNewCommitteeMember] = useState("");
+  const [committeeSuggestions, setCommitteeSuggestions] = useState<string[]>([]);
+  const [showCommitteeSuggestions, setShowCommitteeSuggestions] = useState(false);
   const [grade, setGrade] = useState("");
   const [language, setLanguage] = useState("en");
   const [topic, setTopic] = useState("");
@@ -106,9 +119,9 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
     if (alumniSearch.trim() === "") {
       setFilteredAlumni(alumniOptions.slice(0, 10)); // Prikaži prvih 10
     } else {
-      const searchLower = alumniSearch.toLowerCase();
+      const searchLower = normalizeName(alumniSearch.toLowerCase());
       const filtered = alumniOptions.filter((a: AlumniOption) => {
-        const fullName = `${a.first_name} ${a.last_name}`.toLowerCase();
+        const fullName = normalizeName(`${a.first_name} ${a.last_name}`.toLowerCase());
         return fullName.includes(searchLower);
       });
       setFilteredAlumni(filtered.slice(0, 10)); // Max 10 rezultata
@@ -128,27 +141,46 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
     setSelectedAlumniId("");
   };
 
-  // Učitaj mentore iz baze
+  // Učitaj mentore i članove komisije iz baze
   useEffect(() => {
     if (!isOpen) return;
 
-    const loadMentors = async () => {
+    const loadSuggestions = async () => {
       try {
         const response = await fetch("/api/theses");
         const data = await response.json();
         if (response.ok && Array.isArray(data)) {
-          // Izvuci jedinstvene mentore
-          const uniqueMentors = Array.from(
-            new Set(data.map((t: any) => t.mentor).filter(Boolean))
-          ).sort() as string[];
-          setMentorSuggestions(uniqueMentors);
+          // Izvuci jedinstvene mentore (normalizovano)
+          const seenMentors: { [key: string]: string } = {};
+          data.forEach((t: any) => {
+            if (t.mentor) {
+              const normalized = normalizeName(t.mentor);
+              if (!seenMentors[normalized]) seenMentors[normalized] = t.mentor;
+            }
+          });
+          setMentorSuggestions(Object.values(seenMentors).sort());
+
+          // Izvuci jedinstvene članove komisije (normalizovano)
+          const seenCommittee: { [key: string]: string } = {};
+          data.forEach((t: any) => {
+            if (t.committee_members) {
+              t.committee_members.split(',').forEach((m: string) => {
+                const member = m.trim();
+                if (member) {
+                  const normalized = normalizeName(member);
+                  if (!seenCommittee[normalized]) seenCommittee[normalized] = member;
+                }
+              });
+            }
+          });
+          setCommitteeSuggestions(Object.values(seenCommittee).sort());
         }
       } catch (err) {
-        console.error("Greska pri ucitavanju mentora:", err);
+        console.error("Greska pri ucitavanju sugestija:", err);
       }
     };
 
-    loadMentors();
+    loadSuggestions();
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -775,7 +807,7 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                 {showMentorSuggestions && mentorSuggestions.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                     {mentorSuggestions
-                      .filter((m) => m.toLowerCase().includes(mentor.toLowerCase()))
+                      .filter((m) => normalizeName(m.toLowerCase()).includes(normalizeName(mentor.toLowerCase())))
                       .map((suggestion, index) => (
                         <div
                           key={index}
@@ -800,29 +832,58 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
                   Članovi komisije (opciono)
                 </label>
                 <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newCommitteeMember}
-                      onChange={(e) => setNewCommitteeMember(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          if (newCommitteeMember.trim()) {
-                            setCommitteeMembers([...committeeMembers, newCommitteeMember.trim()]);
-                            setNewCommitteeMember("");
+                  <div className="flex gap-2 relative">
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        value={newCommitteeMember}
+                        onChange={(e) => {
+                          setNewCommitteeMember(e.target.value);
+                          setShowCommitteeSuggestions(e.target.value.length > 0);
+                        }}
+                        onFocus={() => setShowCommitteeSuggestions(newCommitteeMember.length > 0)}
+                        onBlur={() => setTimeout(() => setShowCommitteeSuggestions(false), 200)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (newCommitteeMember.trim()) {
+                              setCommitteeMembers([...committeeMembers, newCommitteeMember.trim()]);
+                              setNewCommitteeMember("");
+                              setShowCommitteeSuggestions(false);
+                            }
                           }
-                        }
-                      }}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
-                      placeholder="Ime i prezime člana komisije"
-                    />
+                        }}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                        placeholder="Počni kucati ime člana komisije..."
+                      />
+                      {showCommitteeSuggestions && committeeSuggestions.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                          {committeeSuggestions
+                            .filter((m) => normalizeName(m.toLowerCase()).includes(normalizeName(newCommitteeMember.toLowerCase())))
+                            .filter((m) => !committeeMembers.some(existing => normalizeName(existing) === normalizeName(m)))
+                            .map((suggestion, index) => (
+                              <div
+                                key={index}
+                                onClick={() => {
+                                  setCommitteeMembers([...committeeMembers, suggestion]);
+                                  setNewCommitteeMember("");
+                                  setShowCommitteeSuggestions(false);
+                                }}
+                                className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                              >
+                                {suggestion}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
                         if (newCommitteeMember.trim()) {
                           setCommitteeMembers([...committeeMembers, newCommitteeMember.trim()]);
                           setNewCommitteeMember("");
+                          setShowCommitteeSuggestions(false);
                         }
                       }}
                       className="px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-colors font-semibold"

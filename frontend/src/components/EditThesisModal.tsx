@@ -17,6 +17,18 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
 }) => {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  // Normalizacija imena - zamjena specijalnih karaktera za poređenje
+  const normalizeName = (name: string): string => {
+    return name
+      .replace(/ć/g, 'c').replace(/Ć/g, 'C')
+      .replace(/č/g, 'c').replace(/Č/g, 'C')
+      .replace(/đ/g, 'dj').replace(/Đ/g, 'Dj')
+      .replace(/š/g, 's').replace(/Š/g, 'S')
+      .replace(/ž/g, 'z').replace(/Ž/g, 'Z')
+      .trim();
+  };
+
   const [alumni, setAlumni] = useState<any[]>([]);
   const [filteredAlumni, setFilteredAlumni] = useState<any[]>([]);
   const [alumniSearch, setAlumniSearch] = useState("");
@@ -28,6 +40,10 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
   const [zipError, setZipError] = useState<string | null>(null);
   const [mentorSuggestions, setMentorSuggestions] = useState<string[]>([]);
   const [showMentorSuggestions, setShowMentorSuggestions] = useState(false);
+  const [committeeSuggestions, setCommitteeSuggestions] = useState<string[]>([]);
+  const [showCommitteeSuggestions, setShowCommitteeSuggestions] = useState(false);
+  const [committeeMembers, setCommitteeMembers] = useState<string[]>([]);
+  const [newCommitteeMember, setNewCommitteeMember] = useState("");
   
   // Form state
   const [formData, setFormData] = useState({
@@ -117,6 +133,14 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
       setSelectedFile(null);
       setFileError(null);
 
+      // Popuni članove komisije kao niz
+      if (thesis.committee_members) {
+        setCommitteeMembers(thesis.committee_members.split(',').map((m: string) => m.trim()).filter(Boolean));
+      } else {
+        setCommitteeMembers([]);
+      }
+      setNewCommitteeMember("");
+
       // Postavi trenutnog alumnistu ako postoji
       if (thesis.user_id) {
         const currentAlumni = alumni.find((a: any) => a.id === thesis.user_id);
@@ -136,10 +160,10 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
     if (alumniSearch.trim() === "") {
       setFilteredAlumni(alumni.slice(0, 10)); // Prikaži prvih 10
     } else {
-      const searchLower = alumniSearch.toLowerCase();
+      const searchLower = normalizeName(alumniSearch.toLowerCase());
       const filtered = alumni.filter((a: any) => {
-        const fullName = `${a.first_name} ${a.last_name}`.toLowerCase();
-        const email = a.email.toLowerCase();
+        const fullName = normalizeName(`${a.first_name} ${a.last_name}`.toLowerCase());
+        const email = normalizeName(a.email.toLowerCase());
         return fullName.includes(searchLower) || email.includes(searchLower);
       });
       setFilteredAlumni(filtered.slice(0, 10)); // Max 10 rezultata
@@ -150,22 +174,40 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    const loadMentors = async () => {
+    const loadSuggestions = async () => {
       try {
         const response = await fetch("/api/theses");
         const data = await response.json();
         if (response.ok && Array.isArray(data)) {
-          const uniqueMentors = Array.from(
-            new Set(data.map((t: any) => t.mentor).filter(Boolean))
-          ).sort() as string[];
-          setMentorSuggestions(uniqueMentors);
+          const seenMentors: { [key: string]: string } = {};
+          data.forEach((t: any) => {
+            if (t.mentor) {
+              const normalized = normalizeName(t.mentor);
+              if (!seenMentors[normalized]) seenMentors[normalized] = t.mentor;
+            }
+          });
+          setMentorSuggestions(Object.values(seenMentors).sort());
+
+          const seenCommittee: { [key: string]: string } = {};
+          data.forEach((t: any) => {
+            if (t.committee_members) {
+              t.committee_members.split(',').forEach((m: string) => {
+                const member = m.trim();
+                if (member) {
+                  const normalized = normalizeName(member);
+                  if (!seenCommittee[normalized]) seenCommittee[normalized] = member;
+                }
+              });
+            }
+          });
+          setCommitteeSuggestions(Object.values(seenCommittee).sort());
         }
       } catch (err) {
-        console.error("Greska pri ucitavanju mentora:", err);
+        console.error("Greska pri ucitavanju sugestija:", err);
       }
     };
 
-    loadMentors();
+    loadSuggestions();
   }, [isOpen]);
 
   const handleAlumniSelect = (alumnus: any) => {
@@ -246,6 +288,7 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
 
       const payload = {
         ...formData,
+        committee_members: committeeMembers.length > 0 ? committeeMembers.join(", ") : null,
         defense_date: defense_datetime,
         user_id: formData.user_id ? Number(formData.user_id) : null,
       };
@@ -619,7 +662,7 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
               {showMentorSuggestions && mentorSuggestions.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                   {mentorSuggestions
-                    .filter((m) => m.toLowerCase().includes(formData.mentor.toLowerCase()))
+                    .filter((m) => normalizeName(m.toLowerCase()).includes(normalizeName(formData.mentor.toLowerCase())))
                     .map((suggestion, index) => (
                       <div
                         key={index}
@@ -639,14 +682,88 @@ const EditThesisModal: React.FC<EditThesisModalProps> = ({
 {/* Članovi komisije */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Članovi komisije</label>
-            <input
-              type="text"
-              name="committee_members"
-              value={formData.committee_members}
-              onChange={handleChange}
-              placeholder="Prof. dr Ivan Petrović, Doc. dr Ana Jovanović"
-              className="w-full px-4 py-2 border rounded-lg"
-            />
+            <div className="space-y-2">
+              <div className="flex gap-2 relative">
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={newCommitteeMember}
+                    onChange={(e) => {
+                      setNewCommitteeMember(e.target.value);
+                      setShowCommitteeSuggestions(e.target.value.length > 0);
+                    }}
+                    onFocus={() => setShowCommitteeSuggestions(newCommitteeMember.length > 0)}
+                    onBlur={() => setTimeout(() => setShowCommitteeSuggestions(false), 200)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (newCommitteeMember.trim()) {
+                          setCommitteeMembers([...committeeMembers, newCommitteeMember.trim()]);
+                          setNewCommitteeMember("");
+                          setShowCommitteeSuggestions(false);
+                        }
+                      }
+                    }}
+                    placeholder="Počni kucati ime člana komisije..."
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#294a70]"
+                  />
+                  {showCommitteeSuggestions && committeeSuggestions.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {committeeSuggestions
+                        .filter((m) => normalizeName(m.toLowerCase()).includes(normalizeName(newCommitteeMember.toLowerCase())))
+                        .filter((m) => !committeeMembers.some(existing => normalizeName(existing) === normalizeName(m)))
+                        .map((suggestion, index) => (
+                          <div
+                            key={index}
+                            onClick={() => {
+                              setCommitteeMembers([...committeeMembers, suggestion]);
+                              setNewCommitteeMember("");
+                              setShowCommitteeSuggestions(false);
+                            }}
+                            className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                          >
+                            {suggestion}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newCommitteeMember.trim()) {
+                      setCommitteeMembers([...committeeMembers, newCommitteeMember.trim()]);
+                      setNewCommitteeMember("");
+                      setShowCommitteeSuggestions(false);
+                    }
+                  }}
+                  className="px-4 py-2 bg-[#294a70] text-white rounded-lg hover:bg-[#1f3a5a] transition-colors font-semibold"
+                >
+                  Dodaj
+                </button>
+              </div>
+              {committeeMembers.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {committeeMembers.map((member, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
+                    >
+                      <span className="text-sm">{member}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCommitteeMembers(committeeMembers.filter((_, i) => i !== index));
+                        }}
+                        className="text-blue-600 hover:text-blue-800 font-bold"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Ocjena i jezik */}
