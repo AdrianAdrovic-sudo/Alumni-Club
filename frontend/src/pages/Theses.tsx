@@ -37,6 +37,7 @@ export default function DiplomskiRadovi() {
   const [selectedTopic, setSelectedTopic] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [hoveredYear, setHoveredYear] = useState<number | null>(null);
 
   const fetchTheses = async () => {
     try {
@@ -275,10 +276,30 @@ export default function DiplomskiRadovi() {
   const topicStats: [string, number][] = getTopicStats();
   const keywordStats: [string, number][] = getKeywordStats();
 
-  // Dobijanje jedinstvenih vrednosti za filtere
-  const uniqueMentors = Array.from(new Set(podaci.map(p => p.mentor).filter(Boolean))).sort();
+  // Dobijanje jedinstvenih vrednosti za filtere (normalizovano za č, ć, š, ž, đ)
+  const getUniqueMentors = () => {
+    const seen: { [key: string]: string } = {};
+    podaci.forEach(p => {
+      if (p.mentor) {
+        const normalized = normalizeName(p.mentor);
+        if (!seen[normalized]) seen[normalized] = p.mentor;
+      }
+    });
+    return Object.values(seen).sort();
+  };
+  const getUniqueTopics = () => {
+    const seen: { [key: string]: string } = {};
+    podaci.forEach(p => {
+      if (p.topic) {
+        const normalized = normalizeName(p.topic);
+        if (!seen[normalized]) seen[normalized] = p.topic;
+      }
+    });
+    return Object.values(seen).sort();
+  };
+  const uniqueMentors = getUniqueMentors();
   const uniqueGrades = Array.from(new Set(podaci.map(p => p.grade).filter(Boolean))).sort();
-  const uniqueTopics = Array.from(new Set(podaci.map(p => p.topic).filter(Boolean))).sort();
+  const uniqueTopics = getUniqueTopics();
   const uniqueYears = Array.from(new Set(podaci.map(p => p.year).filter(Boolean))).sort((a, b) => b - a);
   const uniqueLanguages = Array.from(new Set(podaci.map(p => p.language).filter(Boolean))).sort();
 
@@ -290,23 +311,24 @@ export default function DiplomskiRadovi() {
 
   // Filtriranje - napredna pretraga
   const filtrirani = podaci.filter((p) => {
-    // Priprema podataka za pretragu
-    const firstName = (p.first_name || "").toLowerCase();
-    const lastName = (p.last_name || "").toLowerCase();
-    const title = (p.title || "").toLowerCase();
-    const mentor = (p.mentor || "").toLowerCase();
-    const keywords = (p.keywords || "").toLowerCase();
-    const committeeMembers = (p.committee_members || "").toLowerCase();
-    const topic = (p.topic || "").toLowerCase();
-    const abstract = (p.abstract || "").toLowerCase();
+    // Priprema podataka za pretragu (normalizovano za č, ć, š, ž, đ)
+    const firstName = normalizeName((p.first_name || "").toLowerCase());
+    const lastName = normalizeName((p.last_name || "").toLowerCase());
+    const title = normalizeName((p.title || "").toLowerCase());
+    const mentor = normalizeName((p.mentor || "").toLowerCase());
+    const keywords = normalizeName((p.keywords || "").toLowerCase());
+    const committeeMembers = normalizeName((p.committee_members || "").toLowerCase());
+    const topic = normalizeName((p.topic || "").toLowerCase());
+    const abstract = normalizeName((p.abstract || "").toLowerCase());
     const grade = (p.grade || "").toLowerCase();
     const language = (p.language || "").toLowerCase();
-    const additionalTitle = (p.additional_title || "").toLowerCase();
-    const additionalSubtitle = (p.additional_subtitle || "").toLowerCase();
+    const additionalTitle = normalizeName((p.additional_title || "").toLowerCase());
+    const additionalSubtitle = normalizeName((p.additional_subtitle || "").toLowerCase());
     
-    const searchLower = searchTerm.toLowerCase();
+    // Normalizujemo i sam search term
+    const searchLower = normalizeName(searchTerm.toLowerCase());
 
-    // Pretraga po SVIM poljima
+    // Pretraga po SVIM poljima (normalizovano)
     const matchesSearch = searchTerm === "" || 
       firstName.includes(searchLower) ||
       lastName.includes(searchLower) ||
@@ -324,10 +346,10 @@ export default function DiplomskiRadovi() {
     // Filter po tipu rada
     const matchesType = thesisTypeFilter === "all" || p.type === thesisTypeFilter;
     
-    // Napredni filteri
-    const matchesMentor = selectedMentor === "all" || p.mentor === selectedMentor;
+    // Napredni filteri (normalizovano poređenje)
+    const matchesMentor = selectedMentor === "all" || normalizeName(p.mentor || "") === normalizeName(selectedMentor);
     const matchesGrade = selectedGrade === "all" || p.grade === selectedGrade;
-    const matchesTopic = selectedTopic === "all" || p.topic === selectedTopic;
+    const matchesTopic = selectedTopic === "all" || normalizeName(p.topic || "") === normalizeName(selectedTopic);
     const matchesYear = selectedYear === "all" || p.year?.toString() === selectedYear;
     const matchesLanguage = selectedLanguage === "all" || p.language === selectedLanguage;
 
@@ -1078,28 +1100,32 @@ export default function DiplomskiRadovi() {
                   <p>Nema podataka za prikaz grafikona</p>
                 </div>
               ) : (
-              <div className="overflow-x-auto">
-              <div className="flex items-end justify-between gap-3 md:gap-4 h-96 border-l-4 border-b-4 border-[#294a70] pl-4 pb-4 bg-gradient-to-t from-gray-50 to-white rounded-bl-lg min-w-max"
-                   style={{ minWidth: years.length > 10 ? `${years.length * 80}px` : 'auto' }}
+              <div className={years.length > 14 ? "overflow-x-auto" : ""}>
+              <div className="flex items-end justify-between gap-3 md:gap-4 h-96 border-l-4 border-b-4 border-[#294a70] pl-4 pb-4 bg-gradient-to-t from-gray-50 to-white rounded-bl-lg mb-4"
+                   style={{ minWidth: years.length > 14 ? `${years.length * 80}px` : 'auto' }}
               >
                 {years.sort((a, b) => a - b).map(year => {
                   const stats = yearStats[year];
-                  const maxHeight = 320; // maksimalna visina u pikselima (povećano za više radova)
+                  const maxHeight = 320;
                   const barHeight = (stats.total / Math.max(maxThesesInYear, 10)) * maxHeight;
                   
                   return (
                     <div key={year} className="flex-1 flex flex-col items-center gap-2">
                       {/* Bar */}
-                      <div className="w-full flex flex-col items-center">
+                      <div className="w-full flex flex-col items-center relative">
                         <div 
-                          className="w-full bg-gradient-to-t from-[#294a70] via-[#3d5a7f] to-[#5a7fa0] rounded-t-lg shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer relative group border-2 border-[#294a70] flex items-start justify-center pt-2"
+                          className={`w-5/6 bg-gradient-to-t from-[#294a70] via-[#3d5a7f] to-[#5a7fa0] rounded-t-lg shadow-lg transition-all cursor-pointer border-2 ${hoveredYear === year ? 'border-yellow-400 shadow-2xl' : 'border-[#294a70]'} flex items-start justify-center pt-2`}
                           style={{ 
                             height: `${Math.max(barHeight, 40)}px`
                           }}
+                          onMouseEnter={() => setHoveredYear(year)}
+                          onMouseLeave={() => setHoveredYear(null)}
                         >
                           <span className="text-sm md:text-base font-bold text-white">{stats.total}</span>
-                          {/* Tooltip on hover */}
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 hidden group-hover:block bg-[#294a70] text-white text-xs rounded-lg py-3 px-4 whitespace-nowrap z-10 shadow-xl border-2 border-white">
+                        </div>
+                        {/* Tooltip ispod bara */}
+                        {hoveredYear === year && (
+                          <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-[#294a70] text-white text-xs rounded-lg py-3 px-4 whitespace-nowrap z-50 shadow-xl border-2 border-white pointer-events-none">
                             <div className="font-bold mb-2 text-sm border-b border-white/30 pb-1">{year}. godina</div>
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
@@ -1116,7 +1142,7 @@ export default function DiplomskiRadovi() {
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                       {/* Year Label */}
                       <span className="text-xs md:text-sm font-bold text-[#294a70] mt-2 bg-gray-100 px-3 py-1 rounded-full">{year}</span>
