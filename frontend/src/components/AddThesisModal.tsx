@@ -11,6 +11,8 @@ interface AlumniOption {
   id: number;
   first_name: string;
   last_name: string;
+  email?: string;
+  username?: string;
 }
 
 export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesisModalProps) {
@@ -80,13 +82,14 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
     }
   };
 
-  const toSlug = (value: string) =>
+  const toDotSlug = (value: string) =>
     value
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "_")
-      .replace(/^_+|_+$/g, "");
-
-  const shortId = () => Math.random().toString(36).slice(2, 8);
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, ".")
+      .replace(/^\.+|\.+$/g, "")
+      .replace(/\.+/g, ".");
 
   useEffect(() => {
     if (!isAdmin || !isOpen) {
@@ -103,6 +106,8 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
               id: u.id,
               first_name: u.first_name,
               last_name: u.last_name,
+              email: u.email,
+              username: u.username,
             }))
           );
         }
@@ -299,6 +304,26 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
           setErrorMessage("Ime i prezime novog alumniste su obavezni.");
           return;
         }
+
+        const proposedEmail = `${toDotSlug(newAlumniFirstName)}.${toDotSlug(newAlumniLastName)}@gmail.com`;
+        const proposedUsername = `${toDotSlug(newAlumniFirstName)}.${toDotSlug(newAlumniLastName)}`;
+        const normalizedNew = normalizeName(`${newAlumniFirstName} ${newAlumniLastName}`.toLowerCase());
+        const duplicate = alumniOptions.find((a) => {
+          const normalizedExisting = normalizeName(`${a.first_name} ${a.last_name}`.toLowerCase());
+          const emailMatch = a.email?.toLowerCase() === proposedEmail.toLowerCase();
+          const usernameMatch = a.username?.toLowerCase() === proposedUsername.toLowerCase();
+          return normalizedExisting === normalizedNew || emailMatch || usernameMatch;
+        });
+
+        if (duplicate) {
+          setErrorMessage("Alumnista već postoji. Molimo izaberite postojećeg.");
+          setSelectExistingAlumni(true);
+          setSelectedAlumni(duplicate);
+          setAlumniSearch(`${duplicate.first_name} ${duplicate.last_name}`);
+          setSelectedAlumniId(String(duplicate.id));
+          setShowAlumniDropdown(false);
+          return;
+        }
         
         // Kreiraj novog alumnistu u bazi
         try {
@@ -311,8 +336,8 @@ export default function AddThesisModal({ isOpen, onClose, onSuccess }: AddThesis
             body: JSON.stringify({
               first_name: newAlumniFirstName.trim(),
               last_name: newAlumniLastName.trim(),
-              email: `${toSlug(newAlumniFirstName)}.${toSlug(newAlumniLastName)}.${shortId()}@temp.alumni.com`,
-              username: `${toSlug(newAlumniFirstName).slice(0, 12)}_${toSlug(newAlumniLastName).slice(0, 12)}_${shortId()}`.slice(0, 30),
+              email: proposedEmail,
+              username: proposedUsername,
               password: Math.random().toString(36).slice(-8), // Privremena lozinka
               role: "user",
               enrollment_year: parsedYear,
